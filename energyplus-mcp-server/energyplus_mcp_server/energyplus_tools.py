@@ -2960,22 +2960,17 @@ class EnergyPlusManager:
             logger.error(f"Error creating interactive plot: {e}")
             raise RuntimeError(f"Error creating interactive plot: {str(e)}")
 
-    def _get_branches_from_list(self, idf, branch_list_name: str) -> List[Dict[str, Any]]:
+    def _get_branches_from_list(self, ep, branch_list_name: str) -> List[Dict[str, Any]]:
         """Helper method to get branch information from a branch list"""
         branches = []
-        
-        branch_lists = idf.idfobjects.get("BranchList", [])
+        branch_lists = ep.get("BranchList", {})
         for branch_list in branch_lists:
-            if getattr(branch_list, 'Name', '') == branch_list_name:
+            if branch_list == branch_list_name:
                 # Get all branch names from the list
-                for i in range(1, 50):  # EnergyPlus can have many branches
-                    branch_name_field = f"Branch_{i}_Name" if i > 1 else "Branch_1_Name"
-                    branch_name = getattr(branch_list, branch_name_field, None)
-                    if not branch_name:
-                        break
-                    
+                for branch in branch_lists[branch_list]["branches"]:
+                    branch_name = branch["branch_name"]                   
                     # Get detailed branch information
-                    branch_info = self._get_branch_details(idf, branch_name)
+                    branch_info = self._get_branch_details(ep, branch_name)
                     if branch_info:
                         branches.append(branch_info)
                 break
@@ -2983,40 +2978,24 @@ class EnergyPlusManager:
         return branches
 
 
-    def _get_branch_details(self, idf, branch_name: str) -> Optional[Dict[str, Any]]:
+    def _get_branch_details(self, ep, branch_name: str) -> Optional[Dict[str, Any]]:
         """Helper method to get detailed information about a specific branch"""
-        branch_objs = idf.idfobjects.get("Branch", [])
-        
-        for branch in branch_objs:
-            if getattr(branch, 'Name', '') == branch_name:
-                branch_info = {
-                    "name": branch_name,
-                    "components": []
+        branch_objs = ep.get("Branch", {})
+        if branch_name in branch_objs:
+            branch_info = {
+                "name": branch_name,
+                "components": []
+            }
+            comps = branch_objs[branch_name]["components"]
+            for comp in comps:
+                component_info = {
+                    "type": comp["component_object_type"],
+                    "name": comp["component_name"],
+                    "inlet_node": comp["component_inlet_node_name"],
+                    "outlet_node": comp["component_outlet_node_name"]
                 }
-                
-                # Get all components in the branch
-                for i in range(1, 20):  # EnergyPlus branches can have multiple components
-                    comp_type_field = f"Component_{i}_Object_Type" if i > 1 else "Component_1_Object_Type"
-                    comp_name_field = f"Component_{i}_Name" if i > 1 else "Component_1_Name"
-                    comp_inlet_field = f"Component_{i}_Inlet_Node_Name" if i > 1 else "Component_1_Inlet_Node_Name"
-                    comp_outlet_field = f"Component_{i}_Outlet_Node_Name" if i > 1 else "Component_1_Outlet_Node_Name"
-                    
-                    comp_type = getattr(branch, comp_type_field, None)
-                    comp_name = getattr(branch, comp_name_field, None)
-                    
-                    if not comp_type or not comp_name:
-                        break
-                    
-                    component_info = {
-                        "type": comp_type,
-                        "name": comp_name,
-                        "inlet_node": getattr(branch, comp_inlet_field, 'Unknown'),
-                        "outlet_node": getattr(branch, comp_outlet_field, 'Unknown')
-                    }
-                    branch_info["components"].append(component_info)
-                
-                return branch_info
-        
+                branch_info["components"].append(component_info)
+            return branch_info       
         return None
 
 
