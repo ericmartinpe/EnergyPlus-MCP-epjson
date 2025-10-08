@@ -938,17 +938,17 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error modifying Lights objects: {str(e)}")
 
     
-    def inspect_electric_equipment(self, idf_path: str) -> str:
+    def inspect_electric_equipment(self, epjson_path: str) -> str:
         """
         Inspect and list all ElectricEquipment objects in the EnergyPlus model
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
         
         Returns:
             JSON string with detailed ElectricEquipment objects information
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.info(f"Inspecting ElectricEquipment objects for: {resolved_path}")
@@ -965,13 +965,13 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error inspecting ElectricEquipment objects: {str(e)}")
     
     
-    def modify_electric_equipment(self, idf_path: str, modifications: List[Dict[str, Any]], 
+    def modify_electric_equipment(self, epjson_path: str, modifications: List[Dict[str, Any]], 
                                  output_path: Optional[str] = None) -> str:
         """
         Modify ElectricEquipment objects in the EnergyPlus model
         
         Args:
-            idf_path: Path to the input IDF file
+            epjson_path: Path to the input epJSON file
             modifications: List of modification specifications. Each item should have:
                           - "target": "all", "zone:ZoneName", or "name:ElectricEquipmentName"
                           - "field_updates": Dictionary of field names and new values
@@ -980,7 +980,7 @@ class EnergyPlusManager:
         Returns:
             JSON string with modification results
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.info(f"Modifying ElectricEquipment objects for: {resolved_path}")
