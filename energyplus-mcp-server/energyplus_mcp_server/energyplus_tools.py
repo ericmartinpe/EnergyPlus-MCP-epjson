@@ -39,7 +39,6 @@ class EnergyPlusManager:
     def __init__(self, config: Optional[Config] = None):
         """Initialize the EnergyPlus manager with configuration"""
         self.config = config or get_config()
-        self._initialize_eppy()
         
         # Initialize utilities
         self.diagram_generator = HVACDiagramGenerator()
@@ -49,7 +48,7 @@ class EnergyPlusManager:
         self.lights_manager = LightsManager()
         self.electric_equipment_manager = ElectricEquipmentManager()
         
-        logger.info(f"EnergyPlus Manager initialized with IDD: {self.config.energyplus.idd_path}")
+        logger.info("EnergyPlus Manager initialized for epJSON format")
     
 
     def load_json(self, file_path: str) -> Dict[str, Any]:
@@ -785,17 +784,17 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error getting materials: {str(e)}")
     
 
-    def inspect_people(self, idf_path: str) -> str:
+    def inspect_people(self, epjson_path: str) -> str:
         """
         Inspect and list all People objects in the EnergyPlus model
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
         
         Returns:
             JSON string with detailed People objects information
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.info(f"Inspecting People objects for: {resolved_path}")
@@ -812,13 +811,13 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error inspecting People objects: {str(e)}")
     
     
-    def modify_people(self, idf_path: str, modifications: List[Dict[str, Any]], 
+    def modify_people(self, epjson_path: str, modifications: List[Dict[str, Any]], 
                      output_path: Optional[str] = None) -> str:
         """
         Modify People objects in the EnergyPlus model
         
         Args:
-            idf_path: Path to the input IDF file
+            epjson_path: Path to the input epJSON file
             modifications: List of modification specifications. Each item should have:
                           - "target": "all", "zone:ZoneName", or "name:PeopleName"
                           - "field_updates": Dictionary of field names and new values
@@ -827,7 +826,7 @@ class EnergyPlusManager:
         Returns:
             JSON string with modification results
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.info(f"Modifying People objects for: {resolved_path}")
