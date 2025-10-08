@@ -7,12 +7,6 @@ import json
 import logging
 from typing import Dict, List, Any, Optional
 from pathlib import Path
-
-import eppy
-from eppy.modeleditor import IDF
-from eppy import hvacbuilder
-from eppy.useful_scripts import loopdiagram
-from eppy import walk_hvac
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -58,21 +52,10 @@ class EnergyPlusManager:
         logger.info(f"EnergyPlus Manager initialized with IDD: {self.config.energyplus.idd_path}")
     
 
-    def _initialize_eppy(self):
-        """Initialize eppy with the IDD file from configuration"""
-        idd_path = self.config.energyplus.idd_path
-        
-        if not idd_path:
-            raise RuntimeError("EnergyPlus IDD path not configured")
-        
-        if not os.path.exists(idd_path):
-            raise RuntimeError(f"IDD file not found at: {idd_path}")
-        
-        try:
-            eppy.modeleditor.IDF.setiddname(idd_path)
-            logger.debug(f"Eppy initialized with IDD: {idd_path}")
-        except Exception as e:
-            raise RuntimeError(f"Failed to initialize eppy with IDD {idd_path}: {e}")
+    def load_json(self, file_path: str) -> Dict[str, Any]:
+        """Load epJSON file and return its content"""
+        with open(file_path, 'r') as f:
+            return json.load(f)
     
 
     def _resolve_idf_path(self, idf_path: str) -> str:
