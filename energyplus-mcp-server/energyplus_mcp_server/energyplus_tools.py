@@ -707,27 +707,27 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error listing zones: {str(e)}")
     
 
-    def get_surfaces(self, idf_path: str) -> str:
+    def get_surfaces(self, epjson_path: str) -> str:
         """Get detailed surface information"""
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.debug(f"Getting surfaces for: {resolved_path}")
-            idf = IDF(resolved_path)
-            surfaces = idf.idfobjects.get("BuildingSurface:Detailed", [])
+            ep = self.load_json(resolved_path)
+            surfaces = ep.get("BuildingSurface:Detailed", {})
             
             surface_info = []
-            for i, surface in enumerate(surfaces):
+            for i, (surf_name, surface) in enumerate(surfaces.items()):
                 surface_data = {
                     "Index": i + 1,
-                    "Name": getattr(surface, 'Name', 'Unknown'),
-                    "Surface Type": getattr(surface, 'Surface_Type', 'Unknown'),
-                    "Construction Name": getattr(surface, 'Construction_Name', 'Unknown'),
-                    "Zone Name": getattr(surface, 'Zone_Name', 'Unknown'),
-                    "Outside Boundary Condition": getattr(surface, 'Outside_Boundary_Condition', 'Unknown'),
-                    "Sun Exposure": getattr(surface, 'Sun_Exposure', 'Unknown'),
-                    "Wind Exposure": getattr(surface, 'Wind_Exposure', 'Unknown'),
-                    "Number of Vertices": getattr(surface, 'Number_of_Vertices', 'Unknown')
+                    "Name": surf_name,
+                    "Surface Type": surface.get('surface_type', 'Unknown'),
+                    "Construction Name": surface.get('construction_name', 'Unknown'),
+                    "Zone Name": surface.get('zone_name', 'Unknown'),
+                    "Outside Boundary Condition": surface.get('outside_boundary_condition', 'Unknown'),
+                    "Sun Exposure": surface.get('sun_exposure', 'Unknown'),
+                    "Wind Exposure": surface.get('wind_exposure', 'Unknown'),
+                    "Number of Vertices": surface.get('number_of_vertices', 'Unknown')
                 }
                 surface_info.append(surface_data)
             
