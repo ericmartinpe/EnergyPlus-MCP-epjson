@@ -739,41 +739,41 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error getting surfaces: {str(e)}")
     
 
-    def get_materials(self, idf_path: str) -> str:
+    def get_materials(self, epjson_path: str) -> str:
         """Get material information"""
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.debug(f"Getting materials for: {resolved_path}")
-            idf = IDF(resolved_path)
+            ep = self.load_json(resolved_path)
             
             materials = []
             
             # Regular materials
-            material_objs = idf.idfobjects.get("Material", [])
-            for material in material_objs:
+            material_objs = ep.get("Material", {})
+            for mat_name, material in material_objs.items():
                 material_data = {
                     "Type": "Material",
-                    "Name": getattr(material, 'Name', 'Unknown'),
-                    "Roughness": getattr(material, 'Roughness', 'Unknown'),
-                    "Thickness": getattr(material, 'Thickness', 'Unknown'),
-                    "Conductivity": getattr(material, 'Conductivity', 'Unknown'),
-                    "Density": getattr(material, 'Density', 'Unknown'),
-                    "Specific Heat": getattr(material, 'Specific_Heat', 'Unknown')
+                    "Name": mat_name,
+                    "Roughness": material.get('roughness', 'Unknown'),
+                    "Thickness": material.get('thickness', 'Unknown'),
+                    "Conductivity": material.get('conductivity', 'Unknown'),
+                    "Density": material.get('density', 'Unknown'),
+                    "Specific Heat": material.get('specific_heat', 'Unknown')
                 }
                 materials.append(material_data)
             
             # No-mass materials
-            nomass_objs = idf.idfobjects.get("Material:NoMass", [])
-            for material in nomass_objs:
+            nomass_objs = ep.get("Material:NoMass", {})
+            for mat_name, material in nomass_objs.items():
                 material_data = {
                     "Type": "Material:NoMass",
-                    "Name": getattr(material, 'Name', 'Unknown'),
-                    "Roughness": getattr(material, 'Roughness', 'Unknown'),
-                    "Thermal Resistance": getattr(material, 'Thermal_Resistance', 'Unknown'),
-                    "Thermal Absorptance": getattr(material, 'Thermal_Absorptance', 'Unknown'),
-                    "Solar Absorptance": getattr(material, 'Solar_Absorptance', 'Unknown'),
-                    "Visible Absorptance": getattr(material, 'Visible_Absorptance', 'Unknown')
+                    "Name": mat_name,
+                    "Roughness": material.get('roughness', 'Unknown'),
+                    "Thermal Resistance": material.get('thermal_resistance', 'Unknown'),
+                    "Thermal Absorptance": material.get('thermal_absorptance', 'Unknown'),
+                    "Solar Absorptance": material.get('solar_absorptance', 'Unknown'),
+                    "Visible Absorptance": material.get('visible_absorptance', 'Unknown')
                 }
                 materials.append(material_data)
             
