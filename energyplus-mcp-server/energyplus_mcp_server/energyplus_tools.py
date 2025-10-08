@@ -1509,13 +1509,14 @@ class EnergyPlusManager:
 
 
     # ------------------------ Loop Discovery and Topology ------------------------
-    def discover_hvac_loops(self, idf_path: str) -> str:
-        """Discover all HVAC loops (Plant, Condenser, Air) in the EnergyPlus model"""
-        resolved_path = self._resolve_idf_path(idf_path)
+    def discover_hvac_loops(self, epjson_path: str) -> str:
+        """Discover all HVAC loops (Plant, Condenser, Air) in the EnergyPlus model
+        """
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.debug(f"Discovering HVAC loops for: {resolved_path}")
-            idf = IDF(resolved_path)
+            ep = self.load_json(resolved_path)
             
             hvac_info = {
                 "file_path": resolved_path,
@@ -1530,53 +1531,51 @@ class EnergyPlusManager:
                 }
             }
             
-            # Discover Plant Loops
-            plant_loops = idf.idfobjects.get("PlantLoop", [])
-            for i, loop in enumerate(plant_loops):
+            # # Discover Plant Loops
+            plant_loops = ep.get("PlantLoop", {})
+            for i, (loop_name, loop_data) in enumerate(plant_loops.items()):
                 loop_info = {
                     "index": i + 1,
-                    "name": getattr(loop, 'Name', 'Unknown'),
-                    "fluid_type": getattr(loop, 'Fluid_Type', 'Unknown'),
-                    "max_loop_flow_rate": getattr(loop, 'Maximum_Loop_Flow_Rate', 'Unknown'),
-                    "min_loop_flow_rate": getattr(loop, 'Minimum_Loop_Flow_Rate', 'Unknown'),
-                    "loop_inlet_node": getattr(loop, 'Plant_Side_Inlet_Node_Name', 'Unknown'),
-                    "loop_outlet_node": getattr(loop, 'Plant_Side_Outlet_Node_Name', 'Unknown'),
-                    "demand_inlet_node": getattr(loop, 'Demand_Side_Inlet_Node_Name', 'Unknown'),
-                    "demand_outlet_node": getattr(loop, 'Demand_Side_Outlet_Node_Name', 'Unknown')
+                    "name": loop_name,
+                    "fluid_type": loop_data.get("fluid_type", "Unknown"),
+                    "max_loop_flow_rate": loop_data.get("maximum_loop_flow_rate", "Uknown"),
+                    "loop_inlet_node": loop_data.get("plant_side_inlet_node_name", "Uknown"),
+                    "loop_outlet_node": loop_data.get("plant_side_outlet_node_name", "Uknown"),
+                    "demand_inlet_node": loop_data.get("demand_side_inlet_node_name", "Uknown"),
+                    "demand_outlet_node": loop_data.get("demand_side_outlet_node_name", "Uknown")
                 }
                 hvac_info["plant_loops"].append(loop_info)
-            
+
             # Discover Condenser Loops
-            condenser_loops = idf.idfobjects.get("CondenserLoop", [])
-            for i, loop in enumerate(condenser_loops):
+            condenser_loops = ep.get("CondenserLoop", {})
+            for i, (loop_name, loop_data) in enumerate(condenser_loops.items()):
                 loop_info = {
                     "index": i + 1,
-                    "name": getattr(loop, 'Name', 'Unknown'),
-                    "fluid_type": getattr(loop, 'Fluid_Type', 'Unknown'),
-                    "max_loop_flow_rate": getattr(loop, 'Maximum_Loop_Flow_Rate', 'Unknown'),
-                    "loop_inlet_node": getattr(loop, 'Condenser_Side_Inlet_Node_Name', 'Unknown'),
-                    "loop_outlet_node": getattr(loop, 'Condenser_Side_Outlet_Node_Name', 'Unknown'),
-                    "demand_inlet_node": getattr(loop, 'Demand_Side_Inlet_Node_Name', 'Unknown'),
-                    "demand_outlet_node": getattr(loop, 'Demand_Side_Outlet_Node_Name', 'Unknown')
-                }
+                    "name": loop_name,
+                    "fluid_type": loop_data.get("fluid_type", "Unknown"),
+                    "max_loop_flow_rate": loop_data.get("maximum_loop_flow_rate", "Unknown"),
+                    "loop_inlet_node": loop_data.get("condenser_side_inlet_node_name", "Unknown"),
+                    "loop_outlet_node": loop_data.get("condenser_side_outlet_node_name", "Unknown"),
+                    "demand_inlet_node": loop_data.get("demand_side_inlet_node_name", "Unknown"),
+                    "demand_outlet_node": loop_data.get("demand_side_outlet_node_name", "Unknown")            }
                 hvac_info["condenser_loops"].append(loop_info)
-            
+
             # Discover Air Loops
-            air_loops = idf.idfobjects.get("AirLoopHVAC", [])
-            for i, loop in enumerate(air_loops):
+            air_loops = ep.get("AirLoopHVAC", {})
+            for i, (loop_name, loop_data) in enumerate(air_loops.items()):
                 loop_info = {
                     "index": i + 1,
-                    "name": getattr(loop, 'Name', 'Unknown'),
-                    "supply_inlet_node": getattr(loop, 'Supply_Side_Inlet_Node_Name', 'Unknown'),
-                    "supply_outlet_node": getattr(loop, 'Supply_Side_Outlet_Node_Names', 'Unknown'),
-                    "demand_inlet_node": getattr(loop, 'Demand_Side_Inlet_Node_Names', 'Unknown'),
-                    "demand_outlet_node": getattr(loop, 'Demand_Side_Outlet_Node_Name', 'Unknown')
+                    "name": loop_name,
+                    "supply_inlet_node": loop_data.get("supply_side_inlet_node_name", "Unknown"),
+                    "supply_outlet_node": loop_data.get("supply_side_outlet_node_name", "Unknown"),
+                    "demand_inlet_node": loop_data.get("demand_side_inlet_node_names", "Unknown"),
+                    "demand_outlet_node": loop_data.get("demand_side_outlet_node_names", "Unknown")
                 }
                 hvac_info["air_loops"].append(loop_info)
             
             # Get zone count for context
-            zones = idf.idfobjects.get("Zone", [])
-            
+            zones = ep.get("Zone", {})
+
             # Update summary
             hvac_info["summary"] = {
                 "total_plant_loops": len(plant_loops),
@@ -1584,56 +1583,43 @@ class EnergyPlusManager:
                 "total_air_loops": len(air_loops),
                 "total_zones": len(zones)
             }
-            
-            logger.debug(f"Found {len(plant_loops)} plant loops, {len(condenser_loops)} condenser loops, {len(air_loops)} air loops")
+
             return json.dumps(hvac_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error discovering HVAC loops for {resolved_path}: {e}")
+            logger.error(f"Error discovering HVAC loops for {epjson_path}: {e}")
             raise RuntimeError(f"Error discovering HVAC loops: {str(e)}")
 
 
-    def get_loop_topology(self, idf_path: str, loop_name: str) -> str:
+    def get_loop_topology(self, epjson_path: str, loop_name: str) -> str:
         """Get detailed topology information for a specific HVAC loop"""
-        resolved_path = self._resolve_idf_path(idf_path)
-        
+        resolved_path = self._resolve_epjson_path(epjson_path)
         try:
             logger.debug(f"Getting loop topology for '{loop_name}' in: {resolved_path}")
-            idf = IDF(resolved_path)
-            
+            ep = self.load_json(resolved_path)
+
             # Try to find the loop in different loop types
             loop_obj = None
             loop_type = None
             
-            # Check PlantLoop
-            plant_loops = idf.idfobjects.get("PlantLoop", [])
-            for loop in plant_loops:
-                if getattr(loop, 'Name', '') == loop_name:
-                    loop_obj = loop
-                    loop_type = "PlantLoop"
-                    break
+            # Discover Plant Loops
+            plant_loops = ep.get("PlantLoop", {})
+            condenser_loops = ep.get("CondenserLoop", {})
+            air_loops = ep.get("AirLoopHVAC", {})
             
-            # Check CondenserLoop if not found
-            if not loop_obj:
-                condenser_loops = idf.idfobjects.get("CondenserLoop", [])
-                for loop in condenser_loops:
-                    if getattr(loop, 'Name', '') == loop_name:
-                        loop_obj = loop
-                        loop_type = "CondenserLoop"
-                        break
-            
-            # Check AirLoopHVAC if not found
-            if not loop_obj:
-                air_loops = idf.idfobjects.get("AirLoopHVAC", [])
-                for loop in air_loops:
-                    if getattr(loop, 'Name', '') == loop_name:
-                        loop_obj = loop
-                        loop_type = "AirLoopHVAC"
-                        break
-            
+            if loop_name in plant_loops:
+                loop_type = "PlantLoop"
+                loop_obj = plant_loops[loop_name]
+            elif loop_name in condenser_loops:
+                loop_type = "CondenserLoop"
+                loop_obj = condenser_loops[loop_name]
+            elif loop_name in air_loops:
+                loop_type = "AirLoopHVAC"
+                loop_obj = air_loops[loop_name]
+
             if not loop_obj:
                 raise ValueError(f"Loop '{loop_name}' not found in the IDF file")
-            
+                
             topology_info = {
                 "loop_name": loop_name,
                 "loop_type": loop_type,
@@ -1650,48 +1636,44 @@ class EnergyPlusManager:
                     "connector_lists": []
                 }
             }
-            
+
             # Handle AirLoopHVAC differently from Plant/Condenser loops
             if loop_type == "AirLoopHVAC":
-                topology_info = self._get_airloop_topology(idf, loop_obj, loop_name)
+                topology_info = self._get_airloop_topology(ep, loop_obj, loop_name)
             else:
                 # Handle Plant and Condenser loops (existing logic)
-                topology_info = self._get_plant_condenser_topology(idf, loop_obj, loop_type, loop_name)
+                topology_info = self._get_plant_condenser_topology(ep, loop_obj, loop_type, loop_name)
             
             logger.debug(f"Topology extracted for loop '{loop_name}' of type {loop_type}")
             return json.dumps(topology_info, indent=2)
-            
+
         except Exception as e:
             logger.error(f"Error getting loop topology for {resolved_path}: {e}")
             raise RuntimeError(f"Error getting loop topology: {str(e)}")
 
-    def _get_airloop_topology(self, idf, loop_obj, loop_name: str) -> Dict[str, Any]:
+
+    def _get_airloop_topology(self, ep, loop_obj, loop_name: str) -> Dict[str, Any]:
         """Get topology information specifically for AirLoopHVAC systems"""
         
         # Debug: Print all available fields in the loop object
         logger.debug(f"Loop object fields for {loop_name}:")
-        for field in dir(loop_obj):
-            if not field.startswith('_'):
-                try:
-                    value = getattr(loop_obj, field, None)
-                    if isinstance(value, str) and value.strip():
-                        logger.debug(f"  {field}: {value}")
-                except:
-                    pass
-        
+        for field, value in loop_obj.items():
+            if isinstance(value, (str, int, float)) and str(value).strip():
+                logger.debug(f"  {field}: {value}")
+
         topology_info = {
             "loop_name": loop_name,
             "loop_type": "AirLoopHVAC",
             "supply_side": {
                 "branches": [],
-                "inlet_node": getattr(loop_obj, 'Supply_Side_Inlet_Node_Name', 'Unknown'),
-                "outlet_node": getattr(loop_obj, 'Supply_Side_Outlet_Node_Names', 'Unknown'),
+                "inlet_node": loop_obj.get("supply_side_inlet_node_name", "Unknown"),
+                "outlet_node": loop_obj.get("supply_side_outlet_node_name", "Unknown"),
                 "components": [],
                 "supply_paths": []
             },
             "demand_side": {
-                "inlet_node": getattr(loop_obj, 'Demand_Side_Inlet_Node_Names', 'Unknown'),
-                "outlet_node": getattr(loop_obj, 'Demand_Side_Outlet_Node_Name', 'Unknown'),
+                "inlet_node": loop_obj.get("demand_side_inlet_node_names", "Unknown"),
+                "outlet_node": loop_obj.get("demand_side_outlet_node_names", "Unknown"),
                 "zone_splitters": [],
                 "zone_mixers": [],
                 "return_plenums": [],
@@ -1702,15 +1684,11 @@ class EnergyPlusManager:
         }
         
         # Get supply side branches (main equipment) - try different possible field names
-        supply_branch_list_name = (
-            getattr(loop_obj, 'Branch_List_Name', '') or
-            getattr(loop_obj, 'Supply_Side_Branch_List_Name', '') or
-            getattr(loop_obj, 'Supply_Branch_List_Name', '')
-        )
+        supply_branch_list_name = loop_obj.get("plant_side_branch_list_name", "Unknown"),
         logger.debug(f"Branch list name from loop object: '{supply_branch_list_name}'")
         
         if supply_branch_list_name:
-            supply_branches = self._get_branches_from_list(idf, supply_branch_list_name)
+            supply_branches = self._get_branches_from_list(ep, supply_branch_list_name)
             logger.debug(f"Found {len(supply_branches)} supply branches")
             topology_info["supply_side"]["branches"] = supply_branches
             
@@ -1724,14 +1702,14 @@ class EnergyPlusManager:
         # Get AirLoopHVAC:SupplyPath objects - find by matching demand inlet node
         demand_inlet_node = topology_info["demand_side"]["inlet_node"]
         logger.debug(f"Looking for supply paths with inlet node: '{demand_inlet_node}'")
-        supply_paths = self._get_airloop_supply_paths_by_node(idf, demand_inlet_node)
+        supply_paths = self._get_airloop_supply_paths_by_node(ep, demand_inlet_node)
         topology_info["demand_side"]["supply_paths"] = supply_paths
         logger.debug(f"Found {len(supply_paths)} supply paths")
         
         # Get AirLoopHVAC:ReturnPath objects - find by matching demand outlet node
         demand_outlet_node = topology_info["demand_side"]["outlet_node"]
         logger.debug(f"Looking for return paths with outlet node: '{demand_outlet_node}'")
-        return_paths = self._get_airloop_return_paths_by_node(idf, demand_outlet_node)
+        return_paths = self._get_airloop_return_paths_by_node(ep, demand_outlet_node)
         topology_info["demand_side"]["return_paths"] = return_paths
         logger.debug(f"Found {len(return_paths)} return paths")
         
@@ -1740,7 +1718,7 @@ class EnergyPlusManager:
         for supply_path in supply_paths:
             for component in supply_path.get("components", []):
                 if component["type"] == "AirLoopHVAC:ZoneSplitter":
-                    splitter_details = self._get_airloop_zone_splitter_details(idf, component["name"])
+                    splitter_details = self._get_airloop_zone_splitter_details(ep, component["name"])
                     if splitter_details:
                         zone_splitters.append(splitter_details)
         topology_info["demand_side"]["zone_splitters"] = zone_splitters
@@ -1751,11 +1729,11 @@ class EnergyPlusManager:
         for return_path in return_paths:
             for component in return_path.get("components", []):
                 if component["type"] == "AirLoopHVAC:ZoneMixer":
-                    mixer_details = self._get_airloop_zone_mixer_details(idf, component["name"])
+                    mixer_details = self._get_airloop_zone_mixer_details(ep, component["name"])
                     if mixer_details:
                         zone_mixers.append(mixer_details)
                 elif component["type"] == "AirLoopHVAC:ReturnPlenum":
-                    plenum_details = self._get_airloop_return_plenum_details(idf, component["name"])
+                    plenum_details = self._get_airloop_return_plenum_details(ep, component["name"])
                     if plenum_details:
                         return_plenums.append(plenum_details)
         topology_info["demand_side"]["zone_mixers"] = zone_mixers
@@ -1765,7 +1743,7 @@ class EnergyPlusManager:
         zone_equipment = []
         for splitter in zone_splitters:
             for outlet_node in splitter.get("outlet_nodes", []):
-                equipment = self._get_zone_equipment_for_node(idf, outlet_node)
+                equipment = self._get_zone_equipment_for_node(ep, outlet_node)
                 zone_equipment.extend(equipment)
         topology_info["demand_side"]["zone_equipment"] = zone_equipment
         
