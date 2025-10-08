@@ -1015,12 +1015,12 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error modifying ElectricEquipment objects: {str(e)}")
 
     
-    def get_output_variables(self, idf_path: str, discover_available: bool = False, run_days: int = 1) -> str:
+    def get_output_variables(self, epjson_path: str, discover_available: bool = False, run_days: int = 1) -> str:
         """
         Get output variables from the model - either configured variables or discover all available ones
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
             discover_available: If True, runs simulation to discover all available variables. 
                             If False, returns currently configured variables (default)
             run_days: Number of days to run for discovery simulation (default: 1, only used if discover_available=True)
@@ -1028,7 +1028,7 @@ class EnergyPlusManager:
         Returns:
             JSON string with output variables information
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             if discover_available:
@@ -1045,15 +1045,15 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error getting output variables: {str(e)}")
 
 
-    def add_output_variables(self, idf_path: str, variables: List, 
+    def add_output_variables(self, epjson_path: str, variables: List, 
                             validation_level: str = "moderate", 
                             allow_duplicates: bool = False,
                             output_path: Optional[str] = None) -> str:
         """
-        Add output variables to an EnergyPlus IDF file with validation
+        Add output variables to an EnergyPlus epJSON file with validation
         
         Args:
-            idf_path: Path to the input IDF file
+            epjson_path: Path to the input epJSON file
             variables: List of variable specifications (dicts, strings, or lists)
             validation_level: "strict", "moderate", or "lenient" 
             allow_duplicates: Whether to allow duplicate variable specifications
@@ -1063,10 +1063,10 @@ class EnergyPlusManager:
             JSON string with operation results
         """
         try:
-            logger.info(f"Adding output variables to {idf_path} (validation: {validation_level})")
+            logger.info(f"Adding output variables to {epjson_path} (validation: {validation_level})")
             
-            # Resolve IDF path
-            resolved_path = self._resolve_idf_path(idf_path)
+            # Resolve epJSON path
+            resolved_path = self._resolve_epjson_path(epjson_path)
             
             # Auto-resolve variable specifications to standard format
             resolved_variables = self.output_var_manager.auto_resolve_variable_specs(variables)
@@ -1134,20 +1134,20 @@ class EnergyPlusManager:
             return json.dumps({
                 "success": False,
                 "error": str(e),
-                "input_file": idf_path,
+                "input_file": epjson_path,
                 "timestamp": datetime.now().isoformat()
             }, indent=2)
 
     
-    def add_output_meters(self, idf_path: str, meters: List, 
+    def add_output_meters(self, epjson_path: str, meters: List, 
                          validation_level: str = "moderate", 
                          allow_duplicates: bool = False,
                          output_path: Optional[str] = None) -> str:
         """
-        Add output meters to an EnergyPlus IDF file with intelligent validation
+        Add output meters to an EnergyPlus epJSON file with intelligent validation
         
         Args:
-            idf_path: Path to the input IDF file
+            epjson_path: Path to the input epJSON file
             meters: List of meter specifications. Can be:
                    - Simple strings: ["Electricity:Facility", "NaturalGas:Facility"] 
                    - [name, frequency] pairs: [["Electricity:Facility", "hourly"], ["NaturalGas:Facility", "daily"]]
@@ -1166,22 +1166,22 @@ class EnergyPlusManager:
             
         Examples:
             # Simple usage
-            add_output_meters("model.idf", ["Electricity:Facility", "NaturalGas:Facility"])
+            add_output_meters("model.epJSON", ["Electricity:Facility", "NaturalGas:Facility"])
             
             # With custom frequencies  
-            add_output_meters("model.idf", [["Electricity:Facility", "daily"], ["NaturalGas:Facility", "hourly"]])
+            add_output_meters("model.epJSON", [["Electricity:Facility", "daily"], ["NaturalGas:Facility", "hourly"]])
             
             # Full control with meter types
-            add_output_meters("model.idf", [
+            add_output_meters("model.epJSON", [
                 {"meter_name": "Electricity:Facility", "frequency": "hourly", "meter_type": "Output:Meter"},
                 {"meter_name": "NaturalGas:Facility", "frequency": "daily", "meter_type": "Output:Meter:Cumulative"}
             ], validation_level="strict")
         """
         try:
-            logger.info(f"Adding output meters to {idf_path} (validation: {validation_level})")
+            logger.info(f"Adding output meters to {epjson_path} (validation: {validation_level})")
             
-            # Resolve IDF path
-            resolved_path = self._resolve_idf_path(idf_path)
+            # Resolve epJSON path
+            resolved_path = self._resolve_epjson_path(epjson_path)
             
             # Auto-resolve meter specifications to standard format
             resolved_meters = self.output_meter_manager.auto_resolve_meter_specs(meters)
@@ -1249,18 +1249,18 @@ class EnergyPlusManager:
             return json.dumps({
                 "success": False,
                 "error": str(e),
-                "input_file": idf_path,
+                "input_file": epjson_path,
                 "timestamp": datetime.now().isoformat()
             }, indent=2)
 
-    def get_output_meters(self, idf_path: str, discover_available: bool = False, run_days: int = 1) -> str:
+    def get_output_meters(self, epjson_path: str, discover_available: bool = False, run_days: int = 1) -> str:
         """
         Get output meters from the model - either configured meters or discover all available ones
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
             discover_available: If True, runs simulation to discover all available meters.
-                              If False, returns currently configured meters in the IDF (default: False)
+                              If False, returns currently configured meters in the epJSON (default: False)
             run_days: Number of days to run for discovery simulation (default: 1)
         
         Returns:
@@ -1268,7 +1268,7 @@ class EnergyPlusManager:
             all possible meters with units, frequencies, and ready-to-use Output:Meter lines.
             When discover_available=False, shows only currently configured Output:Meter objects.
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             if discover_available:
