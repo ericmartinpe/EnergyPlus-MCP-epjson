@@ -5,9 +5,15 @@ Handles inspection and modification of ElectricEquipment objects in EnergyPlus m
 
 import logging
 from typing import Dict, List, Any, Optional
-from eppy.modeleditor import IDF
+import json
 
 logger = logging.getLogger(__name__)
+
+
+def load_json(file_path: str) -> Dict[str, Any]:
+    """Load JSON file and return its content"""
+    with open(file_path, 'r') as f:
+        return json.load(f)
 
 
 class ElectricEquipmentManager:
@@ -37,23 +43,23 @@ class ElectricEquipmentManager:
         """Initialize the ElectricEquipment manager"""
         pass
     
-    def get_electric_equipment_objects(self, idf_path: str) -> Dict[str, Any]:
+    def get_electric_equipment_objects(self, ep_path: str) -> Dict[str, Any]:
         """
-        Get all ElectricEquipment objects from the IDF file with detailed information
+        Get all ElectricEquipment objects from the epJSON file with detailed information
         
         Args:
-            idf_path: Path to the IDF file
+            ep_path: Path to the epJSON file
             
         Returns:
             Dictionary with electric equipment objects information
         """
         try:
-            idf = IDF(idf_path)
-            equipment_objects = idf.idfobjects.get("ElectricEquipment", [])
+            ep = load_json(ep_path)
+            equipment_objects = ep.get("ElectricEquipment", {})
             
             result = {
                 "success": True,
-                "file_path": idf_path,
+                "file_path": ep_path,
                 "total_electric_equipment_objects": len(equipment_objects),
                 "electric_equipment_objects": [],
                 "summary": {
@@ -63,28 +69,28 @@ class ElectricEquipmentManager:
                 }
             }
             
-            # Get all zones for reference
-            zones = {zone.Name: zone for zone in idf.idfobjects.get("Zone", [])}
+            # Get all zones as a dictionary for lookup
+            zones_dict = ep.get("Zone", {})
             
-            for equipment_obj in equipment_objects:
+            for equipment_name, equipment_data in equipment_objects.items():
                 equipment_info = {
-                    "name": getattr(equipment_obj, 'Name', 'Unknown'),
-                    "zone_or_zonelist_or_space_or_spacelist_name": getattr(equipment_obj, 'Zone_or_ZoneList_or_Space_or_SpaceList_Name', 'Unknown'),
-                    "schedule_name": getattr(equipment_obj, 'Schedule_Name', 'Unknown'),
-                    "design_level_calculation_method": getattr(equipment_obj, 'Design_Level_Calculation_Method', 'Unknown'),
-                    "design_level": getattr(equipment_obj, 'Design_Level', ''),
-                    "watts_per_floor_area": getattr(equipment_obj, 'Watts_per_Floor_Area', ''),
-                    "watts_per_person": getattr(equipment_obj, 'Watts_per_Person', ''),
-                    "fraction_latent": getattr(equipment_obj, 'Fraction_Latent', ''),
-                    "fraction_radiant": getattr(equipment_obj, 'Fraction_Radiant', ''),
-                    "fraction_lost": getattr(equipment_obj, 'Fraction_Lost', ''),
-                    "end_use_subcategory": getattr(equipment_obj, 'EndUse_Subcategory', '')
+                    "name": equipment_name,
+                    "zone_or_zonelist_or_space_or_spacelist_name": equipment_data.get("zone_or_zonelist_or_space_or_spacelist_name", "Unknown"),
+                    "schedule_name": equipment_data.get("schedule_name", "Unknown"),
+                    "design_level_calculation_method": equipment_data.get("design_level_calculation_method", "Unknown"),
+                    "design_level": equipment_data.get("design_level", ""),
+                    "watts_per_floor_area": equipment_data.get("watts_per_floor_area", ""),
+                    "watts_per_person": equipment_data.get("watts_per_person", ""),
+                    "fraction_latent": equipment_data.get("fraction_latent", ""),
+                    "fraction_radiant": equipment_data.get("fraction_radiant", ""),
+                    "fraction_lost": equipment_data.get("fraction_lost", ""),
+                    "end_use_subcategory": equipment_data.get("end_use_subcategory", "")
                 }
                 
                 # Calculate design equipment power if possible
-                design_power = self._calculate_design_power(
-                    equipment_info, zones.get(equipment_info["zone_or_zonelist_or_space_or_spacelist_name"])
-                )
+                zone_name = equipment_info["zone_or_zonelist_or_space_or_spacelist_name"]
+                zone_data = zones_dict.get(zone_name) if zone_name != "Unknown" else None
+                design_power = self._calculate_design_power(equipment_info, zone_data)
                 equipment_info["design_power"] = design_power
                 
                 result["electric_equipment_objects"].append(equipment_info)
@@ -104,7 +110,7 @@ class ElectricEquipmentManager:
                 if design_power is not None:
                     result["summary"]["total_equipment_power"] += design_power
             
-            logger.info(f"Found {len(equipment_objects)} ElectricEquipment objects in {idf_path}")
+            logger.info(f"Found {len(equipment_objects)} ElectricEquipment objects in {ep_path}")
             return result
             
         except Exception as e:
@@ -112,11 +118,11 @@ class ElectricEquipmentManager:
             return {
                 "success": False,
                 "error": str(e),
-                "file_path": idf_path
+                "file_path": ep_path
             }
     
     def _calculate_design_power(self, equipment_info: Dict[str, Any], 
-                               zone_obj: Optional[Any]) -> Optional[float]:
+                               zone_data: Optional[Dict[str, Any]]) -> Optional[float]:
         """Calculate design equipment power based on calculation method and zone data"""
         try:
             calc_method = equipment_info["design_level_calculation_method"]
@@ -126,11 +132,11 @@ class ElectricEquipmentManager:
                 if value and value != '':
                     return float(value)
                     
-            elif calc_method == "Watts/Area" and zone_obj:
+            elif calc_method == "Watts/Area" and zone_data:
                 watts_per_area = equipment_info["watts_per_floor_area"]
                 if watts_per_area and watts_per_area != '':
-                    # Get zone floor area
-                    floor_area = getattr(zone_obj, 'Floor_Area', None)
+                    # Get zone floor area from epJSON
+                    floor_area = zone_data.get('floor_area')
                     if floor_area and floor_area != '' and floor_area != 'autocalculate':
                         return float(watts_per_area) * float(floor_area)
                         
@@ -146,26 +152,26 @@ class ElectricEquipmentManager:
         
         return None
     
-    def modify_electric_equipment_objects(self, idf_path: str, modifications: List[Dict[str, Any]], 
+    def modify_electric_equipment_objects(self, ep_path: str, modifications: List[Dict[str, Any]], 
                                          output_path: str) -> Dict[str, Any]:
         """
-        Modify ElectricEquipment objects in the IDF file
+        Modify ElectricEquipment objects in the epJSON file
         
         Args:
-            idf_path: Path to the input IDF file
+            ep_path: Path to the input epJSON file
             modifications: List of modification specifications
-            output_path: Path for the output IDF file
+            output_path: Path for the output epJSON file
             
         Returns:
             Dictionary with modification results
         """
         try:
-            idf = IDF(idf_path)
-            equipment_objects = idf.idfobjects.get("ElectricEquipment", [])
+            ep = load_json(ep_path)
+            equipment_objects = ep.get("ElectricEquipment", {})
             
             result = {
                 "success": True,
-                "input_file": idf_path,
+                "input_file": ep_path,
                 "output_file": output_path,
                 "modifications_requested": len(modifications),
                 "modifications_applied": [],
@@ -180,35 +186,37 @@ class ElectricEquipmentManager:
                     
                     if target == "all":
                         # Apply to all ElectricEquipment objects
-                        for equipment_obj in equipment_objects:
+                        for equipment_name, equipment_data in equipment_objects.items():
                             self._apply_equipment_modifications(
-                                equipment_obj, field_updates, result
+                                equipment_name, equipment_data, field_updates, result
                             )
                     elif target.startswith("zone:"):
                         # Apply to ElectricEquipment objects in specific zone
                         zone_name = target.replace("zone:", "").strip()
-                        for equipment_obj in equipment_objects:
-                            if getattr(equipment_obj, 'Zone_or_ZoneList_or_Space_or_SpaceList_Name', '') == zone_name:
+                        for equipment_name, equipment_data in equipment_objects.items():
+                            if equipment_data.get('zone_or_zonelist_or_space_or_spacelist_name', '') == zone_name:
                                 self._apply_equipment_modifications(
-                                    equipment_obj, field_updates, result
+                                    equipment_name, equipment_data, field_updates, result
                                 )
                     elif target.startswith("name:"):
                         # Apply to specific ElectricEquipment object by name
-                        equipment_name = target.replace("name:", "").strip()
-                        for equipment_obj in equipment_objects:
-                            if getattr(equipment_obj, 'Name', '') == equipment_name:
-                                self._apply_equipment_modifications(
-                                    equipment_obj, field_updates, result
-                                )
-                                break
+                        target_name = target.replace("name:", "").strip()
+                        if target_name in equipment_objects:
+                            self._apply_equipment_modifications(
+                                target_name, equipment_objects[target_name], field_updates, result
+                            )
+                        else:
+                            result["errors"].append(f"ElectricEquipment object '{target_name}' not found")
                     else:
                         result["errors"].append(f"Invalid target specification: {target}")
                         
                 except Exception as e:
                     result["errors"].append(f"Error processing modification: {str(e)}")
             
-            # Save the modified IDF
-            idf.save(output_path)
+            # Save the modified epJSON
+            with open(output_path, 'w') as f:
+                json.dump(ep, f, indent=2)
+            
             result["total_modifications_applied"] = len(result["modifications_applied"])
             
             logger.info(f"Applied {len(result['modifications_applied'])} modifications to ElectricEquipment objects")
@@ -219,49 +227,50 @@ class ElectricEquipmentManager:
             return {
                 "success": False,
                 "error": str(e),
-                "input_file": idf_path
+                "input_file": ep_path
             }
     
-    def _apply_equipment_modifications(self, equipment_obj: Any, field_updates: Dict[str, Any], 
-                                      result: Dict[str, Any]) -> None:
-        """Apply field updates to an ElectricEquipment object"""
-        # Valid ElectricEquipment object fields based on IDD
+    def _apply_equipment_modifications(self, equipment_name: str, equipment_data: Dict[str, Any],
+                                      field_updates: Dict[str, Any], result: Dict[str, Any]) -> None:
+        """Apply field updates to an ElectricEquipment object in epJSON format"""
+        # Valid ElectricEquipment object fields (epJSON format - lowercase with underscores)
         valid_fields = {
-            "Schedule_Name",
-            "Design_Level_Calculation_Method", 
-            "Design_Level",
-            "Watts_per_Floor_Area",
-            "Watts_per_Person",
-            "Fraction_Latent",
-            "Fraction_Radiant",
-            "Fraction_Lost",
-            "EndUse_Subcategory"
+            "schedule_name",
+            "design_level_calculation_method", 
+            "design_level",
+            "watts_per_floor_area",
+            "watts_per_person",
+            "fraction_latent",
+            "fraction_radiant",
+            "fraction_lost",
+            "end_use_subcategory"
         }
         
         # Fraction fields that must be between 0.0 and 1.0
         fraction_fields = {
-            "Fraction_Latent",
-            "Fraction_Radiant", 
-            "Fraction_Lost"
+            "fraction_latent",
+            "fraction_radiant", 
+            "fraction_lost"
         }
         
         # Numeric fields that must be >= 0
         positive_numeric_fields = {
-            "Design_Level",
-            "Watts_per_Floor_Area",
-            "Watts_per_Person"
+            "design_level",
+            "watts_per_floor_area",
+            "watts_per_person"
         }
         
-        equipment_name = getattr(equipment_obj, 'Name', 'Unknown')
-        
         for field_name, new_value in field_updates.items():
-            if field_name not in valid_fields:
+            # Normalize field name to lowercase with underscores
+            field_key = field_name.lower().replace(" ", "_")
+            
+            if field_key not in valid_fields:
                 result["errors"].append(f"Invalid field '{field_name}' for ElectricEquipment object '{equipment_name}'")
                 continue
             
             try:
                 # Validate calculation method change
-                if field_name == "Design_Level_Calculation_Method":
+                if field_key == "design_level_calculation_method":
                     if new_value not in self.VALID_CALCULATION_METHODS:
                         result["errors"].append(
                             f"Invalid calculation method '{new_value}' for '{equipment_name}'. "
@@ -270,46 +279,46 @@ class ElectricEquipmentManager:
                         continue
                 
                 # Validate fraction fields (0.0 to 1.0)
-                if field_name in fraction_fields:
+                if field_key in fraction_fields:
                     try:
                         float_value = float(new_value)
                         if not (0.0 <= float_value <= 1.0):
                             result["errors"].append(
-                                f"Field '{field_name}' for '{equipment_name}' must be between 0.0 and 1.0, got {new_value}"
+                                f"Field '{field_key}' for '{equipment_name}' must be between 0.0 and 1.0, got {new_value}"
                             )
                             continue
                     except (ValueError, TypeError):
                         result["errors"].append(
-                            f"Field '{field_name}' for '{equipment_name}' must be a number, got {new_value}"
+                            f"Field '{field_key}' for '{equipment_name}' must be a number, got {new_value}"
                         )
                         continue
                 
                 # Validate positive numeric fields
-                if field_name in positive_numeric_fields:
+                if field_key in positive_numeric_fields:
                     try:
                         float_value = float(new_value)
                         if float_value < 0.0:
                             result["errors"].append(
-                                f"Field '{field_name}' for '{equipment_name}' must be >= 0.0, got {new_value}"
+                                f"Field '{field_key}' for '{equipment_name}' must be >= 0.0, got {new_value}"
                             )
                             continue
                     except (ValueError, TypeError):
                         result["errors"].append(
-                            f"Field '{field_name}' for '{equipment_name}' must be a number, got {new_value}"
+                            f"Field '{field_key}' for '{equipment_name}' must be a number, got {new_value}"
                         )
                         continue
                 
-                old_value = getattr(equipment_obj, field_name, "")
-                setattr(equipment_obj, field_name, new_value)
+                old_value = equipment_data.get(field_key, "")
+                equipment_data[field_key] = new_value
                 
                 result["modifications_applied"].append({
                     "object_name": equipment_name,
-                    "field": field_name,
+                    "field": field_key,
                     "old_value": old_value,
                     "new_value": new_value
                 })
                 
-                logger.debug(f"Updated {equipment_name}.{field_name}: {old_value} -> {new_value}")
+                logger.debug(f"Updated {equipment_name}.{field_key}: {old_value} -> {new_value}")
                 
             except Exception as e:
                 result["errors"].append(
