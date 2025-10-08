@@ -512,62 +512,67 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error validating IDF file: {str(e)}")
     
     # ----------------------------- Model Inspection Methods ------------------------
-    def get_model_basics(self, idf_path: str) -> str:
+    def get_model_basics(self, epjson_path: str) -> str:
         """Get basic model information from Building, Site:Location, and SimulationControl"""
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.debug(f"Getting model basics for: {resolved_path}")
-            idf = IDF(resolved_path)
+            ep = self.load_json(resolved_path)
             basics = {}
             
             # Building information
-            building_objs = idf.idfobjects.get("Building", [])
+            building_objs = ep.get("Building", {})
             if building_objs:
-                bldg = building_objs[0]
+                # Get first (and typically only) building
+                bldg_name = list(building_objs.keys())[0]
+                bldg = building_objs[bldg_name]
                 basics["Building"] = {
-                    "Name": getattr(bldg, 'Name', 'Unknown'),
-                    "North Axis": getattr(bldg, 'North_Axis', 'Unknown'),
-                    "Terrain": getattr(bldg, 'Terrain', 'Unknown'),
-                    "Loads Convergence Tolerance": getattr(bldg, 'Loads_Convergence_Tolerance_Value', 'Unknown'),
-                    "Temperature Convergence Tolerance": getattr(bldg, 'Temperature_Convergence_Tolerance_Value', 'Unknown'),
-                    "Solar Distribution": getattr(bldg, 'Solar_Distribution', 'Unknown'),
-                    "Max Warmup Days": getattr(bldg, 'Maximum_Number_of_Warmup_Days', 'Unknown'),
-                    "Min Warmup Days": getattr(bldg, 'Minimum_Number_of_Warmup_Days', 'Unknown')
+                    "Name": bldg_name,
+                    "North Axis": bldg.get('north_axis', 'Unknown'),
+                    "Terrain": bldg.get('terrain', 'Unknown'),
+                    "Loads Convergence Tolerance": bldg.get('loads_convergence_tolerance_value', 'Unknown'),
+                    "Temperature Convergence Tolerance": bldg.get('temperature_convergence_tolerance_value', 'Unknown'),
+                    "Solar Distribution": bldg.get('solar_distribution', 'Unknown'),
+                    "Max Warmup Days": bldg.get('maximum_number_of_warmup_days', 'Unknown'),
+                    "Min Warmup Days": bldg.get('minimum_number_of_warmup_days', 'Unknown')
                 }
             
             # Site:Location information
-            site_objs = idf.idfobjects.get("Site:Location", [])
+            site_objs = ep.get("Site:Location", {})
             if site_objs:
-                site = site_objs[0]
+                site_name = list(site_objs.keys())[0]
+                site = site_objs[site_name]
                 basics["Site:Location"] = {
-                    "Name": getattr(site, 'Name', 'Unknown'),
-                    "Latitude": getattr(site, 'Latitude', 'Unknown'),
-                    "Longitude": getattr(site, 'Longitude', 'Unknown'),
-                    "Time Zone": getattr(site, 'Time_Zone', 'Unknown'),
-                    "Elevation": getattr(site, 'Elevation', 'Unknown')
+                    "Name": site_name,
+                    "Latitude": site.get('latitude', 'Unknown'),
+                    "Longitude": site.get('longitude', 'Unknown'),
+                    "Time Zone": site.get('time_zone', 'Unknown'),
+                    "Elevation": site.get('elevation', 'Unknown')
                 }
             
             # SimulationControl information
-            sim_objs = idf.idfobjects.get("SimulationControl", [])
+            sim_objs = ep.get("SimulationControl", {})
             if sim_objs:
-                sim = sim_objs[0]
+                sim_name = list(sim_objs.keys())[0]
+                sim = sim_objs[sim_name]
                 basics["SimulationControl"] = {
-                    "Do Zone Sizing Calculation": getattr(sim, 'Do_Zone_Sizing_Calculation', 'Unknown'),
-                    "Do System Sizing Calculation": getattr(sim, 'Do_System_Sizing_Calculation', 'Unknown'),
-                    "Do Plant Sizing Calculation": getattr(sim, 'Do_Plant_Sizing_Calculation', 'Unknown'),
-                    "Run Simulation for Sizing Periods": getattr(sim, 'Run_Simulation_for_Sizing_Periods', 'Unknown'),
-                    "Run Simulation for Weather File Run Periods": getattr(sim, 'Run_Simulation_for_Weather_File_Run_Periods', 'Unknown'),
-                    "Do HVAC Sizing Simulation for Sizing Periods": getattr(sim, 'Do_HVAC_Sizing_Simulation_for_Sizing_Periods', 'Unknown'),
-                    "Max Number of HVAC Sizing Simulation Passes": getattr(sim, 'Maximum_Number_of_HVAC_Sizing_Simulation_Passes', 'Unknown')
+                    "Do Zone Sizing Calculation": sim.get('do_zone_sizing_calculation', 'Unknown'),
+                    "Do System Sizing Calculation": sim.get('do_system_sizing_calculation', 'Unknown'),
+                    "Do Plant Sizing Calculation": sim.get('do_plant_sizing_calculation', 'Unknown'),
+                    "Run Simulation for Sizing Periods": sim.get('run_simulation_for_sizing_periods', 'Unknown'),
+                    "Run Simulation for Weather File Run Periods": sim.get('run_simulation_for_weather_file_run_periods', 'Unknown'),
+                    "Do HVAC Sizing Simulation for Sizing Periods": sim.get('do_hvac_sizing_simulation_for_sizing_periods', 'Unknown'),
+                    "Max Number of HVAC Sizing Simulation Passes": sim.get('maximum_number_of_hvac_sizing_simulation_passes', 'Unknown')
                 }
             
             # Version information
-            version_objs = idf.idfobjects.get("Version", [])
+            version_objs = ep.get("Version", {})
             if version_objs:
-                version = version_objs[0]
+                version_name = list(version_objs.keys())[0]
+                version = version_objs[version_name]
                 basics["Version"] = {
-                    "Version Identifier": getattr(version, 'Version_Identifier', 'Unknown')
+                    "Version Identifier": version.get('version_identifier', 'Unknown')
                 }
             
             logger.debug(f"Model basics extracted for {len(basics)} sections")
@@ -578,13 +583,13 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error getting model basics: {str(e)}")
     
 
-    def check_simulation_settings(self, idf_path: str) -> str:
+    def check_simulation_settings(self, epjson_path: str) -> str:
         """Check SimulationControl and RunPeriod settings with modifiable fields info"""
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.debug(f"Checking simulation settings for: {resolved_path}")
-            idf = IDF(resolved_path)
+            ep = self.load_json(resolved_path)
             
             settings_info = {
                 "file_path": resolved_path,
@@ -621,39 +626,40 @@ class EnergyPlusManager:
             }
             
             # Get current SimulationControl values
-            sim_objs = idf.idfobjects.get("SimulationControl", [])
+            sim_objs = ep.get("SimulationControl", {})
             if sim_objs:
-                sim = sim_objs[0]
+                sim_name = list(sim_objs.keys())[0]
+                sim = sim_objs[sim_name]
                 settings_info["SimulationControl"]["current_values"] = {
-                    "Do_Zone_Sizing_Calculation": getattr(sim, 'Do_Zone_Sizing_Calculation', 'Unknown'),
-                    "Do_System_Sizing_Calculation": getattr(sim, 'Do_System_Sizing_Calculation', 'Unknown'),
-                    "Do_Plant_Sizing_Calculation": getattr(sim, 'Do_Plant_Sizing_Calculation', 'Unknown'),
-                    "Run_Simulation_for_Sizing_Periods": getattr(sim, 'Run_Simulation_for_Sizing_Periods', 'Unknown'),
-                    "Run_Simulation_for_Weather_File_Run_Periods": getattr(sim, 'Run_Simulation_for_Weather_File_Run_Periods', 'Unknown'),
-                    "Do_HVAC_Sizing_Simulation_for_Sizing_Periods": getattr(sim, 'Do_HVAC_Sizing_Simulation_for_Sizing_Periods', 'Unknown'),
-                    "Maximum_Number_of_HVAC_Sizing_Simulation_Passes": getattr(sim, 'Maximum_Number_of_HVAC_Sizing_Simulation_Passes', 'Unknown')
+                    "Do_Zone_Sizing_Calculation": sim.get('do_zone_sizing_calculation', 'Unknown'),
+                    "Do_System_Sizing_Calculation": sim.get('do_system_sizing_calculation', 'Unknown'),
+                    "Do_Plant_Sizing_Calculation": sim.get('do_plant_sizing_calculation', 'Unknown'),
+                    "Run_Simulation_for_Sizing_Periods": sim.get('run_simulation_for_sizing_periods', 'Unknown'),
+                    "Run_Simulation_for_Weather_File_Run_Periods": sim.get('run_simulation_for_weather_file_run_periods', 'Unknown'),
+                    "Do_HVAC_Sizing_Simulation_for_Sizing_Periods": sim.get('do_hvac_sizing_simulation_for_sizing_periods', 'Unknown'),
+                    "Maximum_Number_of_HVAC_Sizing_Simulation_Passes": sim.get('maximum_number_of_hvac_sizing_simulation_passes', 'Unknown')
                 }
             else:
                 settings_info["SimulationControl"]["error"] = "No SimulationControl object found"
             
             # Get current RunPeriod values  
-            run_objs = idf.idfobjects.get("RunPeriod", [])
-            for i, run_period in enumerate(run_objs):
+            run_objs = ep.get("RunPeriod", {})
+            for i, (run_name, run_period) in enumerate(run_objs.items()):
                 run_data = {
                     "index": i,
-                    "Name": getattr(run_period, 'Name', 'Unknown'),
-                    "Begin_Month": getattr(run_period, 'Begin_Month', 'Unknown'),
-                    "Begin_Day_of_Month": getattr(run_period, 'Begin_Day_of_Month', 'Unknown'),
-                    "Begin_Year": getattr(run_period, 'Begin_Year', 'Unknown'),
-                    "End_Month": getattr(run_period, 'End_Month', 'Unknown'),
-                    "End_Day_of_Month": getattr(run_period, 'End_Day_of_Month', 'Unknown'),
-                    "End_Year": getattr(run_period, 'End_Year', 'Unknown'),
-                    "Day_of_Week_for_Start_Day": getattr(run_period, 'Day_of_Week_for_Start_Day', 'Unknown'),
-                    "Use_Weather_File_Holidays_and_Special_Days": getattr(run_period, 'Use_Weather_File_Holidays_and_Special_Days', 'Unknown'),
-                    "Use_Weather_File_Daylight_Saving_Period": getattr(run_period, 'Use_Weather_File_Daylight_Saving_Period', 'Unknown'),
-                    "Apply_Weekend_Holiday_Rule": getattr(run_period, 'Apply_Weekend_Holiday_Rule', 'Unknown'),
-                    "Use_Weather_File_Rain_Indicators": getattr(run_period, 'Use_Weather_File_Rain_Indicators', 'Unknown'),
-                    "Use_Weather_File_Snow_Indicators": getattr(run_period, 'Use_Weather_File_Snow_Indicators', 'Unknown')
+                    "Name": run_name,
+                    "Begin_Month": run_period.get('begin_month', 'Unknown'),
+                    "Begin_Day_of_Month": run_period.get('begin_day_of_month', 'Unknown'),
+                    "Begin_Year": run_period.get('begin_year', 'Unknown'),
+                    "End_Month": run_period.get('end_month', 'Unknown'),
+                    "End_Day_of_Month": run_period.get('end_day_of_month', 'Unknown'),
+                    "End_Year": run_period.get('end_year', 'Unknown'),
+                    "Day_of_Week_for_Start_Day": run_period.get('day_of_week_for_start_day', 'Unknown'),
+                    "Use_Weather_File_Holidays_and_Special_Days": run_period.get('use_weather_file_holidays_and_special_days', 'Unknown'),
+                    "Use_Weather_File_Daylight_Saving_Period": run_period.get('use_weather_file_daylight_saving_period', 'Unknown'),
+                    "Apply_Weekend_Holiday_Rule": run_period.get('apply_weekend_holiday_rule', 'Unknown'),
+                    "Use_Weather_File_Rain_Indicators": run_period.get('use_weather_file_rain_indicators', 'Unknown'),
+                    "Use_Weather_File_Snow_Indicators": run_period.get('use_weather_file_snow_indicators', 'Unknown')
                 }
                 settings_info["RunPeriod"]["current_values"].append(run_data)
             
