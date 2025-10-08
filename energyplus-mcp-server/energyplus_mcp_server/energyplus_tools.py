@@ -1286,22 +1286,22 @@ class EnergyPlusManager:
 
 
     # ----------------------- Schedule Inspector Module ------------------------
-    def inspect_schedules(self, idf_path: str, include_values: bool = False) -> str:
+    def inspect_schedules(self, epjson_path: str, include_values: bool = False) -> str:
         """
         Inspect and inventory all schedule objects in the EnergyPlus model
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
             include_values: Whether to extract actual schedule values (default: False)
         
         Returns:
             JSON string with schedule inventory and analysis
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.debug(f"Inspecting schedules for: {resolved_path} (include_values={include_values})")
-            idf = IDF(resolved_path)
+            ep = self.load_json(resolved_path)
             
             # Define all schedule object types to inspect
             schedule_object_types = [
@@ -1337,26 +1337,26 @@ class EnergyPlusManager:
             }
             
             # Inspect ScheduleTypeLimits
-            schedule_type_limits = idf.idfobjects.get("ScheduleTypeLimits", [])
-            for stl in schedule_type_limits:
+            schedule_type_limits = ep.get("ScheduleTypeLimits", {})
+            for stl_name, stl in schedule_type_limits.items():
                 stl_info = {
-                    "name": getattr(stl, 'Name', 'Unknown'),
-                    "lower_limit": getattr(stl, 'Lower_Limit_Value', 'Not specified'),
-                    "upper_limit": getattr(stl, 'Upper_Limit_Value', 'Not specified'),
-                    "numeric_type": getattr(stl, 'Numeric_Type', 'Not specified'),
-                    "unit_type": getattr(stl, 'Unit_Type', 'Not specified')
+                    "name": stl_name,
+                    "lower_limit": stl.get('lower_limit_value', 'Not specified'),
+                    "upper_limit": stl.get('upper_limit_value', 'Not specified'),
+                    "numeric_type": stl.get('numeric_type', 'Not specified'),
+                    "unit_type": stl.get('unit_type', 'Not specified')
                 }
                 schedule_inventory["schedule_type_limits"].append(stl_info)
             
             # Inspect Day Schedules
             day_schedule_types = ["Schedule:Day:Hourly", "Schedule:Day:Interval", "Schedule:Day:List"]
             for day_type in day_schedule_types:
-                day_schedules = idf.idfobjects.get(day_type, [])
-                for day_sched in day_schedules:
+                day_schedules = ep.get(day_type, {})
+                for day_name, day_sched in day_schedules.items():
                     day_info = {
                         "object_type": day_type,
-                        "name": getattr(day_sched, 'Name', 'Unknown'),
-                        "schedule_type_limits": getattr(day_sched, 'Schedule_Type_Limits_Name', 'Not specified')
+                        "name": day_name,
+                        "schedule_type_limits": day_sched.get('schedule_type_limits_name', 'Not specified')
                     }
                     
                     # Add type-specific fields
@@ -1364,10 +1364,10 @@ class EnergyPlusManager:
                         # For hourly, we could count non-zero hours, but keep simple for now
                         day_info["profile_type"] = "24 hourly values"
                     elif day_type == "Schedule:Day:Interval":
-                        day_info["interpolate_to_timestep"] = getattr(day_sched, 'Interpolate_to_Timestep', 'No')
+                        day_info["interpolate_to_timestep"] = day_sched.get('interpolate_to_timestep', 'No')
                     elif day_type == "Schedule:Day:List":
-                        day_info["interpolate_to_timestep"] = getattr(day_sched, 'Interpolate_to_Timestep', 'No')
-                        day_info["minutes_per_item"] = getattr(day_sched, 'Minutes_Per_Item', 'Not specified')
+                        day_info["interpolate_to_timestep"] = day_sched.get('interpolate_to_timestep', 'No')
+                        day_info["minutes_per_item"] = day_sched.get('minutes_per_item', 'Not specified')
                     
                     # Extract values if requested
                     if include_values:
@@ -1384,21 +1384,21 @@ class EnergyPlusManager:
             # Inspect Week Schedules  
             week_schedule_types = ["Schedule:Week:Daily", "Schedule:Week:Compact"]
             for week_type in week_schedule_types:
-                week_schedules = idf.idfobjects.get(week_type, [])
-                for week_sched in week_schedules:
+                week_schedules = ep.get(week_type, {})
+                for week_name, week_sched in week_schedules.items():
                     week_info = {
                         "object_type": week_type,
-                        "name": getattr(week_sched, 'Name', 'Unknown')
+                        "name": week_name
                     }
                     
                     if week_type == "Schedule:Week:Daily":
                         # Extract day schedule references
-                        day_types = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
-                                   'Holiday', 'SummerDesignDay', 'WinterDesignDay', 'CustomDay1', 'CustomDay2']
+                        day_types = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
+                                   'holiday', 'summerdesignday', 'winterdesignday', 'customday1', 'customday2']
                         day_refs = {}
                         for day_type in day_types:
-                            field_name = f"{day_type}_Schedule_Day_Name"
-                            day_refs[day_type] = getattr(week_sched, field_name, 'Not specified')
+                            field_name = f"{day_type}_schedule_day_name"
+                            day_refs[day_type] = week_sched.get(field_name, 'Not specified')
                         week_info["day_schedule_references"] = day_refs
                     
                     # Note: Week schedules don't have direct values, they reference day schedules
@@ -1408,21 +1408,21 @@ class EnergyPlusManager:
             # Inspect Annual/Full Schedules
             annual_schedule_types = ["Schedule:Year", "Schedule:Compact", "Schedule:Constant", "Schedule:File"]
             for annual_type in annual_schedule_types:
-                annual_schedules = idf.idfobjects.get(annual_type, [])
-                for annual_sched in annual_schedules:
+                annual_schedules = ep.get(annual_type, {})
+                for annual_name, annual_sched in annual_schedules.items():
                     annual_info = {
                         "object_type": annual_type,
-                        "name": getattr(annual_sched, 'Name', 'Unknown'),
-                        "schedule_type_limits": getattr(annual_sched, 'Schedule_Type_Limits_Name', 'Not specified')
+                        "name": annual_name,
+                        "schedule_type_limits": annual_sched.get('schedule_type_limits_name', 'Not specified')
                     }
                     
                     # Add type-specific fields
                     if annual_type == "Schedule:Constant":
-                        annual_info["hourly_value"] = getattr(annual_sched, 'Hourly_Value', 'Not specified')
+                        annual_info["hourly_value"] = annual_sched.get('hourly_value', 'Not specified')
                     elif annual_type == "Schedule:File":
-                        annual_info["file_name"] = getattr(annual_sched, 'File_Name', 'Not specified')
-                        annual_info["column_number"] = getattr(annual_sched, 'Column_Number', 'Not specified')
-                        annual_info["number_of_hours"] = getattr(annual_sched, 'Number_of_Hours_of_Data', 'Not specified')
+                        annual_info["file_name"] = annual_sched.get('file_name', 'Not specified')
+                        annual_info["column_number"] = annual_sched.get('column_number', 'Not specified')
+                        annual_info["number_of_hours"] = annual_sched.get('number_of_hours_of_data', 'Not specified')
                         # Skip Schedule:File value extraction as requested
                         if include_values:
                             annual_info["values"] = {"note": "Schedule:File value extraction skipped"}
@@ -1440,11 +1440,12 @@ class EnergyPlusManager:
                     schedule_inventory["annual_schedules"].append(annual_info)
             
             # Handle Schedule:File:Shading separately
-            shading_schedules = idf.idfobjects.get("Schedule:File:Shading", [])
-            for shading_sched in shading_schedules:
+            shading_schedules = ep.get("Schedule:File:Shading", {})
+            for shading_name, shading_sched in shading_schedules.items():
                 other_info = {
                     "object_type": "Schedule:File:Shading",
-                    "file_name": getattr(shading_sched, 'File_Name', 'Not specified'),
+                    "name": shading_name,
+                    "file_name": shading_sched.get('file_name', 'Not specified'),
                     "purpose": "Shading schedules for exterior surfaces"
                 }
                 # Skip shading schedule value extraction
@@ -1469,7 +1470,7 @@ class EnergyPlusManager:
                 "other_schedules_count": len(schedule_inventory["other_schedules"]),
                 "schedule_types_found": [
                     obj_type for obj_type in schedule_object_types 
-                    if len(idf.idfobjects.get(obj_type, [])) > 0
+                    if len(ep.get(obj_type, {})) > 0
                 ]
             }
             
