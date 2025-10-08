@@ -58,30 +58,30 @@ class EnergyPlusManager:
             return json.load(f)
     
 
-    def _resolve_idf_path(self, idf_path: str) -> str:
-        """Resolve IDF path (handle relative paths, sample files, example files, etc.)"""
+    def _resolve_epjson_path(self, epjson_path: str) -> str:
+        """Resolve epJSON path (handle relative paths, sample files, example files, etc.)"""
         from .utils.path_utils import resolve_path
-        return resolve_path(self.config, idf_path, file_types=['.idf'], description="IDF file")
+        return resolve_path(self.config, epjson_path, file_types=['.epJSON', '.json'], description="epJSON file")
         
     
-    def load_idf(self, idf_path: str) -> Dict[str, Any]:
-        """Load an IDF file and return basic information"""
-        resolved_path = self._resolve_idf_path(idf_path)
+    def load_epjson(self, epjson_path: str) -> Dict[str, Any]:
+        """Load an epJSON file and return basic information"""
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
-            logger.info(f"Loading IDF file: {resolved_path}")
-            idf = IDF(resolved_path)
+            logger.info(f"Loading epJSON file: {resolved_path}")
+            ep = self.load_json(resolved_path)
             
             # Get basic counts
-            building_count = len(idf.idfobjects.get("Building", []))
-            zone_count = len(idf.idfobjects.get("Zone", []))
-            surface_count = len(idf.idfobjects.get("BuildingSurface:Detailed", []))
-            material_count = len(idf.idfobjects.get("Material", [])) + len(idf.idfobjects.get("Material:NoMass", []))
-            construction_count = len(idf.idfobjects.get("Construction", []))
+            building_count = len(ep.get("Building", {}))
+            zone_count = len(ep.get("Zone", {}))
+            surface_count = len(ep.get("BuildingSurface:Detailed", {}))
+            material_count = len(ep.get("Material", {})) + len(ep.get("Material:NoMass", {}))
+            construction_count = len(ep.get("Construction", {}))
             
             result = {
                 "file_path": resolved_path,
-                "original_path": idf_path,
+                "original_path": epjson_path,
                 "building_count": building_count,
                 "zone_count": zone_count,
                 "surface_count": surface_count,
@@ -91,12 +91,12 @@ class EnergyPlusManager:
                 "file_size_bytes": os.path.getsize(resolved_path)
             }
             
-            logger.info(f"IDF loaded successfully: {zone_count} zones, {surface_count} surfaces")
+            logger.info(f"epJSON loaded successfully: {zone_count} zones, {surface_count} surfaces")
             return result
             
         except Exception as e:
-            logger.error(f"Error loading IDF file {resolved_path}: {e}")
-            raise RuntimeError(f"Error loading IDF file: {str(e)}")
+            logger.error(f"Error loading epJSON file {resolved_path}: {e}")
+            raise RuntimeError(f"Error loading epJSON file: {str(e)}")
     
 
     def list_available_files(self, include_example_files: bool = False, include_weather_data: bool = False) -> str:
