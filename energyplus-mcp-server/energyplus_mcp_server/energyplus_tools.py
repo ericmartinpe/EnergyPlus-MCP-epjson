@@ -674,28 +674,28 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error checking simulation settings: {str(e)}")
     
     
-    def list_zones(self, idf_path: str) -> str:
+    def list_zones(self, epjson_path: str) -> str:
         """List all zones in the model"""
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.debug(f"Listing zones for: {resolved_path}")
-            idf = IDF(resolved_path)
-            zones = idf.idfobjects.get("Zone", [])
+            ep = self.load_json(resolved_path)
+            zones = ep.get("Zone", {})
             
             zone_info = []
-            for i, zone in enumerate(zones):
+            for i, (zone_name, zone) in enumerate(zones.items()):
                 zone_data = {
                     "Index": i + 1,
-                    "Name": getattr(zone, 'Name', 'Unknown'),
-                    "Direction of Relative North": getattr(zone, 'Direction_of_Relative_North', 'Unknown'),
-                    "X Origin": getattr(zone, 'X_Origin', 'Unknown'),
-                    "Y Origin": getattr(zone, 'Y_Origin', 'Unknown'),
-                    "Z Origin": getattr(zone, 'Z_Origin', 'Unknown'),
-                    "Type": getattr(zone, 'Type', 'Unknown'),
-                    "Multiplier": getattr(zone, 'Multiplier', 'Unknown'),
-                    "Ceiling Height": getattr(zone, 'Ceiling_Height', 'autocalculate'),
-                    "Volume": getattr(zone, 'Volume', 'autocalculate')
+                    "Name": zone_name,
+                    "Direction of Relative North": zone.get('direction_of_relative_north', 'Unknown'),
+                    "X Origin": zone.get('x_origin', 'Unknown'),
+                    "Y Origin": zone.get('y_origin', 'Unknown'),
+                    "Z Origin": zone.get('z_origin', 'Unknown'),
+                    "Type": zone.get('type', 'Unknown'),
+                    "Multiplier": zone.get('multiplier', 'Unknown'),
+                    "Ceiling Height": zone.get('ceiling_height', 'autocalculate'),
+                    "Volume": zone.get('volume', 'autocalculate')
                 }
                 zone_info.append(zone_data)
             
