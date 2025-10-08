@@ -861,17 +861,17 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error modifying People objects: {str(e)}")
 
     
-    def inspect_lights(self, idf_path: str) -> str:
+    def inspect_lights(self, epjson_path: str) -> str:
         """
         Inspect and list all Lights objects in the EnergyPlus model
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
         
         Returns:
             JSON string with detailed Lights objects information
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.info(f"Inspecting Lights objects for: {resolved_path}")
@@ -888,13 +888,13 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error inspecting Lights objects: {str(e)}")
     
     
-    def modify_lights(self, idf_path: str, modifications: List[Dict[str, Any]], 
+    def modify_lights(self, epjson_path: str, modifications: List[Dict[str, Any]], 
                      output_path: Optional[str] = None) -> str:
         """
         Modify Lights objects in the EnergyPlus model
         
         Args:
-            idf_path: Path to the input IDF file
+            epjson_path: Path to the input epJSON file
             modifications: List of modification specifications. Each item should have:
                           - "target": "all", "zone:ZoneName", or "name:LightsName"
                           - "field_updates": Dictionary of field names and new values
@@ -903,7 +903,7 @@ class EnergyPlusManager:
         Returns:
             JSON string with modification results
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.info(f"Modifying Lights objects for: {resolved_path}")
