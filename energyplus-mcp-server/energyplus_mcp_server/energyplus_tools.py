@@ -2999,76 +2999,50 @@ class EnergyPlusManager:
         return None
 
 
-    def _get_connectors_from_list(self, idf, connector_list_name: str) -> List[Dict[str, Any]]:
+    def _get_connectors_from_list(self, ep, connector_list_name: str) -> List[Dict[str, Any]]:
         """Helper method to get connector information (splitters/mixers) from a connector list"""
         connectors = []
-        
-        connector_lists = idf.idfobjects.get("ConnectorList", [])
-        for connector_list in connector_lists:
-            if getattr(connector_list, 'Name', '') == connector_list_name:
-                # Get splitter information
-                splitter_name = getattr(connector_list, 'Connector_1_Name', None)
-                splitter_type = getattr(connector_list, 'Connector_1_Object_Type', None)
-                
-                if splitter_name and splitter_type:
-                    splitter_info = self._get_connector_details(idf, splitter_name, splitter_type)
-                    if splitter_info:
-                        connectors.append(splitter_info)
-                
-                # Get mixer information
-                mixer_name = getattr(connector_list, 'Connector_2_Name', None)
-                mixer_type = getattr(connector_list, 'Connector_2_Object_Type', None)
-                
-                if mixer_name and mixer_type:
-                    mixer_info = self._get_connector_details(idf, mixer_name, mixer_type)
-                    if mixer_info:
-                        connectors.append(mixer_info)
-                
-                break
-        
-        return connectors
-
-
-    def _get_connector_details(self, idf, connector_name: str, connector_type: str) -> Optional[Dict[str, Any]]:
-        """Helper method to get detailed information about splitters/mixers"""
-        connector_objs = idf.idfobjects.get(connector_type, [])
-        
-        for connector in connector_objs:
-            if getattr(connector, 'Name', '') == connector_name:
+        connector_lists = ep.get("ConnectorList", {})
+        if connector_list_name in connector_lists:
+            connector_data = connector_lists[connector_list_name]
+            len_connector_keys = len(list(connector_data.keys()))
+            if not len_connector_keys % 2 == 0:
+                # This should never happen; there should be a name and object_type for each component. If not, the epJSON is invalid. 
+                print(f"ConnectorList {connector_list_name} has uneven number of keys. This is invalid.")
+                return None
+            num_connector_items = int(len_connector_keys / 2)
+            for i in range(num_connector_items):
+                connector_name = connector_data[f"connector_{i + 1}_name"]
+                connector_type = connector_data[f"connector_{i + 1}_object_type"]
                 if connector_type.lower().endswith('splitter'):
                     # For splitters: one inlet branch, multiple outlet branches
+                    splitter_data = ep.get("Connector:Splitter", {}).get(connector_name, {})               
+                    outlet_branches = [
+                        branch.get("outlet_branch_name", "Unknown") 
+                        for branch in splitter_data.get("branches", [])
+                        if isinstance(branch, dict) and "outlet_branch_name" in branch
+                    ]
                     connector_info = {
                         "name": connector_name,
                         "type": connector_type,
-                        "inlet_branch": getattr(connector, 'Inlet_Branch_Name', 'Unknown'),
-                        "outlet_branches": []
+                        "inlet_branch": splitter_data.get("inlet_branch_name", "Unknown"),
+                        "outlet_branches": outlet_branches
                     }
-                    
-                    # Get outlet branches for splitters
-                    for i in range(1, 20):  # Can have many outlet branches
-                        branch_field = f"Outlet_Branch_{i}_Name" if i > 1 else "Outlet_Branch_1_Name"
-                        branch_name = getattr(connector, branch_field, None)
-                        if not branch_name:
-                            break
-                        connector_info["outlet_branches"].append(branch_name)
-                
-                else:  # mixer
+                elif connector_type.lower().endswith('mixer'):
                     # For mixers: multiple inlet branches, one outlet branch
+                    mixer_data = ep.get("Connector:Mixer", {}).get(connector_name, {}) 
+                    inlet_branches = [
+                        branch.get("inlet_branch_name", "Unknown") 
+                        for branch in mixer_data.get("branches", [])
+                        if isinstance(branch, dict) and "inlet_branch_name" in branch
+                    ]
                     connector_info = {
                         "name": connector_name,
                         "type": connector_type,
-                        "outlet_branch": getattr(connector, 'Outlet_Branch_Name', 'Unknown'),
-                        "inlet_branches": []
+                        "inlet_branches": inlet_branches,
+                        "outlet_branch": mixer_data.get("outlet_branch_name", "Unknown")
                     }
-                    
-                    # Get inlet branches for mixers
-                    for i in range(1, 20):  # Can have many inlet branches
-                        branch_field = f"Inlet_Branch_{i}_Name" if i > 1 else "Inlet_Branch_1_Name"
-                        branch_name = getattr(connector, branch_field, None)
-                        if not branch_name:
-                            break
-                        connector_info["inlet_branches"].append(branch_name)
-                
-                return connector_info
-        
+                connectors.append(connector_info)    
+            return connectors
         return None
+
