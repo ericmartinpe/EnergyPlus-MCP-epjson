@@ -2206,23 +2206,23 @@ class EnergyPlusManager:
         }        
     
     # ------------------------ Model Modification Methods ------------------------
-    def modify_simulation_settings(self, idf_path: str, object_type: str, field_updates: Dict[str, Any], 
+    def modify_simulation_settings(self, epjson_path: str, object_type: str, field_updates: Dict[str, Any], 
                                  run_period_index: int = 0, output_path: Optional[str] = None) -> str:
         """
         Modify SimulationControl or RunPeriod settings and save to a new file
         
         Args:
-            idf_path: Path to the input IDF file
+            epjson_path: Path to the input epJSON file
             object_type: "SimulationControl" or "RunPeriod"
             field_updates: Dictionary of field names and new values
             run_period_index: Index of RunPeriod to modify (default 0, ignored for SimulationControl)
             output_path: Path for output file (if None, creates one with _modified suffix)
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.info(f"Modifying {object_type} settings for: {resolved_path}")
-            idf = IDF(resolved_path)
+            ep = self.load_json(resolved_path)
             
             # Determine output path
             if output_path is None:
@@ -2232,37 +2232,39 @@ class EnergyPlusManager:
             modifications_made = []
             
             if object_type == "SimulationControl":
-                sim_objs = idf.idfobjects.get("SimulationControl", [])
+                sim_objs = ep.get("SimulationControl", {})
                 if not sim_objs:
-                    raise ValueError("No SimulationControl object found in the IDF file")
+                    raise ValueError("No SimulationControl object found in the epJSON file")
                 
-                sim_obj = sim_objs[0]
+                sim_name = list(sim_objs.keys())[0]
+                sim_obj = sim_objs[sim_name]
                 
-                # Valid SimulationControl fields
+                # Valid SimulationControl fields (epJSON format - lowercase with underscores)
                 valid_fields = {
-                    "Do_Zone_Sizing_Calculation", "Do_System_Sizing_Calculation", 
-                    "Do_Plant_Sizing_Calculation", "Run_Simulation_for_Sizing_Periods",
-                    "Run_Simulation_for_Weather_File_Run_Periods", 
-                    "Do_HVAC_Sizing_Simulation_for_Sizing_Periods",
-                    "Maximum_Number_of_HVAC_Sizing_Simulation_Passes"
+                    "do_zone_sizing_calculation", "do_system_sizing_calculation", 
+                    "do_plant_sizing_calculation", "run_simulation_for_sizing_periods",
+                    "run_simulation_for_weather_file_run_periods", 
+                    "do_hvac_sizing_simulation_for_sizing_periods",
+                    "maximum_number_of_hvac_sizing_simulation_passes"
                 }
                 
                 for field_name, new_value in field_updates.items():
-                    if field_name not in valid_fields:
+                    field_key = field_name.lower().replace(" ", "_")
+                    if field_key not in valid_fields:
                         logger.warning(f"Invalid field name for SimulationControl: {field_name}")
                         continue
                     
                     try:
-                        old_value = getattr(sim_obj, field_name, "Not set")
-                        setattr(sim_obj, field_name, new_value)
+                        old_value = sim_obj.get(field_key, "Not set")
+                        sim_obj[field_key] = new_value
                         modifications_made.append({
-                            "field": field_name,
+                            "field": field_key,
                             "old_value": old_value,
                             "new_value": new_value
                         })
-                        logger.debug(f"Updated {field_name}: {old_value} -> {new_value}")
+                        logger.debug(f"Updated {field_key}: {old_value} -> {new_value}")
                     except Exception as e:
-                        logger.error(f"Error setting {field_name} to {new_value}: {e}")
+                        logger.error(f"Error setting {field_key} to {new_value}: {e}")
             
             elif object_type == "RunPeriod":
                 run_objs = idf.idfobjects.get("RunPeriod", [])
