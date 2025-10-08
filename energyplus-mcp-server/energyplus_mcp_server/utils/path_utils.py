@@ -156,9 +156,9 @@ def resolve_path(config: Config, file_path: str, file_types: List[str] = None,
 
 
 # Convenience functions for common use cases
-def resolve_idf_path(config: Config, idf_path: str) -> str:
-    """Resolve IDF file path (existing file)"""
-    return resolve_path(config, idf_path, file_types=['.idf'], description="IDF file")
+def resolve_epjson_path(config: Config, epjson_path: str) -> str:
+    """Resolve epJSON file path (existing file)"""
+    return resolve_path(config, epjson_path, file_types=['.epJSON'], description="epJSON file")
 
 
 def resolve_weather_file_path(config: Config, weather_path: str) -> str:
