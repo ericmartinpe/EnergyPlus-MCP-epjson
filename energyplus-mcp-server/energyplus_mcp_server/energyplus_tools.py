@@ -296,18 +296,18 @@ class EnergyPlusManager:
             if source_size != target_size:
                 raise RuntimeError(f"Copy verification failed - size mismatch: source={source_size}, target={target_size}")
             
-            # Try to validate the copied file if it's an IDF
+            # Try to validate the copied file if it's an epJSON
             validation_passed = True
             validation_message = "File copied successfully"
             
-            if file_types and '.idf' in file_types:
+            if file_types and ('.epJSON' in file_types or '.json' in file_types):
                 try:
-                    idf = IDF(resolved_target_path)
-                    validation_message = "IDF file loads successfully"
+                    ep = self.load_json(resolved_target_path)
+                    validation_message = "epJSON file loads successfully"
                 except Exception as e:
                     validation_passed = False
-                    validation_message = f"Warning: Copied IDF file may be invalid: {str(e)}"
-                    logger.warning(f"IDF validation failed for copied file: {e}")
+                    validation_message = f"Warning: Copied epJSON file may be invalid: {str(e)}"
+                    logger.warning(f"epJSON validation failed for copied file: {e}")
             
             result = {
                 "success": True,
@@ -434,13 +434,13 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error getting configuration info: {str(e)}")
     
  
-    def validate_idf(self, idf_path: str) -> str:
-        """Validate an IDF file and return any issues found"""
-        resolved_path = self._resolve_idf_path(idf_path)
+    def validate_epjson(self, epjson_path: str) -> str:
+        """Validate an epJSON file and return any issues found"""
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
-            logger.debug(f"Validating IDF file: {resolved_path}")
-            idf = IDF(resolved_path)
+            logger.debug(f"Validating epJSON file: {resolved_path}")
+            ep = self.load_json(resolved_path)
             
             validation_results = {
                 "file_path": resolved_path,
@@ -457,35 +457,36 @@ class EnergyPlusManager:
             # Check for required objects
             required_objects = ["Building", "Zone", "SimulationControl"]
             for obj_type in required_objects:
-                objs = idf.idfobjects.get(obj_type, [])
+                objs = ep.get(obj_type, {})
                 if not objs:
                     errors.append(f"Missing required object type: {obj_type}")
                 elif len(objs) > 1 and obj_type in ["Building", "SimulationControl"]:
                     warnings.append(f"Multiple {obj_type} objects found (only one expected)")
             
             # Check for zones without surfaces
-            zones = idf.idfobjects.get("Zone", [])
-            surfaces = idf.idfobjects.get("BuildingSurface:Detailed", [])
+            zones = ep.get("Zone", {})
+            surfaces = ep.get("BuildingSurface:Detailed", {})
             
-            zone_names = {getattr(zone, 'Name', '') for zone in zones}
-            surface_zones = {getattr(surface, 'Zone_Name', '') for surface in surfaces}
+            zone_names = set(zones.keys())
+            surface_zones = {surf_data.get('zone_name', '') for surf_data in surfaces.values()}
             
             zones_without_surfaces = zone_names - surface_zones
             if zones_without_surfaces:
                 warnings.append(f"Zones without surfaces: {list(zones_without_surfaces)}")
             
             # Check for materials referenced in constructions
-            constructions = idf.idfobjects.get("Construction", [])
-            materials = idf.idfobjects.get("Material", []) + idf.idfobjects.get("Material:NoMass", [])
-            material_names = {getattr(mat, 'Name', '') for mat in materials}
+            constructions = ep.get("Construction", {})
+            materials = ep.get("Material", {})
+            nomass_materials = ep.get("Material:NoMass", {})
+            material_names = set(materials.keys()) | set(nomass_materials.keys())
             
-            for construction in constructions:
+            for const_name, const_data in constructions.items():
                 # Check all layers in construction
-                for i in range(1, 10):  # EnergyPlus supports up to 10 layers
-                    layer_attr = f"Layer_{i}" if i > 1 else "Outside_Layer"
-                    layer_name = getattr(construction, layer_attr, None)
+                for i in range(1, 11):  # EnergyPlus supports up to 10 layers
+                    layer_key = f"layer_{i}" if i > 1 else "outside_layer"
+                    layer_name = const_data.get(layer_key, None)
                     if layer_name and layer_name not in material_names:
-                        errors.append(f"Construction '{getattr(construction, 'Name', 'Unknown')}' references undefined material: {layer_name}")
+                        errors.append(f"Construction '{const_name}' references undefined material: {layer_name}")
             
             # Set validation status
             validation_results["warnings"] = warnings
@@ -496,10 +497,10 @@ class EnergyPlusManager:
             validation_results["summary"] = {
                 "total_warnings": len(warnings),
                 "total_errors": len(errors),
-                "building_count": len(idf.idfobjects.get("Building", [])),
+                "building_count": len(ep.get("Building", {})),
                 "zone_count": len(zones),
                 "surface_count": len(surfaces),
-                "material_count": len(materials),
+                "material_count": len(materials) + len(nomass_materials),
                 "construction_count": len(constructions)
             }
             
