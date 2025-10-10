@@ -7,13 +7,12 @@ import os
 import json
 import logging
 import time
-from typing import Dict, List, Any, Optional, Set, Tuple
+from typing import Dict, List, Any, Optional
 from pathlib import Path
 from datetime import datetime
 import shutil
 from difflib import get_close_matches
-
-from eppy.modeleditor import IDF
+from run_functions import run
 
 logger = logging.getLogger(__name__)
 
@@ -26,16 +25,16 @@ class ValidationCache:
         self._configured_vars_cache = {}
         self._cache_timestamps = {}
     
-    def get_cache_key(self, idf_path: str) -> str:
+    def get_cache_key(self, epjson_path: str) -> str:
         """Generate cache key based on file path and modification time"""
         try:
-            path_obj = Path(idf_path)
+            path_obj = Path(epjson_path)
             if path_obj.exists():
-                mtime = os.path.getmtime(idf_path)
-                return f"{idf_path}:{mtime}"
-            return idf_path
+                mtime = os.path.getmtime(epjson_path)
+                return f"{epjson_path}:{mtime}"
+            return epjson_path
         except Exception:
-            return idf_path
+            return epjson_path
     
     def is_cache_valid(self, cache_key: str, max_age_seconds: int = 300) -> bool:
         """Check if cache entry is still valid (default: 5 minutes)"""
@@ -64,27 +63,37 @@ class OutputVariableManager:
             "runperiod": "End of run period",
             "annual": "Annual summary"
         }
-    
-    def discover_available_variables(self, idf_path: str, run_days: int = 1) -> Dict[str, Any]:
+
+    def load_json(self, file_path: str) -> Dict[str, Any]:
+        """Load epJSON file and return its content"""
+        with open(file_path, 'r') as f:
+            return json.load(f)
+
+    def save_json(self, data: Dict[str, Any], file_path: str):
+        """Save data to epJSON file"""
+        with open(file_path, 'w') as f:
+            json.dump(data, f, indent=4)
+
+    def discover_available_variables(self, epjson_path: str, run_days: int = 1) -> Dict[str, Any]:
         """
         Discover all available output variables by running simulation with Output:VariableDictionary
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
             run_days: Number of days to run simulation (default: 1 for speed)
         
         Returns:
             Dictionary with discovered variables and metadata
         """
         try:
-            logger.info(f"Discovering available output variables for: {idf_path}")
+            logger.info(f"Discovering available output variables for: {epjson_path}")
             
             # Create temporary modified IDF with Output:VariableDictionary
-            temp_idf_path = self._create_temp_idf_with_variable_dictionary(idf_path, run_days)
+            temp_epjson_path = self._create_temp_epjson_with_variable_dictionary(epjson_path, run_days)
             
             # Run short simulation
             logger.info("Running short simulation to generate variable dictionary...")
-            sim_result = self._run_variable_discovery_simulation(temp_idf_path)
+            sim_result = self._run_variable_discovery_simulation(temp_epjson_path)
             
             if not sim_result["success"]:
                 return {
@@ -105,12 +114,12 @@ class OutputVariableManager:
             variables = self._parse_rdd_file(rdd_file_path)
             
             # Clean up temporary files
-            self._cleanup_temp_files(temp_idf_path, sim_result["output_directory"])
+            self._cleanup_temp_files(temp_epjson_path, sim_result["output_directory"])
             
             result = {
                 "success": True,
                 "discovery_mode": True,
-                "input_file": idf_path,
+                "input_file": epjson_path,
                 "total_variables": len(variables),
                 "run_days": run_days,
                 "categories": self._categorize_variables(variables),
@@ -124,27 +133,27 @@ class OutputVariableManager:
             logger.error(f"Error discovering available output variables: {e}")
             raise RuntimeError(f"Error discovering available output variables: {str(e)}")
     
-    def get_configured_variables(self, idf_path: str) -> Dict[str, Any]:
+    def get_configured_variables(self, epjson_path: str) -> Dict[str, Any]:
         """
         Get currently configured output variables from the IDF file
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the IDF file
         
         Returns:
             Dictionary with currently configured variables
         """
         try:
-            logger.debug(f"Getting configured output variables for: {idf_path}")
-            idf = IDF(idf_path)
+            logger.debug(f"Getting configured output variables for: {epjson_path}")
+            ep = self.load_json(epjson_path)
             
-            output_vars = idf.idfobjects.get("Output:Variable", [])
-            output_meters = idf.idfobjects.get("Output:Meter", [])
+            output_vars = ep.get("Output:Variable", {})
+            output_meters = ep.get("Output:Meter", {})
             
             variables_info = {
                 "success": True,
                 "discovery_mode": False,
-                "input_file": idf_path,
+                "input_file": epjson_path,
                 "output_variables": [],
                 "output_meters": [],
                 "summary": {
@@ -154,73 +163,79 @@ class OutputVariableManager:
             }
             
             # Process Output:Variable objects
-            for var in output_vars:
+            for var in output_vars.keys():
                 var_info = {
-                    "key_value": getattr(var, 'Key_Value', 'Unknown'),
-                    "variable_name": getattr(var, 'Variable_Name', 'Unknown'),
-                    "reporting_frequency": getattr(var, 'Reporting_Frequency', 'Unknown')
+                    "key_value": output_vars[var]["key_value"],
+                    "variable_name": output_vars[var]["variable_name"],
+                    "reporting_frequency": output_vars[var]["reporting_frequency"]
                 }
                 variables_info["output_variables"].append(var_info)
             
             # Process Output:Meter objects
-            for meter in output_meters:
+            for meter in output_meters.keys():
                 meter_info = {
-                    "key_name": getattr(meter, 'Key_Name', 'Unknown'),
-                    "reporting_frequency": getattr(meter, 'Reporting_Frequency', 'Unknown')
+                    "key_name": output_meters[meter]["key_name"],
+                    "reporting_frequency": output_meters[meter]["reporting_frequency"]
                 }
                 variables_info["output_meters"].append(meter_info)
             
-            logger.debug(f"Found {len(output_vars)} output variables and {len(output_meters)} output meters")
+            logger.debug(f"Found {len(list(output_vars.keys()))} output variables and {len(list(output_meters.keys()))} output meters")
             return variables_info
             
         except Exception as e:
             logger.error(f"Error getting configured output variables: {e}")
             raise RuntimeError(f"Error getting configured output variables: {str(e)}")
     
-    def _create_temp_idf_with_variable_dictionary(self, idf_path: str, run_days: int) -> str:
+    def _create_temp_epjson_with_variable_dictionary(self, epjson_path: str, run_days: int) -> str:
         """Create temporary IDF with Output:VariableDictionary and short run period"""
-        idf = IDF(idf_path)
+        ep = self.load_json(epjson_path)
         
         # Check if Output:VariableDictionary already exists
-        existing_var_dict = idf.idfobjects.get('Output:VariableDictionary', [])
+        existing_var_dict = ep.get('Output:VariableDictionary', {})
         
         if existing_var_dict:
             # Update existing Output:VariableDictionary to use 'IDF' key field
-            var_dict = existing_var_dict[0]  # Use the first one if multiple exist
-            var_dict.Key_Field = 'IDF'
+            var_dict = existing_var_dict["Output:VariableDictionary 1"]  # Use the first one if multiple exist
+            var_dict["key_field"] = 'IDF'
             logger.debug(f"Updated existing Output:VariableDictionary Key_Field to 'IDF'")
         else:
             # Add new Output:VariableDictionary object
-            var_dict = idf.newidfobject('Output:VariableDictionary')
-            var_dict.Key_Field = 'IDF'
+            ep["Output:VariableDictionary"] = {
+                "Output:VariableDictionary 1": {
+                    "key_field": "IDF"
+                }
+            }
             logger.debug(f"Added new Output:VariableDictionary with Key_Field 'IDF'")
         
         # Remove any additional Output:VariableDictionary objects to avoid conflicts
-        if len(existing_var_dict) > 1:
-            for extra_dict in existing_var_dict[1:]:
-                idf.removeidfobject(extra_dict)
-            logger.debug(f"Removed {len(existing_var_dict) - 1} extra Output:VariableDictionary objects")
+        if len(list(existing_var_dict.keys())) > 1:
+            ep["Output:VariableDictionary"] = {
+                "Output:VariableDictionary 1": {
+                    "key_field": "IDF"
+                }
+            }
+            logger.debug(f"Removed {len(list(existing_var_dict.keys())) - 1} extra Output:VariableDictionary objects")
         
         # Modify run period to be short (1 day by default)
-        run_periods = idf.idfobjects.get("RunPeriod", [])
+        run_periods = ep.get("RunPeriod", {})
         if run_periods:
-            run_period = run_periods[0]
+            run_period = run_periods["Run Period 1"]
             # Set to run for specified days in January
-            run_period.Begin_Month = 1
-            run_period.Begin_Day_of_Month = 1
-            run_period.End_Month = 1
-            run_period.End_Day_of_Month = run_days
+            run_period["begin_month"] = 1
+            run_period["begin_day_of_month"] = 1
+            run_period["end_month"] = 1
+            run_period["end_day_of_month"] = run_days
         
         # Create temporary file
         temp_path = os.path.join(
             self.config.paths.temp_dir, 
-            f"temp_variable_discovery_{datetime.now().strftime('%Y%m%d_%H%M%S')}.idf"
+            f"temp_variable_discovery_{datetime.now().strftime('%Y%m%d_%H%M%S')}.epJSON"
         )
-        idf.save(temp_path)
+        self.save_json(ep, temp_path)
         
         return temp_path
     
-    def _run_variable_discovery_simulation(self, temp_idf_path: str) -> Dict[str, Any]:
+    def _run_variable_discovery_simulation(self, temp_epjson_path: str) -> Dict[str, Any]:
         """Run a minimal simulation just to generate the .rdd file"""
         try:
             # Create output directory
@@ -236,11 +251,12 @@ class OutputVariableManager:
             else:
                 logger.warning("Default weather file not found, running without weather data")
             
-            # Load IDF for simulation (with weather file if available)
-            if weather_file:
-                idf = IDF(temp_idf_path, weather_file)
-            else:
-                idf = IDF(temp_idf_path)
+            # Load epJSON for simulation and determine EnergyPlus version
+            # Load epjson file
+            ep = self.load_json(temp_epjson_path)
+            version = ep["Version"]["Version 1"]["version_identifier"]
+            # Split, pad to 3 parts, and join with dashes
+            ep_version = "-".join((version.split(".") + ["0", "0"])[:3])
             
             # Run simulation with minimal options
             simulation_options = {
@@ -250,7 +266,8 @@ class OutputVariableManager:
                 'readvars': False,  # Don't need variable processing
                 'expandobjects': False,  # Speed up
                 'output_prefix': 'variable_discovery',
-                'output_suffix': 'C'
+                'output_suffix': 'C',
+                'ep_version': ep_version
             }
             
             # Add weather file to options if available
@@ -258,7 +275,7 @@ class OutputVariableManager:
                 simulation_options['weather'] = weather_file
             
             start_time = datetime.now()
-            result = idf.run(**simulation_options)
+            result = run(**simulation_options)
             end_time = datetime.now()
             
             return {
@@ -365,13 +382,13 @@ class OutputVariableManager:
         
         return categories
     
-    def _cleanup_temp_files(self, temp_idf_path: str, temp_output_dir: str):
+    def _cleanup_temp_files(self, temp_epjson_path: str, temp_output_dir: str):
         """Clean up temporary files and directories"""
         try:
             # Remove temporary IDF file
-            if os.path.exists(temp_idf_path):
-                os.remove(temp_idf_path)
-                logger.debug(f"Cleaned up temporary IDF: {temp_idf_path}")
+            if os.path.exists(temp_epjson_path):
+                os.remove(temp_epjson_path)
+                logger.debug(f"Cleaned up temporary IDF: {temp_epjson_path}")
             
             # Remove temporary output directory
             if os.path.exists(temp_output_dir):
@@ -381,23 +398,23 @@ class OutputVariableManager:
         except Exception as e:
             logger.warning(f"Error cleaning up temporary files: {e}")
 
-    def _get_available_variables_cached(self, idf_path: str, force_refresh: bool = False) -> List[Dict]:
+    def _get_available_variables_cached(self, epjson_path: str, force_refresh: bool = False) -> List[Dict]:
         """Get available variables using discovery tool with intelligent caching"""
-        cache_key = self._validation_cache.get_cache_key(idf_path)
+        cache_key = self._validation_cache.get_cache_key(epjson_path)
         
         # Check cache first
         if (not force_refresh and 
             cache_key in self._validation_cache._available_vars_cache and
             self._validation_cache.is_cache_valid(cache_key)):
             
-            logger.debug(f"Using cached available variables for {idf_path}")
+            logger.debug(f"Using cached available variables for {epjson_path}")
             return self._validation_cache._available_vars_cache[cache_key]
         
-        logger.info(f"Discovering available variables for validation: {idf_path}")
+        logger.info(f"Discovering available variables for validation: {epjson_path}")
         
         try:
             # Use existing discovery method
-            discovery_result = self.discover_available_variables(idf_path, run_days=1)
+            discovery_result = self.discover_available_variables(epjson_path, run_days=1)
             
             if discovery_result.get("success"):
                 available_vars = discovery_result.get("variables", [])
@@ -414,9 +431,9 @@ class OutputVariableManager:
             logger.error(f"Error during variable discovery: {e}")
             return []
     
-    def _get_configured_variables_cached(self, idf_path: str) -> List[Dict]:
+    def _get_configured_variables_cached(self, epjson_path: str) -> List[Dict]:
         """Get currently configured variables with caching"""
-        cache_key = self._validation_cache.get_cache_key(idf_path)
+        cache_key = self._validation_cache.get_cache_key(epjson_path)
         
         # Check cache first
         if (cache_key in self._validation_cache._configured_vars_cache and
@@ -425,7 +442,7 @@ class OutputVariableManager:
         
         try:
             # Use existing method
-            configured_result = self.get_configured_variables(idf_path)
+            configured_result = self.get_configured_variables(epjson_path)
             
             if configured_result.get("success"):
                 configured_vars = configured_result.get("output_variables", [])
@@ -465,7 +482,7 @@ class OutputVariableManager:
                 "suggestions": get_close_matches(freq_lower, self.VALID_FREQUENCIES.keys(), n=3, cutoff=0.6)
             }
     
-    def validate_variable_name(self, idf_path: str, variable_name: str, 
+    def validate_variable_name(self, epjson_path: str, variable_name: str, 
                              available_vars: Optional[List[Dict]] = None) -> Dict[str, Any]:
         """Validate variable name against available variables in the model"""
         if not variable_name or not isinstance(variable_name, str):
@@ -476,7 +493,7 @@ class OutputVariableManager:
         
         # Get available variables if not provided
         if available_vars is None:
-            available_vars = self._get_available_variables_cached(idf_path)
+            available_vars = self._get_available_variables_cached(epjson_path)
         
         available_names = {var["variable_name"] for var in available_vars}
         variable_lookup = {var["variable_name"]: var for var in available_vars}
@@ -499,7 +516,7 @@ class OutputVariableManager:
             
             return result
     
-    def validate_key_value(self, idf_path: str, key_value: str, variable_name: str) -> Dict[str, Any]:
+    def validate_key_value(self, epjson_path: str, key_value: str, variable_name: str) -> Dict[str, Any]:
         """Validate key value against model objects (basic implementation)"""
         if not key_value or not isinstance(key_value, str):
             return {
@@ -559,7 +576,7 @@ class OutputVariableManager:
         
         return resolved
     
-    def validate_variable_specifications(self, idf_path: str, variables: List[Dict], 
+    def validate_variable_specifications(self, epjson_path: str, variables: List[Dict], 
                                        validation_level: str = "moderate") -> Dict[str, Any]:
         """Validate a batch of variable specifications"""
         start_time = time.time()
@@ -576,7 +593,7 @@ class OutputVariableManager:
         # Get available variables for validation (cached)
         available_vars = []
         if validation_level in ["strict", "moderate"]:
-            available_vars = self._get_available_variables_cached(idf_path)
+            available_vars = self._get_available_variables_cached(epjson_path)
             validation_report["performance"]["available_variables_found"] = len(available_vars)
         
         validation_report["performance"]["discovery_time"] = time.time() - start_time
@@ -584,7 +601,7 @@ class OutputVariableManager:
         # Validate each variable specification
         for i, var_spec in enumerate(variables):
             var_validation = self._validate_single_variable(
-                var_spec, i, available_vars, validation_level, idf_path
+                var_spec, i, available_vars, validation_level, epjson_path
             )
             
             if var_validation["is_valid"]:
@@ -598,7 +615,7 @@ class OutputVariableManager:
         return validation_report
     
     def _validate_single_variable(self, var_spec: Dict, index: int, available_vars: List[Dict],
-                                 validation_level: str, idf_path: str) -> Dict[str, Any]:
+                                 validation_level: str, epjson_path: str) -> Dict[str, Any]:
         """Validate a single variable specification"""
         result = {
             "index": index,
@@ -628,7 +645,7 @@ class OutputVariableManager:
         
         # 2. Variable name validation (moderate and strict)
         if validation_level in ["strict", "moderate"]:
-            var_validation = self.validate_variable_name(idf_path, variable_name, available_vars)
+            var_validation = self.validate_variable_name(epjson_path, variable_name, available_vars)
             result["validation_details"]["variable_name"] = var_validation
             if not var_validation["is_valid"]:
                 result["is_valid"] = False
@@ -640,7 +657,7 @@ class OutputVariableManager:
         
         # 3. Key value validation (strict only)
         if validation_level == "strict":
-            key_validation = self.validate_key_value(idf_path, key_value, variable_name)
+            key_validation = self.validate_key_value(epjson_path, key_value, variable_name)
             result["validation_details"]["key_value"] = key_validation
             if not key_validation["is_valid"]:
                 result["is_valid"] = False
@@ -650,11 +667,11 @@ class OutputVariableManager:
         
         return result
     
-    def check_duplicate_variables(self, idf_path: str, variables: List[Dict], 
+    def check_duplicate_variables(self, epjson_path: str, variables: List[Dict], 
                                 allow_duplicates: bool = False) -> Dict[str, Any]:
         """Check for duplicate variables against existing configuration"""
         # Get currently configured variables
-        configured_vars = self._get_configured_variables_cached(idf_path)
+        configured_vars = self._get_configured_variables_cached(epjson_path)
         
         # Create set of existing specifications
         existing_specs = set()
@@ -690,28 +707,29 @@ class OutputVariableManager:
             "will_add": len(new_variables)
         }
     
-    def add_variables_to_idf(self, idf_path: str, variables: List[Dict], 
+    def add_variables_to_epjson(self, epjson_path: str, variables: List[Dict], 
                            output_path: str) -> Dict[str, Any]:
-        """Add output variables to IDF file and save"""
+        """Add output variables to epJSON file and save"""
         try:
-            # Load IDF
-            idf = IDF(idf_path)
-            
+            # Load epJSON
+            ep = self.load_json(epjson_path)
+            var_count = len(ep.get("Output:Variable", {}))
             added_variables = []
             
             # Add each variable
             for var_spec in variables:
-                # Create new Output:Variable object
-                output_var = idf.newidfobject('Output:Variable')
-                output_var.Key_Value = var_spec["key_value"]
-                output_var.Variable_Name = var_spec["variable_name"]
-                output_var.Reporting_Frequency = var_spec["frequency"]
-                
+                new_key = f"Output:Variable {var_count + 1}"
+                ep["Output:Variable"][new_key] = {
+                    "key_value": var_spec["key_value"],
+                    "reporting_frequency": var_spec["frequency"],
+                    "variable_name": var_spec["variable_name"]
+                }
+                var_count += 1
                 added_variables.append(var_spec)
                 logger.debug(f"Added Output:Variable: {var_spec}")
             
-            # Save modified IDF
-            idf.save(output_path)
+            # Save modified epJSON
+            self.save_json(ep, output_path)
             
             return {
                 "success": True,
@@ -721,7 +739,7 @@ class OutputVariableManager:
             }
             
         except Exception as e:
-            logger.error(f"Error adding variables to IDF: {e}")
+            logger.error(f"Error adding variables to epJSON: {e}")
             return {
                 "success": False,
                 "error": str(e),
