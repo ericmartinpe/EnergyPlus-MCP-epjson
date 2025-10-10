@@ -29,6 +29,7 @@ from .utils.output_meters import OutputMeterManager
 from .utils.people_utils import PeopleManager
 from .utils.lights_utils import LightsManager
 from .utils.electric_equipment_utils import ElectricEquipmentManager
+from .utils.run_functions import run
 
 logger = logging.getLogger(__name__)
 
@@ -2603,124 +2604,128 @@ class EnergyPlusManager:
     
     
     # ------------------------ Simulation Execution ------------------------
-    def run_simulation(self, idf_path: str, weather_file: str = None, 
-                       output_directory: str = None, annual: bool = True,
-                       design_day: bool = False, readvars: bool = True,
-                       expandobjects: bool = True) -> str:
-            """
-            Run EnergyPlus simulation with specified IDF and weather file
+    def run_simulation(self, epjson_path: str, weather_file: str = None, 
+                        output_directory: str = None, annual: bool = True,
+                        design_day: bool = False, readvars: bool = True,
+                        expandobjects: bool = True, ep_version: str = "25-1-0") -> str:
+        """
+        Run EnergyPlus simulation with specified epjson and weather file
+        
+        Args:
+            epjson_path: Path to the epjson file
+            weather_file: Path to weather file (.epw). If None, searches for weather files in sample_files
+            output_directory: Directory for simulation outputs. If None, creates one in outputs/
+            annual: Run annual simulation (default: True)
+            design_day: Run design day only simulation (default: False)
+            readvars: Run ReadVarsESO after simulation (default: True)
+            expandobjects: Run ExpandObjects prior to simulation (default: True)
+            ep_version: EnergyPlus version (default: "25-1-0")
+        
+        Returns:
+            JSON string with simulation results and output file paths
+        """
+        resolved_epjson_path = self._resolve_epjson_path(epjson_path)
+        
+        try:
+            logger.info(f"Starting simulation for: {resolved_epjson_path}")
             
-            Args:
-                idf_path: Path to the IDF file
-                weather_file: Path to weather file (.epw). If None, searches for weather files in sample_files
-                output_directory: Directory for simulation outputs. If None, creates one in outputs/
-                annual: Run annual simulation (default: True)
-                design_day: Run design day only simulation (default: False)
-                readvars: Run ReadVarsESO after simulation (default: True)
-                expandobjects: Run ExpandObjects prior to simulation (default: True)
+            # Resolve weather file path
+            resolved_weather_path = None
+            if weather_file:
+                resolved_weather_path = self._resolve_weather_file_path(weather_file)
+                logger.info(f"Using weather file: {resolved_weather_path}")
             
-            Returns:
-                JSON string with simulation results and output file paths
-            """
-            resolved_idf_path = self._resolve_idf_path(idf_path)
+            # Set up output directory
+            if output_directory is None:
+                epjson_name = Path(resolved_epjson_path).stem
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_directory = str(Path(self.config.paths.output_dir) / f"{epjson_name}_simulation_{timestamp}")
             
+            # Create output directory if it doesn't exist
+            os.makedirs(output_directory, exist_ok=True)
+            logger.info(f"Output directory: {output_directory}")
+            
+            # Load epjson file
+            ep = self.load_json(epjson_path)
+            version = ep["Version"]["Version 1"]["version_identifier"]
+            # Split, pad to 3 parts, and join with dashes
+            ep_version = "-".join((version.split(".") + ["0", "0"])[:3])
+            
+            # Configure simulation options
+            simulation_options = {
+                'idf': epjson_path,
+                'output_directory': output_directory,
+                'annual': annual,
+                'design_day': design_day,
+                'readvars': readvars,
+                'expandobjects': expandobjects,
+                'output_prefix': Path(resolved_epjson_path).stem,
+                'output_suffix': 'C',  # Capital suffix style
+                'verbose': 'v',  # Verbose output,
+                'ep_version': ep_version
+            }
+            
+            # Add weather file to options if provided
+            if resolved_weather_path:
+                simulation_options['weather'] = resolved_weather_path
+            
+            logger.info("Starting EnergyPlus simulation...")
+            start_time = datetime.now()
+            
+            # Run the simulation
             try:
-                logger.info(f"Starting simulation for: {resolved_idf_path}")
+                result = run(**simulation_options)
+                end_time = datetime.now()
+                duration = end_time - start_time
                 
-                # Resolve weather file path
-                resolved_weather_path = None
-                if weather_file:
-                    resolved_weather_path = self._resolve_weather_file_path(weather_file)
-                    logger.info(f"Using weather file: {resolved_weather_path}")
+                # Check for common output files
+                output_files = self._find_simulation_outputs(output_directory)
                 
-                # Set up output directory
-                if output_directory is None:
-                    idf_name = Path(resolved_idf_path).stem
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    output_directory = str(Path(self.config.paths.output_dir) / f"{idf_name}_simulation_{timestamp}")
-                
-                # Create output directory if it doesn't exist
-                os.makedirs(output_directory, exist_ok=True)
-                logger.info(f"Output directory: {output_directory}")
-                
-                # Load IDF file
-                if resolved_weather_path:
-                    idf = IDF(resolved_idf_path, resolved_weather_path)
-                else:
-                    idf = IDF(resolved_idf_path)
-                
-                # Configure simulation options
-                simulation_options = {
-                    'output_directory': output_directory,
-                    'annual': annual,
-                    'design_day': design_day,
-                    'readvars': readvars,
-                    'expandobjects': expandobjects,
-                    'output_prefix': Path(resolved_idf_path).stem,
-                    'output_suffix': 'C',  # Capital suffix style
-                    'verbose': 'v'  # Verbose output
+                simulation_result = {
+                    "success": True,
+                    "input_idf": resolved_epjson_path,
+                    "weather_file": resolved_weather_path,
+                    "output_directory": output_directory,
+                    "simulation_duration": str(duration),
+                    "simulation_options": simulation_options,
+                    "output_files": output_files,
+                    "energyplus_result": str(result) if result else "Simulation completed",
+                    "timestamp": end_time.isoformat()
                 }
                 
-                # Add weather file to options if provided
-                if resolved_weather_path:
-                    simulation_options['weather'] = resolved_weather_path
+                logger.info(f"Simulation completed successfully in {duration}")
+                return json.dumps(simulation_result, indent=2)
                 
-                logger.info("Starting EnergyPlus simulation...")
-                start_time = datetime.now()
-                
-                # Run the simulation
-                try:
-                    result = idf.run(**simulation_options)
-                    end_time = datetime.now()
-                    duration = end_time - start_time
-                    
-                    # Check for common output files
-                    output_files = self._find_simulation_outputs(output_directory)
-                    
-                    simulation_result = {
-                        "success": True,
-                        "input_idf": resolved_idf_path,
-                        "weather_file": resolved_weather_path,
-                        "output_directory": output_directory,
-                        "simulation_duration": str(duration),
-                        "simulation_options": simulation_options,
-                        "output_files": output_files,
-                        "energyplus_result": str(result) if result else "Simulation completed",
-                        "timestamp": end_time.isoformat()
-                    }
-                    
-                    logger.info(f"Simulation completed successfully in {duration}")
-                    return json.dumps(simulation_result, indent=2)
-                    
-                except Exception as e:
-                    # Try to find error file for more detailed error information
-                    error_file = Path(output_directory) / f"{Path(resolved_idf_path).stem}.err"
-                    error_details = ""
-                    
-                    if error_file.exists():
-                        try:
-                            with open(error_file, 'r') as f:
-                                error_details = f.read()
-                        except Exception:
-                            error_details = "Could not read error file"
-                    
-                    simulation_result = {
-                        "success": False,
-                        "input_idf": resolved_idf_path,
-                        "weather_file": resolved_weather_path,
-                        "output_directory": output_directory,
-                        "error": str(e),
-                        "error_details": error_details,
-                        "simulation_options": simulation_options,
-                        "timestamp": datetime.now().isoformat()
-                    }
-                    
-                    logger.error(f"Simulation failed: {str(e)}")
-                    return json.dumps(simulation_result, indent=2)
-                    
             except Exception as e:
-                logger.error(f"Error setting up simulation for {resolved_idf_path}: {e}")
-                raise RuntimeError(f"Error running simulation: {str(e)}")
+                # Try to find error file for more detailed error information
+                error_file = Path(output_directory) / f"{Path(resolved_epjson_path).stem}.err"
+                error_details = ""
+                
+                if error_file.exists():
+                    try:
+                        with open(error_file, 'r') as f:
+                            error_details = f.read()
+                    except Exception:
+                        error_details = "Could not read error file"
+                
+                simulation_result = {
+                    "success": False,
+                    "input_idf": resolved_epjson_path,
+                    "weather_file": resolved_weather_path,
+                    "output_directory": output_directory,
+                    "error": str(e),
+                    "error_details": error_details,
+                    "simulation_options": simulation_options,
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+                logger.error(f"Simulation failed: {str(e)}")
+                return json.dumps(simulation_result, indent=2)
+                
+        except Exception as e:
+            logger.error(f"Error setting up simulation for {resolved_epjson_path}: {e}")
+            raise RuntimeError(f"Error running simulation: {str(e)}")
+
         
 
     def _resolve_weather_file_path(self, weather_file: str) -> str:
@@ -2728,9 +2733,6 @@ class EnergyPlusManager:
         from .utils.path_utils import resolve_path
         return resolve_path(self.config, weather_file, file_types=['.epw'], description="weather file", 
                            enable_fuzzy_weather_matching=True)
-    
-
-
     
 
     def _find_simulation_outputs(self, output_directory: str) -> Dict[str, Any]:
