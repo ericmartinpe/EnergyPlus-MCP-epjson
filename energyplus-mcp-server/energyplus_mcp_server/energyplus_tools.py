@@ -117,6 +117,7 @@ class EnergyPlusManager:
                     "path": str(sample_path),
                     "available": sample_path.exists(),
                     "IDF files": [],
+                    "epJSON files": [],
                     "Weather files": [],
                     "Other files": []
                 }
@@ -135,6 +136,8 @@ class EnergyPlusManager:
                         
                         if file_path.suffix.lower() == '.idf':
                             files["sample_files"]["IDF files"].append(file_info)
+                        elif file_path.suffix.lower() == '.epjson':
+                            files["sample_files"]["epJSON files"].append(file_info)
                         elif file_path.suffix.lower() == '.epw':
                             files["sample_files"]["Weather files"].append(file_info)
                         else:
@@ -149,6 +152,7 @@ class EnergyPlusManager:
                     "path": str(example_path),
                     "available": example_path.exists(),
                     "IDF files": [],
+                    "epJSON files": [],
                     "Weather files": [],
                     "Other files": []
                 }
@@ -165,6 +169,8 @@ class EnergyPlusManager:
                             
                             if file_path.suffix.lower() == '.idf':
                                 files["example_files"]["IDF files"].append(file_info)
+                            elif file_path.suffix.lower() == '.epjson':
+                                files["example_files"]["epJSON files"].append(file_info)
                             elif file_path.suffix.lower() == '.epw':
                                 files["example_files"]["Weather files"].append(file_info)
                             else:
@@ -179,6 +185,7 @@ class EnergyPlusManager:
                     "path": str(weather_path),
                     "available": weather_path.exists(),
                     "IDF files": [],
+                    "epJSON files": [],
                     "Weather files": [],
                     "Other files": []
                 }
@@ -195,6 +202,8 @@ class EnergyPlusManager:
                             
                             if file_path.suffix.lower() == '.idf':
                                 files["weather_data"]["IDF files"].append(file_info)
+                            elif file_path.suffix.lower() == '.epjson':
+                                files["weather_data"]["epJSON files"].append(file_info)
                             elif file_path.suffix.lower() == '.epw':
                                 files["weather_data"]["Weather files"].append(file_info)
                             else:
@@ -202,16 +211,17 @@ class EnergyPlusManager:
             
             # Sort files by name in each category for each source
             for source_key in files.keys():
-                for category in ["IDF files", "Weather files", "Other files"]:
+                for category in ["IDF files", "epJSON files", "Weather files", "Other files"]:
                     files[source_key][category].sort(key=lambda x: x["name"])
             
             # Log summary
             total_counts = {}
             for source_key in files.keys():
                 total_idf = len(files[source_key]["IDF files"])
+                total_epsjon = len(files[source_key]["epJSON files"])
                 total_weather = len(files[source_key]["Weather files"])
-                total_counts[source_key] = {"IDF": total_idf, "Weather": total_weather}
-                logger.debug(f"Found {total_idf} IDF files, {total_weather} weather files in {source_key}")
+                total_counts[source_key] = {"IDF": total_idf, "epJSON": total_epsjon, "Weather": total_weather}
+                logger.debug(f"Found {total_idf} IDF files, {total_epsjon} epJSON files, {total_weather} weather files in {source_key}")
             
             return json.dumps(files, indent=2)
             
