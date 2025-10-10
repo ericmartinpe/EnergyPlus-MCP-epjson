@@ -255,6 +255,8 @@ class EnergyPlusManager:
             if file_types:
                 if '.idf' in file_types:
                     file_description = "IDF file"
+                if '.epjson' in file_types.lower():
+                    file_description = "epJSON file"
                 elif '.epw' in file_types:
                     file_description = "weather file"
                 else:
@@ -313,7 +315,7 @@ class EnergyPlusManager:
             if file_types and ('.epJSON' in file_types or '.json' in file_types):
                 try:
                     ep = self.load_json(resolved_target_path)
-                    validation_message = "epJSON file loads successfully"
+                    validation_message = "epJSON or JSON file loads successfully"
                 except Exception as e:
                     validation_passed = False
                     validation_message = f"Warning: Copied epJSON file may be invalid: {str(e)}"
