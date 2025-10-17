@@ -8,18 +8,34 @@ import logging
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 from datetime import datetime
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib.patches import FancyBboxPatch
-import networkx as nx
 import calendar
 import string
 import random
 
-# For simulation post-processing
-import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+# Optional visualization dependencies
+try:
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import FancyBboxPatch
+    MATPLOTLIB_AVAILABLE = True
+except ImportError:
+    MATPLOTLIB_AVAILABLE = False
+    plt = None
+    FancyBboxPatch = None
+
+# Optional post-processing dependencies
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+    pd = None
+
+try:
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+    go = None
 
 from .config import get_config, Config
 from .utils.diagrams import HVACDiagramGenerator
