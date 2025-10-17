@@ -50,6 +50,9 @@ RUN set -eux; \
 ENV PATH="${EPLUS_PREFIX}:${PATH}" \
     EPLUS_IDD_PATH="${EPLUS_PREFIX}/Energy+.idd"
 
+ENV PATH="${EPLUS_PREFIX}:${PATH}" \
+    EPJSON_SCHEMA_PATH="${EPLUS_PREFIX}/Energy+.schema.epJSON"
+
 # ----------------------------------------------------------------------------- 
 # 4. Language-specific tooling
 # ----------------------------------------------------------------------------- 
