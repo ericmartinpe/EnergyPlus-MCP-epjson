@@ -327,15 +327,11 @@ def run(
         with open(idf_path, "r") as f:
             args["expandobjects"] = "HVACTEMPLATE:" in f.read().upper()
     ep_version = args.pop("ep_version")
-    # get version from IDF object or by parsing the IDF file for it
+    # ep_version is now required for all inputs
     if not ep_version:
-        try:
-            ep_version = "-".join(str(x) for x in idf.idd_version[:3])
-        except AttributeError:
-            raise AttributeError(
-                "The ep_version must be set when passing an IDF path. \
-                Alternatively, use IDF.run()"
-            )
+        raise AttributeError(
+            "The ep_version must be set when passing an IDF or epJSON path."
+        )
 
     eplus_exe_path, eplus_weather_path = install_paths(ep_version, iddname)
     if version:
