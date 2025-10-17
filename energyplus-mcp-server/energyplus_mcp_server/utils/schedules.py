@@ -16,12 +16,12 @@ class ScheduleValueParser:
     """Parser for extracting values from different EnergyPlus schedule objects"""
     
     @staticmethod
-    def parse_day_hourly(schedule_obj) -> Dict[str, Any]:
+    def parse_day_hourly(schedule_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Parse Schedule:Day:Hourly values
         
         Args:
-            schedule_obj: eppy schedule object
+            schedule_data: epJSON schedule dictionary
             
         Returns:
             Dictionary with hourly values and metadata
@@ -32,9 +32,9 @@ class ScheduleValueParser:
             
             # Extract 24 hourly values
             for hour in range(1, 25):
-                field_name = f"Hour_{hour}_Value" if hour > 1 else "Hour_1_Value"
+                field_name = f"hour_{hour}" if hour > 1 else "hour_1"
                 try:
-                    value = getattr(schedule_obj, field_name, 0.0)
+                    value = schedule_data.get(field_name, 0.0)
                     # Handle empty strings and non-numeric values
                     if value == '' or value is None:
                         value = 0.0
@@ -68,12 +68,12 @@ class ScheduleValueParser:
             return {"format": "hourly", "error": str(e)}
 
     @staticmethod
-    def parse_day_interval(schedule_obj) -> Dict[str, Any]:
+    def parse_day_interval(schedule_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Parse Schedule:Day:Interval values
         
         Args:
-            schedule_obj: eppy schedule object
+            schedule_data: epJSON schedule dictionary
             
         Returns:
             Dictionary with interval values and metadata
@@ -81,23 +81,25 @@ class ScheduleValueParser:
         try:
             intervals = []
             
-            # Extract time-value pairs (extensible object)
-            for i in range(1, 50):  # EnergyPlus supports many intervals
-                time_field = f"Time_{i}" if i > 1 else "Time_1"
-                value_field = f"Value_Until_Time_{i}" if i > 1 else "Value_Until_Time_1"
+            # Extract time-value pairs from extensible groups
+            i = 1
+            while True:
+                time_key = f"time_{i}"
+                value_key = f"value_until_time_{i}"
                 
-                time_val = getattr(schedule_obj, time_field, None)
-                value_val = getattr(schedule_obj, value_field, None)
+                time_val = schedule_data.get(time_key)
+                value_val = schedule_data.get(value_key)
                 
                 if time_val is None or time_val == '':
                     break
                 
-                # Clean up time format (remove "Until:" prefix if present)
-                time_str = str(time_val).replace("Until:", "").strip()
+                # Clean up time format
+                time_str = str(time_val).strip()
                 
                 # Validate time format
                 if not ScheduleValueParser._validate_time_format(time_str):
                     logger.warning(f"Invalid time format: {time_str}, skipping interval")
+                    i += 1
                     continue
                 
                 try:
@@ -110,6 +112,8 @@ class ScheduleValueParser:
                     "until": time_str,
                     "value": value
                 })
+                
+                i += 1
             
             values = [interval["value"] for interval in intervals]
             
@@ -117,7 +121,7 @@ class ScheduleValueParser:
                 "format": "intervals",
                 "data": intervals,
                 "total_intervals": len(intervals),
-                "interpolate_to_timestep": getattr(schedule_obj, 'Interpolate_to_Timestep', 'No'),
+                "interpolate_to_timestep": schedule_data.get('interpolate_to_timestep', 'No'),
                 "min_value": min(values) if values else 0.0,
                 "max_value": max(values) if values else 0.0,
                 "average_value": sum(values) / len(values) if values else 0.0
@@ -137,19 +141,19 @@ class ScheduleValueParser:
             return False
 
     @staticmethod
-    def parse_day_list(schedule_obj) -> Dict[str, Any]:
+    def parse_day_list(schedule_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Parse Schedule:Day:List values
         
         Args:
-            schedule_obj: eppy schedule object
+            schedule_data: epJSON schedule dictionary
             
         Returns:
             Dictionary with list values and metadata
         """
         try:
             values = []
-            minutes_per_item = getattr(schedule_obj, 'Minutes_Per_Item', 60)
+            minutes_per_item = schedule_data.get('minutes_per_item', 60)
             
             # Validate and convert minutes_per_item
             try:
@@ -161,12 +165,13 @@ class ScheduleValueParser:
                 logger.warning(f"Invalid minutes_per_item: {minutes_per_item}, using 60")
                 minutes_per_item = 60
             
-            # Extract values (up to 1440 for minute-by-minute)
+            # Extract values from extensible array
+            i = 1
             max_values = 1440 // minutes_per_item  # Maximum possible values for a day
             
-            for i in range(1, max_values + 1):
-                value_field = f"Value_{i}" if i > 1 else "Value_1"
-                value = getattr(schedule_obj, value_field, None)
+            while i <= max_values:
+                value_key = f"value_{i}"
+                value = schedule_data.get(value_key)
                 
                 if value is None or value == '':
                     break
@@ -174,8 +179,10 @@ class ScheduleValueParser:
                 try:
                     values.append(float(value))
                 except (ValueError, TypeError):
-                    logger.warning(f"Invalid value for {value_field}: {value}, using 0.0")
+                    logger.warning(f"Invalid value for {value_key}: {value}, using 0.0")
                     values.append(0.0)
+                
+                i += 1
             
             # Generate time labels
             time_labels = []
@@ -191,7 +198,7 @@ class ScheduleValueParser:
                 "time_labels": time_labels,
                 "minutes_per_item": minutes_per_item,
                 "total_items": len(values),
-                "interpolate_to_timestep": getattr(schedule_obj, 'Interpolate_to_Timestep', 'No'),
+                "interpolate_to_timestep": schedule_data.get('interpolate_to_timestep', 'No'),
                 "min_value": min(values) if values else 0.0,
                 "max_value": max(values) if values else 0.0,
                 "average_value": sum(values) / len(values) if values else 0.0
@@ -202,46 +209,36 @@ class ScheduleValueParser:
             return {"format": "list", "error": str(e)}
 
     @staticmethod
-    def parse_compact_schedule(schedule_obj) -> Dict[str, Any]:
+    def parse_compact_schedule(schedule_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Parse Schedule:Compact values
         
         Args:
-            schedule_obj: eppy schedule object
+            schedule_data: epJSON schedule dictionary
             
         Returns:
             Dictionary with parsed compact schedule structure
         """
         try:
-            # Get all fields from the schedule object
-            # Schedule:Compact is an extensible object with variable fields
+            # Get all field values from the schedule data
             periods = []
             current_period = None
-            
-            # Extract field values - improved approach to get all extensible fields
             field_values = []
             
-            # Get field names from the object (eppy objects have fieldnames attribute)
-            if hasattr(schedule_obj, 'fieldnames'):
-                field_names = schedule_obj.fieldnames[2:]  # Skip Name and Schedule_Type_Limits_Name
-                for field_name in field_names:
-                    try:
-                        value = getattr(schedule_obj, field_name, None)
-                        if value is not None and str(value).strip() != '':
-                            field_values.append(str(value).strip())
-                    except Exception:
-                        continue
+            # Extract all data fields (skip metadata fields)
+            data_fields = schedule_data.get('data', [])
+            if isinstance(data_fields, list):
+                field_values = [str(val).strip() for val in data_fields if val]
             else:
-                # Fallback to the original method
-                field_names = [attr for attr in dir(schedule_obj) if not attr.startswith('_')]
-                for field_name in field_names:
-                    if field_name.lower() not in ['name', 'schedule_type_limits_name']:
-                        try:
-                            value = getattr(schedule_obj, field_name, None)
-                            if value is not None and str(value).strip() != '':
-                                field_values.append(str(value).strip())
-                        except Exception:
-                            continue
+                # Fallback: extract extensible fields
+                i = 1
+                while True:
+                    field_key = f"field_{i}"
+                    field_val = schedule_data.get(field_key)
+                    if field_val is None or field_val == '':
+                        break
+                    field_values.append(str(field_val).strip())
+                    i += 1
             
             # Parse the field values to extract periods
             i = 0
@@ -311,18 +308,18 @@ class ScheduleValueParser:
             return {"format": "compact", "error": str(e)}
 
     @staticmethod
-    def parse_constant_schedule(schedule_obj) -> Dict[str, Any]:
+    def parse_constant_schedule(schedule_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Parse Schedule:Constant values
         
         Args:
-            schedule_obj: eppy schedule object
+            schedule_data: epJSON schedule dictionary
             
         Returns:
             Dictionary with constant value
         """
         try:
-            value = getattr(schedule_obj, 'Hourly_Value', 0.0)
+            value = schedule_data.get('hourly_value', 0.0)
             value = float(value) if value != '' else 0.0
             
             return {
@@ -336,12 +333,12 @@ class ScheduleValueParser:
             return {"format": "constant", "error": str(e)}
 
     @classmethod
-    def parse_schedule_values(cls, schedule_obj, object_type: str) -> Optional[Dict[str, Any]]:
+    def parse_schedule_values(cls, schedule_data: Dict[str, Any], object_type: str) -> Optional[Dict[str, Any]]:
         """
         Main entry point for parsing schedule values based on object type
         
         Args:
-            schedule_obj: eppy schedule object
+            schedule_data: epJSON schedule dictionary
             object_type: Type of schedule object
             
         Returns:
@@ -349,15 +346,15 @@ class ScheduleValueParser:
         """
         try:
             if object_type == "Schedule:Day:Hourly":
-                return cls.parse_day_hourly(schedule_obj)
+                return cls.parse_day_hourly(schedule_data)
             elif object_type == "Schedule:Day:Interval":
-                return cls.parse_day_interval(schedule_obj)
+                return cls.parse_day_interval(schedule_data)
             elif object_type == "Schedule:Day:List":
-                return cls.parse_day_list(schedule_obj)
+                return cls.parse_day_list(schedule_data)
             elif object_type == "Schedule:Compact":
-                return cls.parse_compact_schedule(schedule_obj)
+                return cls.parse_compact_schedule(schedule_data)
             elif object_type == "Schedule:Constant":
-                return cls.parse_constant_schedule(schedule_obj)
+                return cls.parse_constant_schedule(schedule_data)
             else:
                 # For Schedule:Year, Schedule:Week:*, etc. we don't extract values
                 # as they are structural objects that reference other schedules
@@ -595,10 +592,10 @@ class ScheduleConverter:
     """Convert between EnergyPlus schedule types and SimpleScheduleFormat."""
     
     @staticmethod
-    def from_energyplus(schedule_obj, schedule_type: str) -> SimpleScheduleFormat:
+    def from_energyplus(schedule_data: Dict[str, Any], schedule_name: str, schedule_type: str) -> SimpleScheduleFormat:
         """Convert EnergyPlus schedule to SimpleScheduleFormat."""
-        if not schedule_obj:
-            logger.error("Invalid schedule object provided")
+        if not schedule_data:
+            logger.error("Invalid schedule data provided")
             return SimpleScheduleFormat()
         
         if not schedule_type:
@@ -606,8 +603,167 @@ class ScheduleConverter:
             return SimpleScheduleFormat()
         
         ssf = SimpleScheduleFormat()
-        ssf.name = getattr(schedule_obj, 'Name', 'Unknown')
-        ssf.schedule_type_limits = getattr(schedule_obj, 'Schedule_Type_Limits_Name', '')
+        ssf.name = schedule_name
+        ssf.schedule_type_limits = schedule_data.get('schedule_type_limits_name', '')
+        
+        try:
+            if schedule_type == "Schedule:Constant":
+                value = schedule_data.get('hourly_value', 0.0)
+                try:
+                    value = float(value) if value not in [None, ''] else 0.0
+                except (ValueError, TypeError):
+                    logger.warning(f"Invalid constant value: {value}, using 0.0")
+                    value = 0.0
+                
+                ssf.default_value = value
+                ssf.daily_pattern = [("00:00", value), ("24:00", value)]
+                
+            elif schedule_type == "Schedule:Day:Hourly":
+                hourly_values = []
+                for hour in range(1, 25):
+                    field_name = f"hour_{hour}"
+                    try:
+                        value = schedule_data.get(field_name, 0.0)
+                        value = float(value) if value not in [None, ''] else 0.0
+                    except (ValueError, TypeError):
+                        logger.warning(f"Invalid hourly value for {field_name}: {value}, using 0.0")
+                        value = 0.0
+                    hourly_values.append(value)
+                
+                # Convert hourly values to time-value pairs (compress consecutive same values)
+                ssf.daily_pattern = ScheduleConverter._compress_hourly_values(hourly_values)
+                
+            elif schedule_type == "Schedule:Day:Interval":
+                intervals = []
+                i = 1
+                while True:
+                    time_field = f"time_{i}"
+                    value_field = f"value_until_time_{i}"
+                    
+                    time_val = schedule_data.get(time_field)
+                    value_val = schedule_data.get(value_field)
+                    
+                    if time_val is None or time_val == '':
+                        break
+                    
+                    time_str = str(time_val).strip()
+                    
+                    # Validate time format
+                    if not ScheduleValueParser._validate_time_format(time_str):
+                        logger.warning(f"Invalid time format in interval: {time_str}, skipping")
+                        i += 1
+                        continue
+                    
+                    try:
+                        value = float(value_val) if value_val not in [None, ''] else 0.0
+                    except (ValueError, TypeError):
+                        logger.warning(f"Invalid interval value: {value_val}, using 0.0")
+                        value = 0.0
+                    
+                    intervals.append((time_str, value))
+                    i += 1
+                
+                ssf.daily_pattern = intervals
+                
+            elif schedule_type == "Schedule:Compact":
+                # Parse Schedule:Compact - handle the actual format where Until: time,value are combined
+                intervals = []
+                
+                # Get all field values from the schedule data
+                field_values = []
+                data_fields = schedule_data.get('data', [])
+                if isinstance(data_fields, list):
+                    field_values = [str(val).strip() for val in data_fields if val]
+                else:
+                    # Extract extensible fields
+                    i = 1
+                    while True:
+                        field_key = f"field_{i}"
+                        field_val = schedule_data.get(field_key)
+                        if field_val is None or field_val == '':
+                            break
+                        field_values.append(str(field_val).strip())
+                        i += 1
+                
+                # Parse field values looking for weekday schedule patterns
+                in_weekday_section = False
+                
+                for field_val in field_values:
+                    field_val = field_val.strip()
+                    
+                    # Check if we're entering a weekday section
+                    if field_val.startswith("For:") and any(day in field_val.lower() for day in ['weekday', 'weekdays']):
+                        in_weekday_section = True
+                        continue
+                    
+                    # Check if we're entering a weekend section
+                    elif field_val.startswith("For:") and any(day in field_val.lower() for day in ['weekend', 'weekends', 'holiday']):
+                        in_weekday_section = False
+                        continue
+                    
+                    # Parse Until: entries when in weekday section
+                    elif in_weekday_section and field_val.startswith("Until:"):
+                        # Format: "Until: 8:00,0.0" or "Until: 8:00" followed by separate value
+                        until_part = field_val.replace("Until:", "").strip()
+                        
+                        if ',' in until_part:
+                            # Combined format: "8:00,0.0"
+                            try:
+                                time_str, value_str = until_part.split(',', 1)
+                                time_str = time_str.strip()
+                                value = float(value_str.strip())
+                                
+                                # Normalize time format to HH:MM
+                                if ':' in time_str and len(time_str.split(':')[0]) == 1:
+                                    hour, minute = time_str.split(':')
+                                    time_str = f"{int(hour):02d}:{minute}"
+                                
+                                intervals.append((time_str, value))
+                            except (ValueError, IndexError) as e:
+                                logger.warning(f"Could not parse Until entry: '{field_val}': {e}")
+                        else:
+                            # Time only, value might be in next field or standalone
+                            time_str = until_part.strip()
+                            
+                            # Normalize time format to HH:MM
+                            if ':' in time_str and len(time_str.split(':')[0]) == 1:
+                                hour, minute = time_str.split(':')
+                                time_str = f"{int(hour):02d}:{minute}"
+                            
+                            # Use a default value for now
+                            intervals.append((time_str, 0.0))
+                    
+                    # Handle standalone numeric values that might be schedule values
+                    elif in_weekday_section and field_val.replace('.', '').replace('-', '').isdigit():
+                        try:
+                            value = float(field_val)
+                            # If the previous interval has a 0.0 value, update it
+                            if intervals and intervals[-1][1] == 0.0:
+                                time_str, _ = intervals[-1]
+                                intervals[-1] = (time_str, value)
+                        except ValueError:
+                            pass
+                
+                if intervals:
+                    ssf.daily_pattern = intervals
+                else:
+                    # Fallback if parsing failed
+                    logger.warning(f"Could not parse Schedule:Compact '{ssf.name}', using default pattern")
+                    ssf.default_value = 1.0
+                    ssf.daily_pattern = [("00:00", 1.0), ("24:00", 1.0)]
+                
+            else:
+                # For other types, create a simple default pattern
+                logger.warning(f"Unsupported schedule type for conversion: {schedule_type}")
+                ssf.default_value = 1.0
+                ssf.daily_pattern = [("00:00", 1.0), ("24:00", 1.0)]
+        
+        except Exception as e:
+            logger.error(f"Error converting schedule from EnergyPlus: {e}")
+            ssf.default_value = 0.0
+            ssf.daily_pattern = [("00:00", 0.0), ("24:00", 0.0)]
+        
+        return ssf
         
         try:
             if schedule_type == "Schedule:Constant":
@@ -790,8 +946,8 @@ class ScheduleConverter:
         return compressed
     
     @staticmethod
-    def to_energyplus(ssf: SimpleScheduleFormat, target_type: str, idf_obj=None) -> Dict[str, Any]:
-        """Convert SimpleScheduleFormat to EnergyPlus schedule object."""
+    def to_energyplus(ssf: SimpleScheduleFormat, target_type: str) -> Dict[str, Any]:
+        """Convert SimpleScheduleFormat to EnergyPlus schedule dictionary."""
         if not ssf or not target_type:
             logger.error("Invalid arguments for schedule conversion")
             return {}
@@ -807,25 +963,25 @@ class ScheduleConverter:
                     most_common_value = max(set(values), key=values.count)
                 else:
                     most_common_value = ssf.default_value
-                modifications['Hourly_Value'] = most_common_value
+                modifications['hourly_value'] = most_common_value
                 
             elif target_type == "Schedule:Day:Hourly":
                 # Expand to 24 hourly values
                 hourly_values = ScheduleConverter._expand_to_hourly(ssf.daily_pattern)
                 for hour in range(24):
-                    field_name = f"Hour_{hour + 1}_Value" if hour > 0 else "Hour_1_Value"
+                    field_name = f"hour_{hour + 1}"
                     modifications[field_name] = hourly_values[hour]
                     
             elif target_type == "Schedule:Day:Interval":
                 # Use the time-value pairs directly
-                modifications['Interpolate_to_Timestep'] = 'No'
+                modifications['interpolate_to_timestep'] = 'No'
                 
                 # Limit to reasonable number of intervals (EnergyPlus limit)
                 max_intervals = min(len(ssf.daily_pattern), 25)
                 
                 for i, (time_str, value) in enumerate(ssf.daily_pattern[:max_intervals]):
-                    time_field = f"Time_{i + 1}" if i > 0 else "Time_1"
-                    value_field = f"Value_Until_Time_{i + 1}" if i > 0 else "Value_Until_Time_1"
+                    time_field = f"time_{i + 1}"
+                    value_field = f"value_until_time_{i + 1}"
                     modifications[time_field] = time_str
                     modifications[value_field] = value
             
@@ -848,7 +1004,7 @@ class ScheduleConverter:
                 
                 # Set the fields in the modifications dictionary
                 for i, field_value in enumerate(field_values):
-                    field_name = f"Field_{i + 1}" if i > 0 else "Field_1"
+                    field_name = f"field_{i + 1}"
                     modifications[field_name] = field_value
             
             else:
