@@ -12,7 +12,7 @@ from typing import Optional
 @dataclass
 class EnergyPlusConfig:
     """EnergyPlus-specific configuration"""
-    idd_path: str = ""
+    epjson_schema_path: str = ""
     installation_path: str = ""
     executable_path: str = ""
     version: str = "25.1.0"
@@ -62,11 +62,11 @@ class Config:
     def _setup_energyplus_paths(self):
         """Set up EnergyPlus paths from environment variables or defaults"""
         # Get from environment variable or use default
-        ep_idd_path = os.getenv('EPLUS_IDD_PATH')
-        if ep_idd_path:
-            self.energyplus.idd_path = ep_idd_path
-            # Derive installation path from IDD path
-            self.energyplus.installation_path = os.path.dirname(ep_idd_path)
+        ep_schema_path = os.getenv('EPJSON_SCHEMA_PATH')
+        if ep_schema_path:
+            self.energyplus.epjson_schema_path = ep_schema_path
+            # Derive installation path from schema path
+            self.energyplus.installation_path = os.path.dirname(ep_schema_path)
             # Set executable path
             self.energyplus.executable_path = os.path.join(
                 self.energyplus.installation_path, "energyplus"
@@ -83,7 +83,7 @@ class Config:
             # Default paths
             default_installation = "/app/software/EnergyPlusV25-1-0"
             self.energyplus.installation_path = default_installation
-            self.energyplus.idd_path = os.path.join(default_installation, "Energy+.idd")
+            self.energyplus.epjson_schema_path = os.path.join(default_installation, "Energy+.schema.epJSON")
             self.energyplus.executable_path = os.path.join(default_installation, "energyplus")
             # Set weather data path
             self.energyplus.weather_data_path = os.path.join(default_installation, "WeatherData")
@@ -115,8 +115,8 @@ class Config:
         logger = logging.getLogger(__name__)
         
         # Check EnergyPlus installation
-        if not os.path.exists(self.energyplus.idd_path):
-            logger.warning(f"EnergyPlus IDD file not found: {self.energyplus.idd_path}")
+        if not os.path.exists(self.energyplus.epjson_schema_path):
+            logger.warning(f"EnergyPlus epJSON schema file not found: {self.energyplus.epjson_schema_path}")
         
         if not os.path.exists(self.energyplus.executable_path):
             logger.warning(f"EnergyPlus executable not found: {self.energyplus.executable_path}")
