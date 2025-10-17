@@ -1,5 +1,7 @@
 """
-EnergyPlus tools with configuration management and simulation control
+EnergyPlus tools with configuration management and simulation control.
+Provides comprehensive interface for EnergyPlus epJSON file operations,
+simulation execution, and results analysis.
 """
 
 import os
@@ -51,7 +53,17 @@ logger = logging.getLogger(__name__)
 
 
 class EnergyPlusManager:
-    """Manager class for EnergyPlus operations using eppy with configuration management"""
+    """
+    Manager class for EnergyPlus epJSON operations with configuration management.
+    
+    Provides comprehensive interface for:
+    - Loading and manipulating epJSON files
+    - Running EnergyPlus simulations  
+    - Inspecting and modifying building components
+    - Analyzing simulation results
+    - Managing output variables and meters
+    - Visualizing HVAC systems
+    """
     
     def __init__(self, config: Optional[Config] = None):
         """Initialize the EnergyPlus manager with configuration"""
