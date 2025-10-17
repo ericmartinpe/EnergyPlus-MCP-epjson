@@ -11,9 +11,7 @@ from typing import Dict, List, Any, Optional
 from pathlib import Path
 from datetime import datetime
 import shutil
-import re
-
-from eppy.modeleditor import IDF
+from .run_functions import run
 
 logger = logging.getLogger(__name__)
 
@@ -25,17 +23,22 @@ class ValidationCache:
         self._available_meters_cache = {}
         self._configured_meters_cache = {}
         self._cache_timestamps = {}
-    
-    def get_cache_key(self, idf_path: str) -> str:
+
+    def load_json(self, file_path: str) -> Dict[str, Any]:
+        """Load epJSON file and return its content"""
+        with open(file_path, 'r') as f:
+            return json.load(f)
+
+    def get_cache_key(self, epjson_path: str) -> str:
         """Generate cache key based on file path and modification time"""
         try:
-            path_obj = Path(idf_path)
+            path_obj = Path(epjson_path)
             if path_obj.exists():
-                mtime = os.path.getmtime(idf_path)
-                return f"{idf_path}:{mtime}"
-            return idf_path
+                mtime = os.path.getmtime(epjson_path)
+                return f"{epjson_path}:{mtime}"
+            return epjson_path
         except Exception:
-            return idf_path
+            return epjson_path
     
     def is_cache_valid(self, cache_key: str, max_age_seconds: int = 300) -> bool:
         """Check if cache entry is still valid (default: 5 minutes)"""
@@ -73,12 +76,12 @@ class OutputMeterManager:
             "Output:Meter:Cumulative:MeterFileOnly": "Cumulative meter output to file only"
         }
     
-    def get_output_meters(self, idf_path: str, discover_available: bool = False, run_days: int = 1) -> Dict[str, Any]:
+    def get_output_meters(self, epjson_path: str, discover_available: bool = False, run_days: int = 1) -> Dict[str, Any]:
         """
         Get output meters from the model - either configured meters or discover all available ones
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
             discover_available: If True, runs simulation to discover all available meters.
                               If False, returns currently configured meters in the IDF (default: False)
             run_days: Number of days to run for discovery simulation (default: 1)
@@ -89,30 +92,30 @@ class OutputMeterManager:
             When discover_available=False, shows only currently configured Output:Meter objects.
         """
         if discover_available:
-            return self.discover_available_meters(idf_path, run_days)
+            return self.discover_available_meters(epjson_path, run_days)
         else:
-            return self.get_configured_meters(idf_path)
+            return self.get_configured_meters(epjson_path)
     
-    def discover_available_meters(self, idf_path: str, run_days: int = 1) -> Dict[str, Any]:
+    def discover_available_meters(self, epjson_path: str, run_days: int = 1) -> Dict[str, Any]:
         """
         Discover all available output meters by running simulation with minimal configuration
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
             run_days: Number of days to run simulation (default: 1 for speed)
         
         Returns:
             Dictionary with discovered meters and metadata
         """
         try:
-            logger.info(f"Discovering available output meters for: {idf_path}")
+            logger.info(f"Discovering available output meters for: {epjson_path}")
             
-            # Create temporary modified IDF for meter discovery
-            temp_idf_path = self._create_temp_idf_for_meter_discovery(idf_path, run_days)
+            # Create temporary modified epJSON for meter discovery
+            temp_epjson_path = self._create_temp_epjson_for_meter_discovery(epjson_path, run_days)
             
             # Run short simulation
             logger.info("Running short simulation to generate meter data dictionary...")
-            sim_result = self._run_meter_discovery_simulation(temp_idf_path)
+            sim_result = self._run_meter_discovery_simulation(temp_epjson_path)
             
             if not sim_result["success"]:
                 return {
@@ -133,12 +136,12 @@ class OutputMeterManager:
             meters = self._parse_mdd_file_for_meters(mdd_file_path)
             
             # Clean up temporary files
-            self._cleanup_temp_files(temp_idf_path, sim_result["output_directory"])
+            self._cleanup_temp_files(temp_epjson_path, sim_result["output_directory"])
             
             result = {
                 "success": True,
                 "discovery_mode": True,
-                "input_file": idf_path,
+                "input_file": epjson_path,
                 "total_meters": len(meters),
                 "run_days": run_days,
                 "categories": self._categorize_meters(meters),
@@ -152,29 +155,29 @@ class OutputMeterManager:
             logger.error(f"Error discovering available output meters: {e}")
             raise RuntimeError(f"Error discovering available output meters: {str(e)}")
     
-    def get_configured_meters(self, idf_path: str) -> Dict[str, Any]:
+    def get_configured_meters(self, epjson_path: str) -> Dict[str, Any]:
         """
         Get currently configured output meters from the IDF file
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
         
         Returns:
             Dictionary with currently configured meters
         """
         try:
-            logger.debug(f"Getting configured output meters for: {idf_path}")
-            idf = IDF(idf_path)
+            logger.debug(f"Getting configured output meters for: {epjson_path}")
+            ep = self.load_json(epjson_path)
             
-            output_meters = idf.idfobjects.get("Output:Meter", [])
-            output_meter_fileonly = idf.idfobjects.get("Output:Meter:MeterFileOnly", [])
-            output_meter_cumulative = idf.idfobjects.get("Output:Meter:Cumulative", [])
-            output_meter_cumulative_fileonly = idf.idfobjects.get("Output:Meter:Cumulative:MeterFileOnly", [])
+            output_meters = ep.get("Output:Meter", {})
+            output_meter_fileonly = ep.get("Output:Meter:MeterFileOnly", {})
+            output_meter_cumulative = ep.get("Output:Meter:Cumulative", {})
+            output_meter_cumulative_fileonly = ep.get("Output:Meter:Cumulative:MeterFileOnly", {})
             
             meters_info = {
                 "success": True,
                 "discovery_mode": False,
-                "input_file": idf_path,
+                "input_file": epjson_path,
                 "output_meters": [],
                 "output_meter_fileonly": [],
                 "output_meter_cumulative": [],
@@ -189,37 +192,37 @@ class OutputMeterManager:
             }
             
             # Process Output:Meter objects
-            for meter in output_meters:
+            for meter_name, meter_data in output_meters.items():
                 meter_info = {
-                    "key_name": getattr(meter, 'Key_Name', 'Unknown'),
-                    "reporting_frequency": getattr(meter, 'Reporting_Frequency', 'Unknown'),
+                    "key_name": meter_data.get('key_name', 'Unknown'),
+                    "reporting_frequency": meter_data.get('reporting_frequency', 'Unknown'),
                     "meter_type": "Output:Meter"
                 }
                 meters_info["output_meters"].append(meter_info)
             
             # Process Output:Meter:MeterFileOnly objects
-            for meter in output_meter_fileonly:
+            for meter_name, meter_data in output_meter_fileonly.items():
                 meter_info = {
-                    "key_name": getattr(meter, 'Key_Name', 'Unknown'),
-                    "reporting_frequency": getattr(meter, 'Reporting_Frequency', 'Unknown'),
+                    "key_name": meter_data.get('key_name', 'Unknown'),
+                    "reporting_frequency": meter_data.get('reporting_frequency', 'Unknown'),
                     "meter_type": "Output:Meter:MeterFileOnly"
                 }
                 meters_info["output_meter_fileonly"].append(meter_info)
             
             # Process Output:Meter:Cumulative objects
-            for meter in output_meter_cumulative:
+            for meter_name, meter_data in output_meter_cumulative.items():
                 meter_info = {
-                    "key_name": getattr(meter, 'Key_Name', 'Unknown'),
-                    "reporting_frequency": getattr(meter, 'Reporting_Frequency', 'Unknown'),
+                    "key_name": meter_data.get('key_name', 'Unknown'),
+                    "reporting_frequency": meter_data.get('reporting_frequency', 'Unknown'),
                     "meter_type": "Output:Meter:Cumulative"
                 }
                 meters_info["output_meter_cumulative"].append(meter_info)
             
             # Process Output:Meter:Cumulative:MeterFileOnly objects
-            for meter in output_meter_cumulative_fileonly:
+            for meter_name, meter_data in output_meter_cumulative_fileonly.items():
                 meter_info = {
-                    "key_name": getattr(meter, 'Key_Name', 'Unknown'),
-                    "reporting_frequency": getattr(meter, 'Reporting_Frequency', 'Unknown'),
+                    "key_name": meter_data.get('key_name', 'Unknown'),
+                    "reporting_frequency": meter_data.get('reporting_frequency', 'Unknown'),
                     "meter_type": "Output:Meter:Cumulative:MeterFileOnly"
                 }
                 meters_info["output_meter_cumulative_fileonly"].append(meter_info)
@@ -232,52 +235,64 @@ class OutputMeterManager:
             logger.error(f"Error getting configured output meters: {e}")
             raise RuntimeError(f"Error getting configured output meters: {str(e)}")
     
-    def _create_temp_idf_for_meter_discovery(self, idf_path: str, run_days: int) -> str:
-        """Create temporary IDF optimized for meter discovery simulation"""
-        idf = IDF(idf_path)
+    def _create_temp_epjson_for_meter_discovery(self, epjson_path: str, run_days: int) -> str:
+        """Create temporary epJSON optimized for meter discovery simulation"""
+        # Load epJSON file
+        ep = self._validation_cache.load_json(epjson_path)
         
         # Remove existing Output:VariableDictionary to avoid conflicts
-        existing_var_dict = idf.idfobjects.get('Output:VariableDictionary', [])
-        for var_dict in existing_var_dict:
-            idf.removeidfobject(var_dict)
+        if "Output:VariableDictionary" in ep:
+            ep["Output:VariableDictionary"] = {}
         
-        # Add Output:VariableDictionary for meter discovery (IDF generates .mdd file)
-        var_dict = idf.newidfobject('Output:VariableDictionary')
-        var_dict.Key_Field = 'IDF'
-        logger.debug(f"Added Output:VariableDictionary with Key_Field 'IDF' for meter discovery")
+        # Add Output:VariableDictionary for meter discovery (generates .mdd file)
+        if "Output:VariableDictionary" not in ep:
+            ep["Output:VariableDictionary"] = {}
+        
+        ep["Output:VariableDictionary"]["Meter Discovery"] = {
+            "key_field": "IDF"
+        }
+        logger.debug(f"Added Output:VariableDictionary with key_field 'IDF' for meter discovery")
         
         # Modify run period to be very short for fast discovery
-        run_periods = idf.idfobjects.get("RunPeriod", [])
+        run_periods = ep.get("RunPeriod", {})
         if run_periods:
-            run_period = run_periods[0]
+            # Get first run period
+            first_run_period_name = list(run_periods.keys())[0]
+            run_period = run_periods[first_run_period_name]
+            
             # Set to run for specified days in January
-            run_period.Begin_Month = 1
-            run_period.Begin_Day_of_Month = 1
-            run_period.End_Month = 1
-            run_period.End_Day_of_Month = min(run_days, 7)  # Cap at 7 days max
-            run_period.Use_Weather_File_Holidays_and_Special_Days = 'No'
-            run_period.Use_Weather_File_Daylight_Saving_Period = 'No'
-            run_period.Apply_Weekend_Holiday_Rule = 'No'
-            run_period.Use_Weather_File_Rain_Indicators = 'No'
-            run_period.Use_Weather_File_Snow_Indicators = 'No'
+            run_period["begin_month"] = 1
+            run_period["begin_day_of_month"] = 1
+            run_period["end_month"] = 1
+            run_period["end_day_of_month"] = min(run_days, 7)  # Cap at 7 days max
+            run_period["use_weather_file_holidays_and_special_days"] = "No"
+            run_period["use_weather_file_daylight_saving_period"] = "No"
+            run_period["apply_weekend_holiday_rule"] = "No"
+            run_period["use_weather_file_rain_indicators"] = "No"
+            run_period["use_weather_file_snow_indicators"] = "No"
         
         # Disable design day simulations to speed up
-        sim_control = idf.idfobjects.get("SimulationControl", [])
+        sim_control = ep.get("SimulationControl", {})
         if sim_control:
-            control = sim_control[0]
-            control.Run_Simulation_for_Sizing_Periods = 'No'
-            control.Run_Simulation_for_Weather_File_Run_Periods = 'Yes'
+            # Get first simulation control object
+            first_control_name = list(sim_control.keys())[0]
+            control = sim_control[first_control_name]
+            control["run_simulation_for_sizing_periods"] = "No"
+            control["run_simulation_for_weather_file_run_periods"] = "Yes"
         
         # Create temporary file
         temp_path = os.path.join(
             self.config.paths.temp_dir, 
-            f"temp_meter_discovery_{datetime.now().strftime('%Y%m%d_%H%M%S')}.idf"
+            f"temp_meter_discovery_{datetime.now().strftime('%Y%m%d_%H%M%S')}.epJSON"
         )
-        idf.save(temp_path)
+        
+        # Save temporary epJSON file
+        with open(temp_path, 'w') as f:
+            json.dump(ep, f, indent=2)
         
         return temp_path
     
-    def _run_meter_discovery_simulation(self, temp_idf_path: str) -> Dict[str, Any]:
+    def _run_meter_discovery_simulation(self, temp_epjson_path: str) -> Dict[str, Any]:
         """Run a minimal simulation to generate the .mdd file with meter information"""
         try:
             # Create output directory
@@ -296,7 +311,7 @@ class OutputMeterManager:
             
             # If no configured weather file, look for one in sample_files
             if not weather_file:
-                sample_files_dir = os.path.join(os.path.dirname(temp_idf_path), '..', '..', 'sample_files')
+                sample_files_dir = os.path.join(os.path.dirname(temp_epjson_path), '..', '..', 'sample_files')
                 sample_files_dir = os.path.abspath(sample_files_dir)
                 if os.path.exists(sample_files_dir):
                     epw_files = list(Path(sample_files_dir).glob('*.epw'))
@@ -307,14 +322,15 @@ class OutputMeterManager:
             if not weather_file:
                 logger.warning("No weather file found, running design day simulation only")
             
-            # Load IDF for simulation
-            if weather_file and os.path.exists(weather_file):
-                idf = IDF(temp_idf_path, weather_file)
-            else:
-                idf = IDF(temp_idf_path)
+            # Load epJSON to get version
+            ep = self._validation_cache.load_json(temp_epjson_path)
+            version = ep.get("Version", {}).get("Version 1", {}).get("version_identifier", "25.1.0")
+            # Split, pad to 3 parts, and join with dashes
+            ep_version = "-".join((version.split(".") + ["0", "0"])[:3])
             
-            # Run simulation with minimal options optimized for meter discovery
+            # Configure simulation options
             simulation_options = {
+                'idf': temp_epjson_path,
                 'output_directory': output_dir,
                 'annual': False,
                 'design_day': not bool(weather_file),  # Only use design day if no weather file
@@ -322,7 +338,8 @@ class OutputMeterManager:
                 'expandobjects': True,  # May be needed for proper meter enumeration
                 'output_prefix': 'meter_discovery',
                 'output_suffix': 'C',
-                'verbose': 'v'  # Minimal verbosity
+                'verbose': 'v',  # Minimal verbosity
+                'ep_version': ep_version
             }
             
             # Add weather file to options if available
@@ -330,7 +347,7 @@ class OutputMeterManager:
                 simulation_options['weather'] = weather_file
             
             start_time = datetime.now()
-            result = idf.run(**simulation_options)
+            result = run(**simulation_options)
             end_time = datetime.now()
             
             return {
@@ -614,13 +631,13 @@ class OutputMeterManager:
         
         return categories
     
-    def _cleanup_temp_files(self, temp_idf_path: str, temp_output_dir: str):
+    def _cleanup_temp_files(self, temp_epjson_path: str, temp_output_dir: str):
         """Clean up temporary files and directories"""
         try:
-            # Remove temporary IDF file
-            if os.path.exists(temp_idf_path):
-                os.remove(temp_idf_path)
-                logger.debug(f"Cleaned up temporary IDF: {temp_idf_path}")
+            # Remove temporary epJSON file
+            if os.path.exists(temp_epjson_path):
+                os.remove(temp_epjson_path)
+                logger.debug(f"Cleaned up temporary epJSON: {temp_epjson_path}")
             
             # Remove temporary output directory
             if os.path.exists(temp_output_dir):
@@ -630,23 +647,23 @@ class OutputMeterManager:
         except Exception as e:
             logger.warning(f"Error cleaning up temporary files: {e}")
     
-    def _get_available_meters_cached(self, idf_path: str, force_refresh: bool = False) -> List[Dict]:
+    def _get_available_meters_cached(self, epjson_path: str, force_refresh: bool = False) -> List[Dict]:
         """Get available meters using discovery tool with intelligent caching"""
-        cache_key = self._validation_cache.get_cache_key(idf_path)
+        cache_key = self._validation_cache.get_cache_key(epjson_path)
         
         # Check cache first
         if (not force_refresh and 
             cache_key in self._validation_cache._available_meters_cache and
             self._validation_cache.is_cache_valid(cache_key)):
             
-            logger.debug(f"Using cached available meters for {idf_path}")
+            logger.debug(f"Using cached available meters for {epjson_path}")
             return self._validation_cache._available_meters_cache[cache_key]
         
-        logger.info(f"Discovering available meters for validation: {idf_path}")
+        logger.info(f"Discovering available meters for validation: {epjson_path}")
         
         try:
             # Use existing discovery method
-            discovery_result = self.discover_available_meters(idf_path, run_days=1)
+            discovery_result = self.discover_available_meters(epjson_path, run_days=1)
             
             if discovery_result.get("success"):
                 available_meters = discovery_result.get("meters", [])
@@ -663,9 +680,9 @@ class OutputMeterManager:
             logger.error(f"Error during meter discovery: {e}")
             return []
     
-    def _get_configured_meters_cached(self, idf_path: str) -> List[Dict]:
+    def _get_configured_meters_cached(self, epjson_path: str) -> List[Dict]:
         """Get currently configured meters with caching"""
-        cache_key = self._validation_cache.get_cache_key(idf_path)
+        cache_key = self._validation_cache.get_cache_key(epjson_path)
         
         # Check cache first
         if (cache_key in self._validation_cache._configured_meters_cache and
@@ -674,7 +691,7 @@ class OutputMeterManager:
         
         try:
             # Use existing method
-            configured_result = self.get_configured_meters(idf_path)
+            configured_result = self.get_configured_meters(epjson_path)
             
             if configured_result.get("success"):
                 # Flatten all meter types into one list for easier caching
@@ -786,7 +803,7 @@ class OutputMeterManager:
                 "suggestions": suggestions
             }
     
-    def validate_meter_name(self, idf_path: str, meter_name: str, 
+    def validate_meter_name(self, epjson_path: str, meter_name: str, 
                            available_meters: Optional[List[Dict]] = None) -> Dict[str, Any]:
         """Validate meter name against available meters in the model"""
         if not meter_name or not isinstance(meter_name, str):
@@ -797,7 +814,7 @@ class OutputMeterManager:
         
         # Get available meters if not provided (using cached method)
         if available_meters is None:
-            available_meters = self._get_available_meters_cached(idf_path)
+            available_meters = self._get_available_meters_cached(epjson_path)
             
             if not available_meters:
                 # If discovery fails, skip detailed validation
@@ -828,7 +845,7 @@ class OutputMeterManager:
             
             return result
     
-    def validate_meter_specifications(self, idf_path: str, meters: List[Dict], 
+    def validate_meter_specifications(self, epjson_path: str, meters: List[Dict], 
                                      validation_level: str = "moderate") -> Dict[str, Any]:
         """Validate a batch of meter specifications"""
         import time
@@ -846,7 +863,7 @@ class OutputMeterManager:
         # Get available meters for validation (only for strict/moderate, using cache)
         available_meters = []
         if validation_level in ["strict", "moderate"]:
-            available_meters = self._get_available_meters_cached(idf_path)
+            available_meters = self._get_available_meters_cached(epjson_path)
             if available_meters:
                 validation_report["performance"]["available_meters_found"] = len(available_meters)
             else:
@@ -857,7 +874,7 @@ class OutputMeterManager:
         # Validate each meter specification
         for i, meter_spec in enumerate(meters):
             meter_validation = self._validate_single_meter(
-                meter_spec, i, available_meters, validation_level, idf_path
+                meter_spec, i, available_meters, validation_level, epjson_path
             )
             
             if meter_validation["is_valid"]:
@@ -871,7 +888,7 @@ class OutputMeterManager:
         return validation_report
     
     def _validate_single_meter(self, meter_spec: Dict, index: int, available_meters: List[Dict],
-                              validation_level: str, idf_path: str) -> Dict[str, Any]:
+                              validation_level: str, epjson_path: str) -> Dict[str, Any]:
         """Validate a single meter specification"""
         result = {
             "index": index,
@@ -908,7 +925,7 @@ class OutputMeterManager:
         
         # 3. Meter name validation (moderate and strict)
         if validation_level in ["strict", "moderate"] and available_meters:
-            meter_validation = self.validate_meter_name(idf_path, meter_name, available_meters)
+            meter_validation = self.validate_meter_name(epjson_path, meter_name, available_meters)
             result["validation_details"]["meter_name"] = meter_validation
             if not meter_validation["is_valid"]:
                 if validation_level == "strict":
@@ -924,11 +941,11 @@ class OutputMeterManager:
         
         return result
     
-    def check_duplicate_meters(self, idf_path: str, meters: List[Dict], 
+    def check_duplicate_meters(self, epjson_path: str, meters: List[Dict], 
                               allow_duplicates: bool = False) -> Dict[str, Any]:
         """Check for duplicate meters against existing configuration"""
         # Get currently configured meters using cached method
-        configured_meters = self._get_configured_meters_cached(idf_path)
+        configured_meters = self._get_configured_meters_cached(epjson_path)
         
         if not configured_meters:
             logger.warning("Failed to get configured meters for duplicate checking")
@@ -975,12 +992,12 @@ class OutputMeterManager:
             "will_add": len(new_meters)
         }
     
-    def add_meters_to_idf(self, idf_path: str, meters: List[Dict], 
+    def add_meters_to_epjson(self, epjson_path: str, meters: List[Dict], 
                          output_path: str) -> Dict[str, Any]:
-        """Add output meters to IDF file and save"""
+        """Add output meters to epJSON file and save"""
         try:
-            # Load IDF
-            idf = IDF(idf_path)
+            # Load epJSON
+            ep = self._validation_cache.load_json(epjson_path)
             
             added_meters = []
             
@@ -988,22 +1005,45 @@ class OutputMeterManager:
             for meter_spec in meters:
                 meter_type = meter_spec.get("meter_type", "Output:Meter")
                 
-                # Create new meter object of the specified type
-                output_meter = idf.newidfobject(meter_type)
+                # Ensure the meter type object exists in the epJSON
+                if meter_type not in ep:
+                    ep[meter_type] = {}
                 
-                # Set fields based on meter type
+                # Create a unique name for this meter instance
+                meter_name = meter_spec["meter_name"]
+                frequency = meter_spec["frequency"]
+                
+                # Create a descriptive instance name (epJSON requires unique instance names)
+                instance_name = f"{meter_name}_{frequency}"
+                
+                # Handle potential duplicates by adding counter
+                counter = 1
+                original_instance_name = instance_name
+                while instance_name in ep[meter_type]:
+                    instance_name = f"{original_instance_name}_{counter}"
+                    counter += 1
+                
+                # Create the meter object based on meter type
                 if meter_type in ["Output:Meter", "Output:Meter:MeterFileOnly"]:
-                    output_meter.Key_Name = meter_spec["meter_name"]
-                    output_meter.Reporting_Frequency = meter_spec["frequency"]
+                    ep[meter_type][instance_name] = {
+                        "key_name": meter_name,
+                        "reporting_frequency": frequency
+                    }
                 elif meter_type in ["Output:Meter:Cumulative", "Output:Meter:Cumulative:MeterFileOnly"]:
-                    output_meter.Key_Name = meter_spec["meter_name"]
-                    output_meter.Reporting_Frequency = meter_spec["frequency"]
+                    ep[meter_type][instance_name] = {
+                        "key_name": meter_name,
+                        "reporting_frequency": frequency
+                    }
                 
-                added_meters.append(meter_spec)
-                logger.debug(f"Added {meter_type}: {meter_spec}")
+                added_meters.append({
+                    **meter_spec,
+                    "instance_name": instance_name
+                })
+                logger.debug(f"Added {meter_type}: {meter_spec} as '{instance_name}'")
             
-            # Save modified IDF
-            idf.save(output_path)
+            # Save modified epJSON
+            with open(output_path, 'w') as f:
+                json.dump(ep, f, indent=2)
             
             return {
                 "success": True,
@@ -1013,7 +1053,7 @@ class OutputMeterManager:
             }
             
         except Exception as e:
-            logger.error(f"Error adding meters to IDF: {e}")
+            logger.error(f"Error adding meters to epJSON: {e}")
             return {
                 "success": False,
                 "error": str(e),
