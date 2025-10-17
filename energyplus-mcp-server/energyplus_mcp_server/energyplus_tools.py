@@ -84,7 +84,8 @@ class EnergyPlusManager:
         """Load epJSON file and return its content"""
         with open(file_path, 'r') as f:
             return json.load(f)
-    
+
+    # todo: validate epjson - see utils\epjson-validate
 
     def _resolve_epjson_path(self, epjson_path: str) -> str:
         """Resolve epJSON path (handle relative paths, sample files, example files, etc.)"""
@@ -1244,8 +1245,8 @@ class EnergyPlusManager:
                 path_obj = Path(resolved_path)
                 output_path = str(path_obj.parent / f"{path_obj.stem}_with_meters{path_obj.suffix}")
             
-            # Add meters to IDF
-            addition_result = self.output_meter_manager.add_meters_to_idf(
+            # Add meters to epJSON
+            addition_result = self.output_meter_manager.add_meters_to_epjson(
                 resolved_path, duplicate_report["new_meters"], output_path
             )
             
@@ -1790,8 +1791,8 @@ class EnergyPlusManager:
         
         return topology_info
 
-    def _get_plant_condenser_topology(self, idf, loop_obj, loop_type: str, loop_name: str) -> Dict[str, Any]:
-        """Get topology information for Plant and Condenser loops (existing logic)"""
+    def _get_plant_condenser_topology(self, ep, loop_obj, loop_type: str, loop_name: str) -> Dict[str, Any]:
+        """Get topology information for Plant and Condenser loops using epJSON"""
         topology_info = {
             "loop_name": loop_name,
             "loop_type": loop_type,
@@ -1809,68 +1810,77 @@ class EnergyPlusManager:
             }
         }
         
-        # Get supply side information
-        if loop_type in ["PlantLoop", "CondenserLoop"]:
-            topology_info["supply_side"]["inlet_node"] = getattr(loop_obj, f'{loop_type.replace("Loop", "")}_Side_Inlet_Node_Name', 'Unknown')
-            topology_info["supply_side"]["outlet_node"] = getattr(loop_obj, f'{loop_type.replace("Loop", "")}_Side_Outlet_Node_Name', 'Unknown')
+        # Get supply side information (epJSON format - lowercase with underscores)
+        if loop_type == "PlantLoop":
+            topology_info["supply_side"]["inlet_node"] = loop_obj.get("plant_side_inlet_node_name", "Unknown")
+            topology_info["supply_side"]["outlet_node"] = loop_obj.get("plant_side_outlet_node_name", "Unknown")
+        elif loop_type == "CondenserLoop":
+            topology_info["supply_side"]["inlet_node"] = loop_obj.get("condenser_side_inlet_node_name", "Unknown")
+            topology_info["supply_side"]["outlet_node"] = loop_obj.get("condenser_side_outlet_node_name", "Unknown")
         
         # Get demand side information
-        topology_info["demand_side"]["inlet_node"] = getattr(loop_obj, 'Demand_Side_Inlet_Node_Names', 'Unknown')
-        topology_info["demand_side"]["outlet_node"] = getattr(loop_obj, 'Demand_Side_Outlet_Node_Name', 'Unknown')
+        topology_info["demand_side"]["inlet_node"] = loop_obj.get("demand_side_inlet_node_name", "Unknown")
+        topology_info["demand_side"]["outlet_node"] = loop_obj.get("demand_side_outlet_node_name", "Unknown")
         
         # Get branch information
-        supply_branch_list_name = getattr(loop_obj, 'Plant_Side_Branch_List_Name' if loop_type == "PlantLoop" 
-                                        else 'Condenser_Side_Branch_List_Name' if loop_type == "CondenserLoop"
-                                        else 'Supply_Side_Branch_List_Name', '')
+        if loop_type == "PlantLoop":
+            supply_branch_list_name = loop_obj.get("plant_side_branch_list_name", "")
+        elif loop_type == "CondenserLoop":
+            supply_branch_list_name = loop_obj.get("condenser_side_branch_list_name", "")
+        else:
+            supply_branch_list_name = loop_obj.get("supply_side_branch_list_name", "")
         
-        demand_branch_list_name = getattr(loop_obj, 'Demand_Side_Branch_List_Name', '')
+        demand_branch_list_name = loop_obj.get("demand_side_branch_list_name", "")
         
         # Get supply side branches
         if supply_branch_list_name:
-            supply_branches = self._get_branches_from_list(idf, supply_branch_list_name)
+            supply_branches = self._get_branches_from_list(ep, supply_branch_list_name)
             topology_info["supply_side"]["branches"] = supply_branches
         
         # Get demand side branches
         if demand_branch_list_name:
-            demand_branches = self._get_branches_from_list(idf, demand_branch_list_name)
+            demand_branches = self._get_branches_from_list(ep, demand_branch_list_name)
             topology_info["demand_side"]["branches"] = demand_branches
         
         # Get connector information (splitters/mixers)
-        supply_connector_list = getattr(loop_obj, 'Plant_Side_Connector_List_Name' if loop_type == "PlantLoop"
-                                    else 'Condenser_Side_Connector_List_Name' if loop_type == "CondenserLoop"
-                                    else 'Supply_Side_Connector_List_Name', '')
+        if loop_type == "PlantLoop":
+            supply_connector_list = loop_obj.get("plant_side_connector_list_name", "")
+        elif loop_type == "CondenserLoop":
+            supply_connector_list = loop_obj.get("condenser_side_connector_list_name", "")
+        else:
+            supply_connector_list = loop_obj.get("supply_side_connector_list_name", "")
         
-        demand_connector_list = getattr(loop_obj, 'Demand_Side_Connector_List_Name', '')
+        demand_connector_list = loop_obj.get("demand_side_connector_list_name", "")
         
         if supply_connector_list:
-            topology_info["supply_side"]["connector_lists"] = self._get_connectors_from_list(idf, supply_connector_list)
+            topology_info["supply_side"]["connector_lists"] = self._get_connectors_from_list(ep, supply_connector_list)
         
         if demand_connector_list:
-            topology_info["demand_side"]["connector_lists"] = self._get_connectors_from_list(idf, demand_connector_list)
+            topology_info["demand_side"]["connector_lists"] = self._get_connectors_from_list(ep, demand_connector_list)
         
         return topology_info
 
-    def _get_airloop_supply_paths_by_node(self, idf, inlet_node: str) -> List[Dict[str, Any]]:
-        """Get AirLoopHVAC:SupplyPath objects that match the specified inlet node"""
+    def _get_airloop_supply_paths_by_node(self, ep, inlet_node: str) -> List[Dict[str, Any]]:
+        """Get AirLoopHVAC:SupplyPath objects that match the specified inlet node (epJSON)"""
         supply_paths = []
         
-        supply_path_objs = idf.idfobjects.get("AirLoopHVAC:SupplyPath", [])
-        for supply_path in supply_path_objs:
-            path_inlet_node = getattr(supply_path, 'Supply_Air_Path_Inlet_Node_Name', '')
+        supply_path_objs = ep.get("AirLoopHVAC:SupplyPath", {})
+        for path_name, supply_path in supply_path_objs.items():
+            path_inlet_node = supply_path.get("supply_air_path_inlet_node_name", "")
             if path_inlet_node == inlet_node:
                 path_info = {
-                    "name": getattr(supply_path, 'Name', 'Unknown'),
+                    "name": path_name,
                     "inlet_node": path_inlet_node,
                     "components": []
                 }
                 
                 # Get components in the supply path
                 for i in range(1, 10):  # Supply paths can have multiple components
-                    comp_type_field = f"Component_{i}_Object_Type" if i > 1 else "Component_1_Object_Type"
-                    comp_name_field = f"Component_{i}_Name" if i > 1 else "Component_1_Name"
+                    comp_type_field = f"component_{i}_object_type" if i > 1 else "component_1_object_type"
+                    comp_name_field = f"component_{i}_name" if i > 1 else "component_1_name"
                     
-                    comp_type = getattr(supply_path, comp_type_field, None)
-                    comp_name = getattr(supply_path, comp_name_field, None)
+                    comp_type = supply_path.get(comp_type_field)
+                    comp_name = supply_path.get(comp_name_field)
                     
                     if not comp_type or not comp_name:
                         break
@@ -1885,27 +1895,27 @@ class EnergyPlusManager:
         
         return supply_paths
 
-    def _get_airloop_return_paths_by_node(self, idf, outlet_node: str) -> List[Dict[str, Any]]:
-        """Get AirLoopHVAC:ReturnPath objects that match the specified outlet node"""
+    def _get_airloop_return_paths_by_node(self, ep, outlet_node: str) -> List[Dict[str, Any]]:
+        """Get AirLoopHVAC:ReturnPath objects that match the specified outlet node (epJSON)"""
         return_paths = []
         
-        return_path_objs = idf.idfobjects.get("AirLoopHVAC:ReturnPath", [])
-        for return_path in return_path_objs:
-            path_outlet_node = getattr(return_path, 'Return_Air_Path_Outlet_Node_Name', '')
+        return_path_objs = ep.get("AirLoopHVAC:ReturnPath", {})
+        for path_name, return_path in return_path_objs.items():
+            path_outlet_node = return_path.get("return_air_path_outlet_node_name", "")
             if path_outlet_node == outlet_node:
                 path_info = {
-                    "name": getattr(return_path, 'Name', 'Unknown'),
+                    "name": path_name,
                     "outlet_node": path_outlet_node,
                     "components": []
                 }
                 
                 # Get components in the return path
                 for i in range(1, 10):  # Return paths can have multiple components
-                    comp_type_field = f"Component_{i}_Object_Type" if i > 1 else "Component_1_Object_Type"
-                    comp_name_field = f"Component_{i}_Name" if i > 1 else "Component_1_Name"
+                    comp_type_field = f"component_{i}_object_type" if i > 1 else "component_1_object_type"
+                    comp_name_field = f"component_{i}_name" if i > 1 else "component_1_name"
                     
-                    comp_type = getattr(return_path, comp_type_field, None)
-                    comp_name = getattr(return_path, comp_name_field, None)
+                    comp_type = return_path.get(comp_type_field)
+                    comp_name = return_path.get(comp_name_field)
                     
                     if not comp_type or not comp_name:
                         break
@@ -1920,122 +1930,15 @@ class EnergyPlusManager:
         
         return return_paths
 
-    def _get_zone_equipment_for_node(self, idf, inlet_node: str) -> List[Dict[str, Any]]:
-        """Get zone equipment objects connected to the specified inlet node"""
-        zone_equipment = []
-        
-        # Check common air terminal types
-        air_terminal_types = [
-            "AirTerminal:SingleDuct:VAV:Reheat",
-            "AirTerminal:SingleDuct:VAV:NoReheat", 
-            "AirTerminal:SingleDuct:ConstantVolume:Reheat",
-            "AirTerminal:SingleDuct:ConstantVolume:NoReheat",
-            "AirTerminal:DualDuct:VAV",
-            "AirTerminal:DualDuct:ConstantVolume"
-        ]
-        
-        for terminal_type in air_terminal_types:
-            terminals = idf.idfobjects.get(terminal_type, [])
-            for terminal in terminals:
-                terminal_inlet = getattr(terminal, 'Air_Inlet_Node_Name', '') or getattr(terminal, 'Air_Inlet_Node', '')
-                if terminal_inlet == inlet_node:
-                    equipment_info = {
-                        "type": terminal_type,
-                        "name": getattr(terminal, 'Name', 'Unknown'),
-                        "inlet_node": terminal_inlet,
-                        "outlet_node": getattr(terminal, 'Air_Outlet_Node_Name', '') or getattr(terminal, 'Air_Outlet_Node', '')
-                    }
-                    zone_equipment.append(equipment_info)
-        
-        return zone_equipment
-
-    def _get_airloop_zone_splitter_details(self, idf, splitter_name: str) -> Optional[Dict[str, Any]]:
-        """Get detailed information about an AirLoopHVAC:ZoneSplitter"""
-        splitter_objs = idf.idfobjects.get("AirLoopHVAC:ZoneSplitter", [])
-        
-        for splitter in splitter_objs:
-            if getattr(splitter, 'Name', '') == splitter_name:
-                splitter_info = {
-                    "name": splitter_name,
-                    "type": "AirLoopHVAC:ZoneSplitter",
-                    "inlet_node": getattr(splitter, 'Inlet_Node_Name', 'Unknown'),
-                    "outlet_nodes": []
-                }
-                
-                # Get all outlet nodes
-                for i in range(1, 50):  # Zone splitters can have many outlets
-                    outlet_field = f"Outlet_{i}_Node_Name" if i > 1 else "Outlet_1_Node_Name"
-                    outlet_node = getattr(splitter, outlet_field, None)
-                    if not outlet_node:
-                        break
-                    splitter_info["outlet_nodes"].append(outlet_node)
-                
-                return splitter_info
-        
-        return None
-
-    def _get_airloop_zone_mixer_details(self, idf, mixer_name: str) -> Optional[Dict[str, Any]]:
-        """Get detailed information about an AirLoopHVAC:ZoneMixer"""
-        mixer_objs = idf.idfobjects.get("AirLoopHVAC:ZoneMixer", [])
-        
-        for mixer in mixer_objs:
-            if getattr(mixer, 'Name', '') == mixer_name:
-                mixer_info = {
-                    "name": mixer_name,
-                    "type": "AirLoopHVAC:ZoneMixer",
-                    "outlet_node": getattr(mixer, 'Outlet_Node_Name', 'Unknown'),
-                    "inlet_nodes": []
-                }
-                
-                # Get all inlet nodes
-                for i in range(1, 50):  # Zone mixers can have many inlets
-                    inlet_field = f"Inlet_{i}_Node_Name" if i > 1 else "Inlet_1_Node_Name"
-                    inlet_node = getattr(mixer, inlet_field, None)
-                    if not inlet_node:
-                        break
-                    mixer_info["inlet_nodes"].append(inlet_node)
-                
-                return mixer_info
-        
-        return None
-
-    def _get_airloop_return_plenum_details(self, idf, plenum_name: str) -> Optional[Dict[str, Any]]:
-        """Get detailed information about an AirLoopHVAC:ReturnPlenum"""
-        plenum_objs = idf.idfobjects.get("AirLoopHVAC:ReturnPlenum", [])
-        
-        for plenum in plenum_objs:
-            if getattr(plenum, 'Name', '') == plenum_name:
-                plenum_info = {
-                    "name": plenum_name,
-                    "type": "AirLoopHVAC:ReturnPlenum",
-                    "zone_name": getattr(plenum, 'Zone_Name', 'Unknown'),
-                    "zone_node_name": getattr(plenum, 'Zone_Node_Name', 'Unknown'),
-                    "outlet_node": getattr(plenum, 'Outlet_Node_Name', 'Unknown'),
-                    "induced_air_outlet_node": getattr(plenum, 'Induced_Air_Outlet_Node_or_NodeList_Name', ''),
-                    "inlet_nodes": []
-                }
-                
-                # Get all inlet nodes
-                for i in range(1, 50):  # Return plenums can have many inlets
-                    inlet_field = f"Inlet_{i}_Node_Name" if i > 1 else "Inlet_1_Node_Name"
-                    inlet_node = getattr(plenum, inlet_field, None)
-                    if not inlet_node:
-                        break
-                    plenum_info["inlet_nodes"].append(inlet_node)
-                
-                return plenum_info
-        
-        return None
-
-    def _get_zone_equipment_for_node(self, idf, node_name: str) -> List[Dict[str, Any]]:
-        """Get zone equipment connected to a specific node"""
+    def _get_zone_equipment_for_node(self, ep, inlet_node: str) -> List[Dict[str, Any]]:
+        """Get zone equipment objects connected to the specified inlet node (epJSON)"""
         zone_equipment = []
         
         # Common zone equipment types that might be connected to air loop nodes
-        equipment_types = [
+        air_terminal_types = [
             "AirTerminal:SingleDuct:Uncontrolled",
             "AirTerminal:SingleDuct:VAV:Reheat",
-            "AirTerminal:SingleDuct:VAV:NoReheat",
+            "AirTerminal:SingleDuct:VAV:NoReheat", 
             "AirTerminal:SingleDuct:ConstantVolume:Reheat",
             "AirTerminal:SingleDuct:ConstantVolume:NoReheat",
             "AirTerminal:DualDuct:VAV",
@@ -2052,45 +1955,120 @@ class EnergyPlusManager:
             "ZoneHVAC:IdealLoadsAirSystem"
         ]
         
-        for equipment_type in equipment_types:
-            equipment_objs = idf.idfobjects.get(equipment_type, [])
-            for equipment in equipment_objs:
-                # Check if this equipment is connected to the node
-                # Different equipment types have different field names for inlet nodes
-                inlet_node = None
-                if hasattr(equipment, 'Air_Inlet_Node_Name'):
-                    inlet_node = getattr(equipment, 'Air_Inlet_Node_Name', None)
-                elif hasattr(equipment, 'Supply_Air_Inlet_Node_Name'):
-                    inlet_node = getattr(equipment, 'Supply_Air_Inlet_Node_Name', None)
-                elif hasattr(equipment, 'Zone_Supply_Air_Node_Name'):
-                    inlet_node = getattr(equipment, 'Zone_Supply_Air_Node_Name', None)
+        for terminal_type in air_terminal_types:
+            terminals = ep.get(terminal_type, {})
+            for terminal_name, terminal in terminals.items():
+                # Check multiple possible field names for inlet node (epJSON format)
+                terminal_inlet = (terminal.get("air_inlet_node_name", "") or 
+                                terminal.get("air_inlet_node", "") or
+                                terminal.get("supply_air_inlet_node_name", "") or
+                                terminal.get("zone_supply_air_node_name", ""))
                 
-                if inlet_node == node_name:
+                if terminal_inlet == inlet_node:
                     equipment_info = {
-                        "type": equipment_type,
-                        "name": getattr(equipment, 'Name', 'Unknown'),
-                        "inlet_node": inlet_node,
-                        "outlet_node": getattr(equipment, 'Air_Outlet_Node_Name', 
-                                             getattr(equipment, 'Zone_Air_Node_Name', 'Unknown'))
+                        "type": terminal_type,
+                        "name": terminal_name,
+                        "inlet_node": terminal_inlet,
+                        "outlet_node": (terminal.get("air_outlet_node_name", "") or 
+                                      terminal.get("air_outlet_node", "") or
+                                      terminal.get("zone_air_node_name", "Unknown"))
                     }
                     
                     # Add zone name if available
-                    if hasattr(equipment, 'Zone_Name'):
-                        equipment_info["zone_name"] = getattr(equipment, 'Zone_Name', 'Unknown')
+                    if "zone_name" in terminal:
+                        equipment_info["zone_name"] = terminal.get("zone_name", "Unknown")
                     
                     zone_equipment.append(equipment_info)
         
         return zone_equipment
 
+    def _get_airloop_zone_splitter_details(self, ep, splitter_name: str) -> Optional[Dict[str, Any]]:
+        """Get detailed information about an AirLoopHVAC:ZoneSplitter (epJSON)"""
+        splitter_objs = ep.get("AirLoopHVAC:ZoneSplitter", {})
+        
+        if splitter_name in splitter_objs:
+            splitter = splitter_objs[splitter_name]
+            splitter_info = {
+                "name": splitter_name,
+                "type": "AirLoopHVAC:ZoneSplitter",
+                "inlet_node": splitter.get("inlet_node_name", "Unknown"),
+                "outlet_nodes": []
+            }
+            
+            # Get all outlet nodes
+            for i in range(1, 50):  # Zone splitters can have many outlets
+                outlet_field = f"outlet_{i}_node_name" if i > 1 else "outlet_1_node_name"
+                outlet_node = splitter.get(outlet_field)
+                if not outlet_node:
+                    break
+                splitter_info["outlet_nodes"].append(outlet_node)
+            
+            return splitter_info
+        
+        return None
 
-    def visualize_loop_diagram(self, idf_path: str, loop_name: str = None, 
+    def _get_airloop_zone_mixer_details(self, ep, mixer_name: str) -> Optional[Dict[str, Any]]:
+        """Get detailed information about an AirLoopHVAC:ZoneMixer (epJSON)"""
+        mixer_objs = ep.get("AirLoopHVAC:ZoneMixer", {})
+        
+        if mixer_name in mixer_objs:
+            mixer = mixer_objs[mixer_name]
+            mixer_info = {
+                "name": mixer_name,
+                "type": "AirLoopHVAC:ZoneMixer",
+                "outlet_node": mixer.get("outlet_node_name", "Unknown"),
+                "inlet_nodes": []
+            }
+            
+            # Get all inlet nodes
+            for i in range(1, 50):  # Zone mixers can have many inlets
+                inlet_field = f"inlet_{i}_node_name" if i > 1 else "inlet_1_node_name"
+                inlet_node = mixer.get(inlet_field)
+                if not inlet_node:
+                    break
+                mixer_info["inlet_nodes"].append(inlet_node)
+            
+            return mixer_info
+        
+        return None
+
+    def _get_airloop_return_plenum_details(self, ep, plenum_name: str) -> Optional[Dict[str, Any]]:
+        """Get detailed information about an AirLoopHVAC:ReturnPlenum (epJSON)"""
+        plenum_objs = ep.get("AirLoopHVAC:ReturnPlenum", {})
+        
+        if plenum_name in plenum_objs:
+            plenum = plenum_objs[plenum_name]
+            plenum_info = {
+                "name": plenum_name,
+                "type": "AirLoopHVAC:ReturnPlenum",
+                "zone_name": plenum.get("zone_name", "Unknown"),
+                "zone_node_name": plenum.get("zone_node_name", "Unknown"),
+                "outlet_node": plenum.get("outlet_node_name", "Unknown"),
+                "induced_air_outlet_node": plenum.get("induced_air_outlet_node_or_nodelist_name", ""),
+                "inlet_nodes": []
+            }
+            
+            # Get all inlet nodes
+            for i in range(1, 50):  # Return plenums can have many inlets
+                inlet_field = f"inlet_{i}_node_name" if i > 1 else "inlet_1_node_name"
+                inlet_node = plenum.get(inlet_field)
+                if not inlet_node:
+                    break
+                plenum_info["inlet_nodes"].append(inlet_node)
+            
+            return plenum_info
+        
+        return None
+
+
+    def visualize_loop_diagram(self, epjson_path: str, loop_name: str = None, 
                             output_path: Optional[str] = None, format: str = "png", 
                             show_legend: bool = True) -> str:
         """
         Generate and save a visual diagram of HVAC loop(s) using custom topology-based approach
         
         Args:
-            idf_path: Path to the IDF file
+            epjson_path: Path to the epJSON file
             loop_name: Optional specific loop name (if None, creates diagram for first found loop)
             output_path: Optional custom output path (if None, creates one automatically)
             format: Image format for the diagram (png, jpg, pdf, svg)
@@ -2099,7 +2077,7 @@ class EnergyPlusManager:
         Returns:
             JSON string with diagram generation results and file path
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         try:
             logger.info(f"Creating custom loop diagram for: {resolved_path}")
@@ -2129,13 +2107,13 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error creating loop diagram: {str(e)}")
 
 
-    def _create_topology_based_diagram(self, idf_path: str, loop_name: Optional[str], 
+    def _create_topology_based_diagram(self, epjson_path: str, loop_name: Optional[str], 
                                      output_path: str, show_legend: bool = True) -> Dict[str, Any]:
         """
         Create diagram using topology data from get_loop_topology
         """
         # Get available loops
-        loops_info = json.loads(self.discover_hvac_loops(idf_path))
+        loops_info = json.loads(self.discover_hvac_loops(epjson_path))
         
         # Determine which loop to diagram
         target_loop = None
@@ -2160,7 +2138,7 @@ class EnergyPlusManager:
             raise ValueError("No HVAC loops found or specified loop not found")
         
         # Get detailed topology for the target loop
-        topology_json = self.get_loop_topology(idf_path, target_loop)
+        topology_json = self.get_loop_topology(epjson_path, target_loop)
         
         # Create custom diagram using the topology data
         result = self.diagram_generator.create_diagram_from_topology(
@@ -2169,7 +2147,7 @@ class EnergyPlusManager:
         
         # Add additional metadata
         result.update({
-            "input_file": idf_path,
+            "input_file": epjson_path,
             "method": "topology_based",
             "total_loops_available": sum(len(loops_info.get(key, [])) 
                                        for key in ['plant_loops', 'condenser_loops', 'air_loops'])
@@ -2178,21 +2156,45 @@ class EnergyPlusManager:
         return result
     
 
-    def _create_simplified_diagram(self, idf_path: str, loop_name: str, 
+    def _create_simplified_diagram(self, epjson_path: str, loop_name: str, 
                                 output_path: str, format: str) -> Dict[str, Any]:
-        """Create a simplified diagram when eppy's full functionality isn't available"""
-        idf = IDF(idf_path)
+        """Create a simplified diagram for HVAC loops from epJSON data"""
+        if not MATPLOTLIB_AVAILABLE:
+            raise ImportError(
+                "Matplotlib is required for diagram generation. "
+                "Please install it with: pip install matplotlib"
+            )
+        
+        ep = self.load_json(epjson_path)
         
         # Get basic loop information
         loops_info = []
         
         # Plant loops
-        plant_loops = idf.idfobjects.get("PlantLoop", [])
-        for loop in plant_loops:
-            if not loop_name or getattr(loop, 'Name', '') == loop_name:
+        plant_loops = ep.get("PlantLoop", {})
+        for plant_loop_name, plant_loop_data in plant_loops.items():
+            if not loop_name or plant_loop_name == loop_name:
                 loops_info.append({
-                    "name": getattr(loop, 'Name', 'Unknown'),
+                    "name": plant_loop_name,
                     "type": "PlantLoop"
+                })
+        
+        # Condenser loops
+        condenser_loops = ep.get("CondenserLoop", {})
+        for condenser_loop_name, condenser_loop_data in condenser_loops.items():
+            if not loop_name or condenser_loop_name == loop_name:
+                loops_info.append({
+                    "name": condenser_loop_name,
+                    "type": "CondenserLoop"
+                })
+        
+        # Air loops
+        air_loops = ep.get("AirLoopHVAC", {})
+        for air_loop_name, air_loop_data in air_loops.items():
+            if not loop_name or air_loop_name == loop_name:
+                loops_info.append({
+                    "name": air_loop_name,
+                    "type": "AirLoopHVAC"
                 })
         
         # Create a simple matplotlib diagram
@@ -2203,10 +2205,21 @@ class EnergyPlusManager:
             for i, loop_info in enumerate(loops_info):
                 y_pos = len(loops_info) - i - 1
                 
+                # Choose color based on loop type
+                if loop_info["type"] == "PlantLoop":
+                    supply_color = 'lightblue'
+                    demand_color = 'lightcoral'
+                elif loop_info["type"] == "CondenserLoop":
+                    supply_color = 'lightgreen'
+                    demand_color = 'lightyellow'
+                else:  # AirLoopHVAC
+                    supply_color = 'lightgray'
+                    demand_color = 'lavender'
+                
                 # Draw supply side
                 supply_box = FancyBboxPatch((0, y_pos), 3, 0.8, 
                                         boxstyle="round,pad=0.1", 
-                                        facecolor='lightblue', 
+                                        facecolor=supply_color, 
                                         edgecolor='black')
                 ax.add_patch(supply_box)
                 ax.text(1.5, y_pos + 0.4, f"{loop_info['name']}\nSupply Side", 
@@ -2215,7 +2228,7 @@ class EnergyPlusManager:
                 # Draw demand side
                 demand_box = FancyBboxPatch((4, y_pos), 3, 0.8, 
                                         boxstyle="round,pad=0.1", 
-                                        facecolor='lightcoral', 
+                                        facecolor=demand_color, 
                                         edgecolor='black')
                 ax.add_patch(demand_box)
                 ax.text(5.5, y_pos + 0.4, f"{loop_info['name']}\nDemand Side", 
@@ -2238,7 +2251,7 @@ class EnergyPlusManager:
         
         return {
             "success": True,
-            "input_file": idf_path,
+            "input_file": epjson_path,
             "output_file": output_path,
             "loop_name": loop_name or "all_loops",
             "format": format,
@@ -2308,46 +2321,50 @@ class EnergyPlusManager:
                         logger.error(f"Error setting {field_key} to {new_value}: {e}")
             
             elif object_type == "RunPeriod":
-                run_objs = idf.idfobjects.get("RunPeriod", [])
+                run_objs = ep.get("RunPeriod", {})
                 if not run_objs:
-                    raise ValueError("No RunPeriod objects found in the IDF file")
+                    raise ValueError("No RunPeriod objects found in the epJSON file")
                 
                 if run_period_index >= len(run_objs):
                     raise ValueError(f"RunPeriod index {run_period_index} out of range (0-{len(run_objs)-1})")
                 
-                run_obj = run_objs[run_period_index]
+                # Get the RunPeriod object by index (convert dict to list)
+                run_period_names = list(run_objs.keys())
+                run_period_name = run_period_names[run_period_index]
+                run_obj = run_objs[run_period_name]
                 
-                # Valid RunPeriod fields
+                # Valid RunPeriod fields (epJSON format - lowercase with underscores)
                 valid_fields = {
-                    "Name", "Begin_Month", "Begin_Day_of_Month", "Begin_Year",
-                    "End_Month", "End_Day_of_Month", "End_Year", "Day_of_Week_for_Start_Day",
-                    "Use_Weather_File_Holidays_and_Special_Days", "Use_Weather_File_Daylight_Saving_Period",
-                    "Apply_Weekend_Holiday_Rule", "Use_Weather_File_Rain_Indicators", 
-                    "Use_Weather_File_Snow_Indicators"
+                    "name", "begin_month", "begin_day_of_month", "begin_year",
+                    "end_month", "end_day_of_month", "end_year", "day_of_week_for_start_day",
+                    "use_weather_file_holidays_and_special_days", "use_weather_file_daylight_saving_period",
+                    "apply_weekend_holiday_rule", "use_weather_file_rain_indicators", 
+                    "use_weather_file_snow_indicators", "treat_weather_as_actual"
                 }
                 
                 for field_name, new_value in field_updates.items():
-                    if field_name not in valid_fields:
+                    field_key = field_name.lower().replace(" ", "_")
+                    if field_key not in valid_fields:
                         logger.warning(f"Invalid field name for RunPeriod: {field_name}")
                         continue
                     
                     try:
-                        old_value = getattr(run_obj, field_name, "Not set")
-                        setattr(run_obj, field_name, new_value)
+                        old_value = run_obj.get(field_key, "Not set")
+                        run_obj[field_key] = new_value
                         modifications_made.append({
-                            "field": field_name,
+                            "field": field_key,
                             "old_value": old_value,
                             "new_value": new_value
                         })
-                        logger.debug(f"Updated {field_name}: {old_value} -> {new_value}")
+                        logger.debug(f"Updated {field_key}: {old_value} -> {new_value}")
                     except Exception as e:
-                        logger.error(f"Error setting {field_name} to {new_value}: {e}")
+                        logger.error(f"Error setting {field_key} to {new_value}: {e}")
             
             else:
                 raise ValueError(f"Invalid object_type: {object_type}. Must be 'SimulationControl' or 'RunPeriod'")
             
-            # Save the modified IDF
-            idf.save(output_path)
+            # Save the modified epJSON
+            self.save_json(ep, output_path)
             
             result = {
                 "success": True,
@@ -2367,92 +2384,139 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error modifying simulation settings: {str(e)}")
 
 
-    def add_coating_outside(self, idf_path: str, location, solar_abs=0.4, thermal_abs=0.9, 
-                            output_path: Optional[str] = None) -> str:
-
+    def add_coating_outside(self, epjson_path: str, location: str, solar_abs: float = 0.4, 
+                            thermal_abs: float = 0.9, output_path: Optional[str] = None) -> str:
         """
         Add exterior coating to all exterior surfaces of the specified location (wall or roof)
-        The default u_value, shgc, and visible_transmittance are from CBES
-
+        
         Args:
-            idf_path: Path to the input IDF file
-            solar_abs: Solar Absorptance of the exterior coating
-            thermal_abs: Thermal Absorptance of the exterior coating
+            epjson_path: Path to the input epJSON file
+            location: Surface location - either "wall" or "roof"
+            solar_abs: Solar Absorptance of the exterior coating (default: 0.4)
+            thermal_abs: Thermal Absorptance of the exterior coating (default: 0.9)
             output_path: Path for output file (if None, creates one with _modified suffix)
-
+        
+        Returns:
+            JSON string with modification results
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         modifications_made = []
 
         try:
-            idf = IDF(resolved_path)
+            ep = self.load_json(resolved_path)
             
             # Determine output path
             if output_path is None:
                 path_obj = Path(resolved_path)
                 output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
             
-            all_surfs = idf.idfobjects['BuildingSurface:Detailed']
-            if location.casefold() == "wall":
-                all_surfs.extend(idf.idfobjects['Wall:Detailed'])
-            elif location.casefold() == "roof":
-                all_surfs.extend(idf.idfobjects['Roof'])
-            else:
-                logger.error(f"location input must be wall or roof: currently '{location}'")
-            ext_surfs = [x for x in all_surfs if (x.Surface_Type.casefold() == location.casefold() and
-                                                    x.Outside_Boundary_Condition.casefold() == "Outdoors".casefold())]
-            if location.casefold() == "wall":
-                ext_surfs.extend(idf.idfobjects['Wall:Exterior'])
-            ext_surf_names = [x.Name for x in ext_surfs]
-
-            construction_names = set([x.Construction_Name for x in ext_surfs])
-            constructions = [x for x in idf.idfobjects["Construction"] if x.Name in construction_names]
-            ext_layer_names = set([x.Outside_Layer for x in constructions])
-            materials = idf.idfobjects['Material']
-            materials.extend(idf.idfobjects['Material:NoMass'])
-            ext_layers = [x for x in materials if x.Name in ext_layer_names]
-            logger.debug(f"Found {len(ext_layers)} exterior layers for {location} surfaces: {ext_surf_names}")
-            logger.debug("construction names: {}".format(construction_names))
-            logger.debug("exterior layer names: {}".format(ext_layer_names))
-
-            for ext_layer in ext_layers:
-                try:
-                    old_value = getattr(ext_layer, 'Solar_Absorptance')
-                    new_value = solar_abs
-                    setattr(ext_layer, 'Solar_Absorptance', new_value)
-                    modifications_made.append({
-                        "layer": ext_layer.Name,
-                        "field": 'Solar_Absorptance',
-                        "old_value": old_value,
-                        "new_value": new_value
+            # Validate location parameter
+            location_lower = location.lower()
+            if location_lower not in ["wall", "roof"]:
+                raise ValueError(f"Location must be 'wall' or 'roof', got '{location}'")
+            
+            # Collect all surfaces of the specified type
+            all_surfs = []
+            
+            # Get BuildingSurface:Detailed objects
+            building_surfaces = ep.get("BuildingSurface:Detailed", {})
+            for surf_name, surf_data in building_surfaces.items():
+                surface_type = surf_data.get("surface_type", "").lower()
+                outside_boundary = surf_data.get("outside_boundary_condition", "").lower()
+                
+                if surface_type == location_lower and outside_boundary == "outdoors":
+                    all_surfs.append({
+                        "name": surf_name,
+                        "construction_name": surf_data.get("construction_name", "")
                     })
-                    old_value = getattr(ext_layer, 'Thermal_Absorptance')
-                    new_value = thermal_abs
-                    setattr(ext_layer, 'Thermal_Absorptance', new_value)
+            
+            logger.debug(f"Found {len(all_surfs)} exterior {location} surfaces")
+            
+            # Get unique construction names from surfaces
+            construction_names = set(surf["construction_name"] for surf in all_surfs if surf["construction_name"])
+            
+            # Get exterior layer names from constructions
+            constructions = ep.get("Construction", {})
+            ext_layer_names = set()
+            for const_name in construction_names:
+                if const_name in constructions:
+                    const_data = constructions[const_name]
+                    # The outside layer is the first layer
+                    outside_layer = const_data.get("outside_layer", "")
+                    if outside_layer:
+                        ext_layer_names.add(outside_layer)
+            
+            logger.debug(f"Construction names: {construction_names}")
+            logger.debug(f"Exterior layer names: {ext_layer_names}")
+            
+            # Modify material properties for exterior layers
+            materials = ep.get("Material", {})
+            materials_no_mass = ep.get("Material:NoMass", {})
+            
+            for layer_name in ext_layer_names:
+                # Check in regular materials
+                if layer_name in materials:
+                    material = materials[layer_name]
+                    old_solar = material.get("solar_absorptance", "Not set")
+                    old_thermal = material.get("thermal_absorptance", "Not set")
+                    
+                    material["solar_absorptance"] = solar_abs
+                    material["thermal_absorptance"] = thermal_abs
+                    
                     modifications_made.append({
-                        "layer": ext_layer.Name,
-                        "field": 'Thermal_Absorptance',
-                        "old_value": old_value,
-                        "new_value": new_value
+                        "layer": layer_name,
+                        "field": "solar_absorptance",
+                        "old_value": old_solar,
+                        "new_value": solar_abs
                     })
-                except Exception as e:
-                    logger.error(f"Error setting Solar and Thermal Absorptance of {ext_layer.Name}: {e}")
+                    modifications_made.append({
+                        "layer": layer_name,
+                        "field": "thermal_absorptance",
+                        "old_value": old_thermal,
+                        "new_value": thermal_abs
+                    })
+                    logger.debug(f"Modified material '{layer_name}'")
+                
+                # Check in no-mass materials
+                elif layer_name in materials_no_mass:
+                    material = materials_no_mass[layer_name]
+                    old_solar = material.get("solar_absorptance", "Not set")
+                    old_thermal = material.get("thermal_absorptance", "Not set")
+                    
+                    material["solar_absorptance"] = solar_abs
+                    material["thermal_absorptance"] = thermal_abs
+                    
+                    modifications_made.append({
+                        "layer": layer_name,
+                        "field": "solar_absorptance",
+                        "old_value": old_solar,
+                        "new_value": solar_abs
+                    })
+                    modifications_made.append({
+                        "layer": layer_name,
+                        "field": "thermal_absorptance",
+                        "old_value": old_thermal,
+                        "new_value": thermal_abs
+                    })
+                    logger.debug(f"Modified no-mass material '{layer_name}'")
 
-            # Save the modified IDF
-            idf.save(output_path)
+            # Save the modified epJSON
+            self.save_json(ep, output_path)
             
             result = {
                 "success": True,
                 "input_file": resolved_path,
                 "output_file": output_path,
-                "solar": solar_abs,
-                "thermal": thermal_abs,
+                "location": location,
+                "solar_absorptance": solar_abs,
+                "thermal_absorptance": thermal_abs,
+                "surfaces_found": len(all_surfs),
                 "modifications_made": modifications_made,
                 "total_modifications": len(modifications_made)
             }
             
-            logger.info(f"Successfully modified exterior coating and saved to: {output_path}")
+            logger.info(f"Successfully modified exterior coating for {len(ext_layer_names)} materials and saved to: {output_path}")
             return json.dumps(result, indent=2)
             
         except Exception as e:
@@ -2460,96 +2524,124 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error modifying exterior coating: {str(e)}")
 
 
-    def add_window_film_outside(self, idf_path: str, u_value = 4.94, shgc = 0.45, visible_transmittance = 0.66,
-                                output_path: Optional[str] = None) -> str:
+    def add_window_film_outside(self, epjson_path: str, u_value: float = 4.94, shgc: float = 0.45, 
+                                visible_transmittance: float = 0.66, output_path: Optional[str] = None) -> str:
         """
-        Use WindowMaterial:SimpleGlazingSystem to mimic the outside window film with specified U-value, SHGC, and visible transmittance
-        The default u_value, shgc, and visible_transmittance are from CBES
-
+        Add window film to exterior windows using WindowMaterial:SimpleGlazingSystem
+        
         Args:
-            idf_path: Path to the input IDF file
-            u_value: U-value of the window film
-            shgc: Solar Heat Gain Coefficient of the window film
-            visible_transmittance: Visible transmittance of the window film
+            epjson_path: Path to the input epJSON file
+            u_value: U-factor of the window film (default: 4.94 W/m²-K from CBES)
+            shgc: Solar Heat Gain Coefficient (default: 0.45 from CBES)
+            visible_transmittance: Visible transmittance (default: 0.66 from CBES)
             output_path: Path for output file (if None, creates one with _modified suffix)
-
+        
+        Returns:
+            JSON string with modification results
         """
-        # helper, generate a random suffix so that the window surface name won't collide with others
-        def generate_random_string(length):
-            characters = string.ascii_letters + string.digits
-            # Generate a random string
-            random_string = ''.join(random.choices(characters, k=length))
-            return random_string
-
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         modifications_made = []
 
         try:
-            idf = IDF(resolved_path)
+            ep = self.load_json(resolved_path)
             
             # Determine output path
             if output_path is None:
                 path_obj = Path(resolved_path)
                 output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
             
-            window_surfs = idf.idfobjects['FenestrationSurface:Detailed']
-            window_surfs = [x for x in window_surfs if x.Surface_Type.casefold() == "Window".casefold()]
-            window_surfs.extend(idf.idfobjects['Window'])
-            non_window_surfs = idf.idfobjects['BuildingSurface:Detailed']
-            exterior_surf_names = [x.Name for x in non_window_surfs if x.Outside_Boundary_Condition.casefold() == "Outdoors".casefold()]
-            ext_window_surfs = [x for x in window_surfs if x.Building_Surface_Name in exterior_surf_names]
-            logger.debug(f"exterior surfaces: {exterior_surf_names}")
-            logger.debug(f"window surfaces: {[x.Name for x in window_surfs]}")
+            # Find all exterior window surfaces
+            # First, identify exterior building surfaces
+            building_surfaces = ep.get("BuildingSurface:Detailed", {})
+            exterior_surf_names = set()
+            for surf_name, surf_data in building_surfaces.items():
+                if surf_data.get("outside_boundary_condition", "").lower() == "outdoors":
+                    exterior_surf_names.add(surf_name)
+            
+            logger.debug(f"Found {len(exterior_surf_names)} exterior building surfaces")
+            
+            # Find windows on exterior surfaces
+            ext_window_surfs = []
+            fenestration_surfaces = ep.get("FenestrationSurface:Detailed", {})
+            for window_name, window_data in fenestration_surfaces.items():
+                if window_data.get("surface_type", "").lower() == "window":
+                    building_surface_name = window_data.get("building_surface_name", "")
+                    if building_surface_name in exterior_surf_names:
+                        ext_window_surfs.append({
+                            "name": window_name,
+                            "data": window_data
+                        })
+            
             logger.debug(f"Found {len(ext_window_surfs)} exterior window surfaces")
-
-            # create window film object
-            window_film_name = 'outside_window_film_{}'.format(generate_random_string(10))
-            window_film = idf.newidfobject('WindowMaterial:SimpleGlazingSystem', Name=window_film_name)
-            setattr(window_film, 'UFactor', u_value)
-            setattr(window_film, 'Solar_Heat_Gain_Coefficient', shgc)
-            setattr(window_film, 'Visible_Transmittance', visible_transmittance)
-            logger.debug(f"create window film: {window_film_name}")
-
-            # create window fillm construction
-            window_film_construction_name = 'cons_' + window_film_name
-            window_film_construction = idf.newidfobject('Construction', Name=window_film_construction_name)
-            setattr(window_film_construction, 'Outside_Layer', window_film_name)
-            # print("construction name: {}, outside layer: {}".format(window_film_construction_name, window_film_name))
-
-            for surf in ext_window_surfs:
-                logger.debug(f"Updating surface: {surf.Name}")
-                try:
-                    old_value = getattr(surf, 'Construction_Name')
-                    new_value = window_film_construction_name
-                    setattr(surf, 'Construction_Name', new_value)
-                    modifications_made.append({
-                        "surface": surf.Name,
-                        "field": 'Construction_Name',
-                        "old_value": old_value,
-                        "new_value": new_value
-                    })
-                    logger.debug(f"Updated Construction_Name of {surf.Name}: {old_value} -> {new_value}")
-                except Exception as e:
-                    logger.error(f"Error setting Construction_Name of {surf.Name} to {new_value}: {e}")
-            if (len(ext_window_surfs) > 1):
-                logger.debug(f"change construction of {ext_window_surfs[0].Name} to {window_film_construction_name}")
-
-            # Save the modified IDF
-            idf.save(output_path)
+            
+            if not ext_window_surfs:
+                logger.warning("No exterior windows found in the model")
+                return json.dumps({
+                    "success": False,
+                    "message": "No exterior windows found in the model",
+                    "windows_found": 0
+                }, indent=2)
+            
+            # Create unique window film material name
+            random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+            window_film_name = f'outside_window_film_{random_suffix}'
+            
+            # Add WindowMaterial:SimpleGlazingSystem for the window film
+            if "WindowMaterial:SimpleGlazingSystem" not in ep:
+                ep["WindowMaterial:SimpleGlazingSystem"] = {}
+            
+            ep["WindowMaterial:SimpleGlazingSystem"][window_film_name] = {
+                "u_factor": u_value,
+                "solar_heat_gain_coefficient": shgc,
+                "visible_transmittance": visible_transmittance
+            }
+            logger.debug(f"Created window film material: {window_film_name}")
+            
+            # Create construction using the window film
+            window_film_construction_name = f'cons_{window_film_name}'
+            if "Construction" not in ep:
+                ep["Construction"] = {}
+            
+            ep["Construction"][window_film_construction_name] = {
+                "outside_layer": window_film_name
+            }
+            logger.debug(f"Created window film construction: {window_film_construction_name}")
+            
+            # Apply the window film construction to all exterior windows
+            for window_info in ext_window_surfs:
+                window_name = window_info["name"]
+                window_data = window_info["data"]
+                
+                old_construction = window_data.get("construction_name", "Not set")
+                window_data["construction_name"] = window_film_construction_name
+                
+                modifications_made.append({
+                    "surface": window_name,
+                    "field": "construction_name",
+                    "old_value": old_construction,
+                    "new_value": window_film_construction_name
+                })
+                logger.debug(f"Updated construction of window '{window_name}': {old_construction} -> {window_film_construction_name}")
+            
+            # Save the modified epJSON
+            self.save_json(ep, output_path)
             
             result = {
                 "success": True,
                 "input_file": resolved_path,
                 "output_file": output_path,
-                "u_value": u_value,
-                "shgc": shgc,
+                "window_film_material": window_film_name,
+                "window_film_construction": window_film_construction_name,
+                "u_factor": u_value,
+                "solar_heat_gain_coefficient": shgc,
                 "visible_transmittance": visible_transmittance,
+                "windows_modified": len(ext_window_surfs),
                 "modifications_made": modifications_made,
                 "total_modifications": len(modifications_made)
             }
             
-            logger.info(f"Successfully modified {window_film_construction_name} and saved to: {output_path}")
+            logger.info(f"Successfully added window film to {len(ext_window_surfs)} windows and saved to: {output_path}")
             return json.dumps(result, indent=2)
             
         except Exception as e:
@@ -2557,22 +2649,25 @@ class EnergyPlusManager:
             raise RuntimeError(f"Error modifying window film properties: {str(e)}")
 
 
-    def change_infiltration_by_mult(self, idf_path: str, mult = 0.9,
+    def change_infiltration_by_mult(self, epjson_path: str, mult: float = 0.9,
                                  output_path: Optional[str] = None) -> str:
         """
-        Modify infiltration rates in the IDF file by a multiplier
+        Modify infiltration rates in the epJSON file by a multiplier
 
         Args:
-            idf_path: Path to the input IDF file
-            mult: multiplier for infiltration rates
+            epjson_path: Path to the input epJSON file
+            mult: Multiplier for infiltration rates (default: 0.9)
             output_path: Path for output file (if None, creates one with _modified suffix)
+        
+        Returns:
+            JSON string with modification results
         """
-        resolved_path = self._resolve_idf_path(idf_path)
+        resolved_path = self._resolve_epjson_path(epjson_path)
         
         modifications_made = []
 
         try:
-            idf = IDF(resolved_path)
+            ep = self.load_json(resolved_path)
             
             # Determine output path
             if output_path is None:
@@ -2580,52 +2675,68 @@ class EnergyPlusManager:
                 output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
             
             object_type = "ZoneInfiltration:DesignFlowRate"
-            infiltration_objs = idf.idfobjects[object_type]
+            infiltration_objs = ep.get(object_type, {})
+            
+            if not infiltration_objs:
+                logger.warning(f"No {object_type} objects found in the epJSON file")
+                return json.dumps({
+                    "success": False,
+                    "message": f"No {object_type} objects found",
+                    "input_file": resolved_path,
+                    "infiltration_objects_found": 0
+                }, indent=2)
 
-            for i in range(len(infiltration_objs)):
-                infiltration_obj = infiltration_objs[i]
-                name = infiltration_obj.Name
-                design_flow_method =  infiltration_obj.Design_Flow_Rate_Calculation_Method
-                # print("design_flow_method is {}".format(design_flow_method))
-                if design_flow_method.casefold() == "Flow/ExteriorArea".casefold(): # ignore case
-                    flow_field = "Flow_Rate_per_Exterior_Surface_Area"
-                elif design_flow_method.casefold() == "Flow/Area".casefold(): # ignore case
-                    flow_field = "Flow_Rate_per_Floor_Area"
-                elif design_flow_method.casefold() == "Flow/Zone".casefold(): # ignore case
-                    flow_field = "Design_Flow_Rate"
-                elif design_flow_method.casefold() == "Flow/ExteriorWallArea".casefold(): # ignore case
-                    flow_field = "Flow_Rate_per_Exterior_Surface_Area"
-                elif design_flow_method.casefold() == "AirChanges/Hour".casefold(): # ignore case
-                    flow_field = "Air_Changes_per_Hour"
+            for infil_name, infiltration_obj in infiltration_objs.items():
+                design_flow_method = infiltration_obj.get("design_flow_rate_calculation_method", "")
+                
+                # Map calculation method to corresponding field name (epJSON format - lowercase with underscores)
+                flow_field = None
+                if design_flow_method.lower() == "flow/exteriorarea":
+                    flow_field = "flow_rate_per_exterior_surface_area"
+                elif design_flow_method.lower() == "flow/area":
+                    flow_field = "flow_rate_per_floor_area"
+                elif design_flow_method.lower() == "flow/zone":
+                    flow_field = "design_flow_rate"
+                elif design_flow_method.lower() == "flow/exteriorwallarea":
+                    flow_field = "flow_rate_per_exterior_surface_area"
+                elif design_flow_method.lower() == "airchanges/hour":
+                    flow_field = "air_changes_per_hour"
                 else:
-                    print("didn't find the flow rate!!!!")
+                    logger.warning(f"Unknown design flow method '{design_flow_method}' for infiltration object '{infil_name}'")
+                    continue
 
                 try:
-                    old_value = getattr(infiltration_obj, flow_field)
-                    new_value = old_value * mult
-                    setattr(infiltration_obj,  flow_field, old_value * mult)
-                    modifications_made.append({
-                        "field": flow_field,
-                        "old_value": old_value,
-                        "new_value": new_value
-                    })
-                    logger.debug(f"Updated {flow_field}: {old_value} -> {new_value}")
+                    old_value = infiltration_obj.get(flow_field)
+                    if old_value is not None:
+                        new_value = old_value * mult
+                        infiltration_obj[flow_field] = new_value
+                        
+                        modifications_made.append({
+                            "object_name": infil_name,
+                            "field": flow_field,
+                            "old_value": old_value,
+                            "new_value": new_value
+                        })
+                        logger.debug(f"Updated {infil_name} {flow_field}: {old_value} -> {new_value}")
+                    else:
+                        logger.warning(f"Field '{flow_field}' not found in infiltration object '{infil_name}'")
                 except Exception as e:
-                    logger.error(f"Error setting {flow_field} to {new_value}: {e}")
+                    logger.error(f"Error setting {flow_field} to {new_value} for '{infil_name}': {e}")
 
-            # Save the modified IDF
-            idf.save(output_path)
+            # Save the modified epJSON
+            self.save_json(ep, output_path)
             
             result = {
                 "success": True,
                 "input_file": resolved_path,
                 "output_file": output_path,
-                "mult": mult,
+                "multiplier": mult,
+                "infiltration_objects_found": len(infiltration_objs),
                 "modifications_made": modifications_made,
                 "total_modifications": len(modifications_made)
             }
             
-            logger.info(f"Successfully modified {object_type} and saved to: {output_path}")
+            logger.info(f"Successfully modified {len(modifications_made)} infiltration objects and saved to: {output_path}")
             return json.dumps(result, indent=2)
             
         except Exception as e:
@@ -2824,6 +2935,18 @@ class EnergyPlusManager:
         Returns:
             JSON string with plot creation results
         """
+        if not PANDAS_AVAILABLE:
+            raise ImportError(
+                "Pandas is required for data processing. "
+                "Please install it with: pip install pandas"
+            )
+        
+        if not PLOTLY_AVAILABLE:
+            raise ImportError(
+                "Plotly is required for interactive plots. "
+                "Please install it with: pip install plotly"
+            )
+        
         try:
             logger.info(f"Creating interactive plot from: {output_directory}")
             
