@@ -174,4 +174,29 @@ cython_debug/
 .pypirc
 
 # For simulation outputs
+*.audit
+*.bnd
+*.eio
+*.end
+*.err
+*.eso
+*.mdd
+*.mtd
+*.rdd
+*.rvaudit
+*.shd
+*.wrl
+*.tab
+*.htm
+*.html
+*.sql
+eplusout.*
+eplustbl.*
+sqlite.err
+
+# EnergyPlus temporary/intermediate files
+*.idf-err
+*.epmidf
+*.epmdet
+*.expidf
 energyplus-mcp-server/outputs/
