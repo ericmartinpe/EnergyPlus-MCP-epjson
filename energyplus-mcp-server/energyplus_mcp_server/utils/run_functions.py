@@ -7,8 +7,7 @@
 #  (See accompanying file LICENSE or copy at
 #  http://opensource.org/licenses/MIT)
 # =======================================================================
-"""Run functions for EnergyPlus.
-"""
+"""Run functions for EnergyPlus."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,7 +21,6 @@ import shutil
 from subprocess import CalledProcessError, check_call
 import sys
 import tempfile
-import errno
 
 
 from io import StringIO
@@ -119,7 +117,7 @@ def paths_from_version(version):
         eplus_home = "C:/EnergyPlusV{version}".format(version=version)
         eplus_exe = os.path.join(eplus_home, "energyplus.exe")
     elif platform.system() == "Linux":
-        eplus_home = "/usr/local/EnergyPlus-{version}".format(version=version)
+        eplus_home = "/app/software/EnergyPlusV{version}".format(version=version)
         eplus_exe = os.path.join(eplus_home, "energyplus")
     else:
         eplus_home = "/Applications/EnergyPlus-{version}".format(version=version)
