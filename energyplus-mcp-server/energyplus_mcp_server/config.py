@@ -6,12 +6,12 @@ import os
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
 class EnergyPlusConfig:
     """EnergyPlus-specific configuration"""
+
     epjson_schema_path: str = ""
     installation_path: str = ""
     executable_path: str = ""
@@ -24,11 +24,12 @@ class EnergyPlusConfig:
 @dataclass
 class PathConfig:
     """Path configuration"""
+
     workspace_root: str = "/workspace/energyplus-mcp-server"
     sample_files_path: str = ""
     temp_dir: str = "/tmp"
     output_dir: str = "/workspace/energyplus-mcp-server/outputs"
-    
+
     def __post_init__(self):
         """Set default paths after initialization"""
         if not self.sample_files_path:
@@ -38,6 +39,7 @@ class PathConfig:
 @dataclass
 class ServerConfig:
     """Server configuration"""
+
     name: str = "energyplus-mcp-server"
     version: str = "0.1.0"
     log_level: str = "INFO"
@@ -48,11 +50,12 @@ class ServerConfig:
 @dataclass
 class Config:
     """Main configuration class"""
+
     energyplus: EnergyPlusConfig = field(default_factory=EnergyPlusConfig)
     paths: PathConfig = field(default_factory=PathConfig)
     server: ServerConfig = field(default_factory=ServerConfig)
     debug_mode: bool = False
-    
+
     def __post_init__(self):
         """Set up configuration after initialization"""
         self._setup_energyplus_paths()
@@ -62,7 +65,7 @@ class Config:
     def _setup_energyplus_paths(self):
         """Set up EnergyPlus paths from environment variables or defaults"""
         # Get from environment variable or use default
-        ep_schema_path = os.getenv('EPJSON_SCHEMA_PATH')
+        ep_schema_path = os.getenv("EPJSON_SCHEMA_PATH")
         if ep_schema_path:
             self.energyplus.epjson_schema_path = ep_schema_path
             # Derive installation path from schema path
@@ -83,131 +86,162 @@ class Config:
             # Default paths
             default_installation = "/app/software/EnergyPlusV25-1-0"
             self.energyplus.installation_path = default_installation
-            self.energyplus.epjson_schema_path = os.path.join(default_installation, "Energy+.schema.epJSON")
-            self.energyplus.executable_path = os.path.join(default_installation, "energyplus")
+            self.energyplus.epjson_schema_path = os.path.join(
+                default_installation, "Energy+.schema.epJSON"
+            )
+            self.energyplus.executable_path = os.path.join(
+                default_installation, "energyplus"
+            )
             # Set weather data path
-            self.energyplus.weather_data_path = os.path.join(default_installation, "WeatherData")
+            self.energyplus.weather_data_path = os.path.join(
+                default_installation, "WeatherData"
+            )
             # Set example files path
-            self.energyplus.example_files_path = os.path.join(default_installation, "ExampleFiles")
-        
+            self.energyplus.example_files_path = os.path.join(
+                default_installation, "ExampleFiles"
+            )
+
         # Set default weather file
         self.energyplus.default_weather_file = os.path.join(
-            self.energyplus.weather_data_path, 
-            "USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw"
+            self.energyplus.weather_data_path,
+            "USA_CA_San.Francisco.Intl.AP.724940_TMY3.epw",
         )
 
     def _setup_logging(self):
         """Configure logging based on configuration"""
         log_level = getattr(logging, self.server.log_level.upper(), logging.INFO)
-        
+
         # Configure logging format
         logging.basicConfig(
             level=log_level,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
-        
+
         logger = logging.getLogger(__name__)
         logger.info(f"Logging configured: level={self.server.log_level}")
 
     def _validate_config(self):
         """Validate configuration and log warnings for missing components"""
         logger = logging.getLogger(__name__)
-        
+
         # Check EnergyPlus installation
         if not os.path.exists(self.energyplus.epjson_schema_path):
-            logger.warning(f"EnergyPlus epJSON schema file not found: {self.energyplus.epjson_schema_path}")
-        
+            logger.warning(
+                f"EnergyPlus epJSON schema file not found: {self.energyplus.epjson_schema_path}"
+            )
+
         if not os.path.exists(self.energyplus.executable_path):
-            logger.warning(f"EnergyPlus executable not found: {self.energyplus.executable_path}")
-        
+            logger.warning(
+                f"EnergyPlus executable not found: {self.energyplus.executable_path}"
+            )
+
         # Check weather data
         if not os.path.exists(self.energyplus.weather_data_path):
-            logger.warning(f"EnergyPlus weather data directory not found: {self.energyplus.weather_data_path}")
-        
+            logger.warning(
+                f"EnergyPlus weather data directory not found: {self.energyplus.weather_data_path}"
+            )
+
         if not os.path.exists(self.energyplus.default_weather_file):
-            logger.warning(f"Default weather file not found: {self.energyplus.default_weather_file}")
-        
+            logger.warning(
+                f"Default weather file not found: {self.energyplus.default_weather_file}"
+            )
+
         # Check example files
         if not os.path.exists(self.energyplus.example_files_path):
-            logger.warning(f"EnergyPlus example files directory not found: {self.energyplus.example_files_path}")
-        
+            logger.warning(
+                f"EnergyPlus example files directory not found: {self.energyplus.example_files_path}"
+            )
+
         # Check sample files directory
         if not os.path.exists(self.paths.sample_files_path):
-            logger.warning(f"Sample files directory not found: {self.paths.sample_files_path}")
-        
+            logger.warning(
+                f"Sample files directory not found: {self.paths.sample_files_path}"
+            )
+
         # Create output directory if it doesn't exist
         os.makedirs(self.paths.output_dir, exist_ok=True)
-        
+
         logger.info("Configuration loaded and validated successfully")
 
     def _setup_logging(self):
         """Set up logging configuration with both console and file handlers"""
         import logging.handlers
-        from pathlib import Path
-        
+
         logger = logging.getLogger(__name__)
-        
+
         # Create logs directory
-        log_dir = Path(self.paths.workspace_root) / "logs"
-        log_dir.mkdir(exist_ok=True)
-        
+        try:
+            log_dir = Path(self.paths.workspace_root) / "logs"
+            log_dir.mkdir(parents=True, exist_ok=True)
+        except (OSError, FileNotFoundError) as e:
+            # If we can't create the log directory, just use console logging
+            logger.warning(
+                f"Could not create log directory {log_dir}: {e}. Using console logging only."
+            )
+            log_dir = None
+
         # Configure root logger
         root_logger = logging.getLogger()
         root_logger.setLevel(getattr(logging, self.server.log_level))
-        
+
         # Clear existing handlers
         for handler in root_logger.handlers[:]:
             root_logger.removeHandler(handler)
-        
+
         # Console handler (for stdout/stderr)
         console_handler = logging.StreamHandler()
         console_formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
         console_handler.setFormatter(console_formatter)
         root_logger.addHandler(console_handler)
-        
-        # File handler for all logs
-        file_handler = logging.handlers.RotatingFileHandler(
-            log_dir / "energyplus_mcp_server.log",
-            maxBytes=10*1024*1024,  # 10MB
-            backupCount=5
-        )
-        file_formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
-        )
-        file_handler.setFormatter(file_formatter)
-        root_logger.addHandler(file_handler)
-        
-        # Separate error log file
-        error_handler = logging.handlers.RotatingFileHandler(
-            log_dir / "energyplus_mcp_errors.log",
-            maxBytes=5*1024*1024,  # 5MB
-            backupCount=3
-        )
-        error_handler.setLevel(logging.ERROR)
-        error_handler.setFormatter(file_formatter)
-        root_logger.addHandler(error_handler)
-        
-        logger.info(f"Logging configured: level={self.server.log_level}")
-        logger.info(f"Log files: {log_dir}")
-        
+
+        # File handler for all logs (only if log_dir was created successfully)
+        if log_dir:
+            file_handler = logging.handlers.RotatingFileHandler(
+                log_dir / "energyplus_mcp_server.log",
+                maxBytes=10 * 1024 * 1024,  # 10MB
+                backupCount=5,
+            )
+            file_formatter = logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S",
+            )
+            file_handler.setFormatter(file_formatter)
+            root_logger.addHandler(file_handler)
+
+            # Separate error log file
+            error_handler = logging.handlers.RotatingFileHandler(
+                log_dir / "energyplus_mcp_errors.log",
+                maxBytes=5 * 1024 * 1024,  # 5MB
+                backupCount=3,
+            )
+            error_handler.setLevel(logging.ERROR)
+            error_handler.setFormatter(file_formatter)
+            root_logger.addHandler(error_handler)
+
+            logger.info(f"Logging configured: level={self.server.log_level}")
+            logger.info(f"Log files: {log_dir}")
+        else:
+            logger.info(
+                f"Logging configured: level={self.server.log_level} (console only)"
+            )
+
         return log_dir
 
 
 def get_config() -> Config:
     """Get the global configuration instance"""
-    if not hasattr(get_config, '_config'):
+    if not hasattr(get_config, "_config"):
         get_config._config = Config()
-    
+
     return get_config._config
 
 
 def reload_config() -> Config:
     """Reload configuration (useful for testing)"""
-    if hasattr(get_config, '_config'):
-        delattr(get_config, '_config')
+    if hasattr(get_config, "_config"):
+        delattr(get_config, "_config")
     return get_config()

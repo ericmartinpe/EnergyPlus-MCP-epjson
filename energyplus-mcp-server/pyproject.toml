@@ -15,7 +15,8 @@ dependencies = [
     "networkx",
     "pandas",
     "plotly",
-    "graphviz"
+    "graphviz",
+    "jsonschema"
 ]
 license = {text = "MIT"}
 keywords = ["EnergyPlus", "MCP", "server"]
@@ -46,3 +47,11 @@ dev = [
     "ruff",
     "mypy"
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Exclude demo/experimental files from test discovery
+norecursedirs = ["energyplus_mcp_server/utils/epjson-validate"]
