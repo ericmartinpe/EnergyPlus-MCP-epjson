@@ -12,14 +12,23 @@
     },
     "energyplus": {
       "type": "stdio",
-      "command": "/workspace/energyplus-mcp-server/.venv/bin/python",
+      "command": "docker",
       "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-v",
+        "${workspaceFolder}:/workspace",
+        "-w",
+        "/workspace/energyplus-mcp-server",
+        "energyplus-mcp-dev",
+        "uv",
+        "run",
+        "python",
         "-m",
         "energyplus_mcp_server.server"
       ],
-      "env": {
-        "EPLUS_IDD_PATH": "/app/software/EnergyPlusV25-1-0/Energy+.idd"
-      }
+      "env": {}
     }
   }
 }
