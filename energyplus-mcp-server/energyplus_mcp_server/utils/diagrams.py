@@ -12,33 +12,33 @@ class HVACDiagramGenerator:
 
     # Color maps -------------------------------------------------------------
     COMPONENT_COLORS = {  # node fill colours
-        'Pump:VariableSpeed': '#4CAF50',
-        'Pump:ConstantSpeed': '#4CAF50',
-        'Chiller:Electric': '#2196F3',
-        'Chiller:Absorption': '#2196F3',
-        'Boiler:HotWater': '#FF5722',
-        'Coil:Cooling:Water': '#00BCD4',
-        'Coil:Heating:Water': '#FF9800',
-        'Pipe:Adiabatic': '#9E9E9E',
-        'default': '#607D8B',
-        'Connector:Splitter': '#E91E63',
-        'Connector:Mixer': '#3F51B5',
+        "Pump:VariableSpeed": "#4CAF50",
+        "Pump:ConstantSpeed": "#4CAF50",
+        "Chiller:Electric": "#2196F3",
+        "Chiller:Absorption": "#2196F3",
+        "Boiler:HotWater": "#FF5722",
+        "Coil:Cooling:Water": "#00BCD4",
+        "Coil:Heating:Water": "#FF9800",
+        "Pipe:Adiabatic": "#9E9E9E",
+        "default": "#607D8B",
+        "Connector:Splitter": "#E91E63",
+        "Connector:Mixer": "#3F51B5",
         # Air loop components
-        'AirLoopHVAC:ZoneSplitter': '#E91E63',
-        'AirLoopHVAC:ZoneMixer': '#3F51B5',
-        'AirLoopHVAC:ReturnPlenum': '#9C27B0',
-        'AirTerminal:SingleDuct:VAV:Reheat': '#FF5722',
-        'AirTerminal:SingleDuct:ConstantVolume:NoReheat': '#FF9800',
-        'AirTerminal:SingleDuct:VAV:NoReheat': '#FF5722',
-        'Fan:VariableVolume': '#4CAF50',
-        'Fan:ConstantVolume': '#4CAF50',
-        'Coil:Cooling:DX:SingleSpeed': '#00BCD4',
-        'Coil:Heating:Electric': '#FF5722',
-        'Coil:Heating:Gas': '#FF5722',
+        "AirLoopHVAC:ZoneSplitter": "#E91E63",
+        "AirLoopHVAC:ZoneMixer": "#3F51B5",
+        "AirLoopHVAC:ReturnPlenum": "#9C27B0",
+        "AirTerminal:SingleDuct:VAV:Reheat": "#FF5722",
+        "AirTerminal:SingleDuct:ConstantVolume:NoReheat": "#FF9800",
+        "AirTerminal:SingleDuct:VAV:NoReheat": "#FF5722",
+        "Fan:VariableVolume": "#4CAF50",
+        "Fan:ConstantVolume": "#4CAF50",
+        "Coil:Cooling:DX:SingleSpeed": "#00BCD4",
+        "Coil:Heating:Electric": "#FF5722",
+        "Coil:Heating:Gas": "#FF5722",
     }
 
-    NODE_STYLE = {'shape': 'box', 'style': 'rounded,filled', 'fontname': 'Helvetica'}
-    CONNECTOR_STYLE = {'shape': 'ellipse', 'style': 'filled', 'fontsize': '10'}
+    NODE_STYLE = {"shape": "box", "style": "rounded,filled", "fontname": "Helvetica"}
+    CONNECTOR_STYLE = {"shape": "ellipse", "style": "filled", "fontsize": "10"}
 
     # Public API -------------------------------------------------------------
     def create_diagram_from_topology(
@@ -65,7 +65,7 @@ class HVACDiagramGenerator:
                         used_types.add(comp["type"])
                 for conn in data[side].get("connector_lists", []):
                     used_types.add(conn["type"])
-                
+
                 # Handle air loop components
                 for splitter in data[side].get("zone_splitters", []):
                     used_types.add(splitter["type"])
@@ -78,7 +78,7 @@ class HVACDiagramGenerator:
 
         # Determine loop type and build accordingly
         loop_type = data.get("loop_type", "")
-        
+
         if loop_type == "AirLoopHVAC":
             # Build air loop diagram with air-specific logic
             self._build_air_loop_side(dot, data["supply_side"], side="Supply")
@@ -98,7 +98,7 @@ class HVACDiagramGenerator:
 
         # Remove extension from output_path since dot.render() will add it automatically
         filename_without_ext = os.path.splitext(output_path)[0]
-        
+
         filepath = dot.render(filename=filename_without_ext, format=fmt, cleanup=True)
 
         return {
@@ -121,7 +121,7 @@ class HVACDiagramGenerator:
 
             branches = side_data.get("branches", [])
             connectors = side_data.get("connector_lists", [])
-            
+
             # Find splitter and mixer
             splitter = None
             mixer = None
@@ -130,20 +130,20 @@ class HVACDiagramGenerator:
                     splitter = conn
                 elif conn["type"] == "Connector:Mixer":
                     mixer = conn
-            
+
             # Create a mapping of branch names to their components
             branch_map = {branch["name"]: branch for branch in branches}
-            
+
             # Step 1: Find inlet branch (typically first branch or branch feeding splitter)
             inlet_branch = None
             if splitter:
                 inlet_branch_name = splitter.get("inlet_branch")
                 inlet_branch = branch_map.get(inlet_branch_name)
-            
+
             if not inlet_branch and branches:
                 # Fallback: use first branch as inlet
                 inlet_branch = branches[0]
-            
+
             # Step 2: Find outlet branch (typically last branch or branch from mixer)
             outlet_branch = None
             if mixer:
@@ -151,7 +151,7 @@ class HVACDiagramGenerator:
                 outlet_branch_name = mixer.get("outlet_branch")
                 if outlet_branch_name and outlet_branch_name != "Unknown":
                     outlet_branch = branch_map.get(outlet_branch_name)
-            
+
             if not outlet_branch and branches:
                 # Fallback: use last branch as outlet if it's not the inlet and not in parallel branches
                 last_branch = branches[-1]
@@ -159,13 +159,15 @@ class HVACDiagramGenerator:
                     # Check if it's not a parallel branch
                     parallel_branch_names = set()
                     if splitter:
-                        parallel_branch_names.update(splitter.get("outlet_branches", []))
+                        parallel_branch_names.update(
+                            splitter.get("outlet_branches", [])
+                        )
                     if mixer:
                         parallel_branch_names.update(mixer.get("inlet_branches", []))
-                    
+
                     if last_branch["name"] not in parallel_branch_names:
                         outlet_branch = last_branch
-            
+
             # Step 3: Find parallel branches (branches between splitter and mixer)
             parallel_branches = []
             if splitter:
@@ -173,20 +175,20 @@ class HVACDiagramGenerator:
                     branch = branch_map.get(branch_name)
                     if branch:
                         parallel_branches.append(branch)
-            
+
             # Step 4: Build the flow diagram
-            
+
             # Draw inlet branch if it exists
             if inlet_branch:
                 last_node = f"{side}_inlet"
                 for comp_idx, comp in enumerate(inlet_branch["components"]):
                     comp_id = f"{inlet_branch['name']}_{comp_idx}"
                     self._draw_component(c, comp_id, comp)
-                    
+
                     if last_node:
                         c.edge(last_node, comp_id)
                     last_node = comp_id
-                
+
                 # Connect to splitter if exists
                 if splitter:
                     splitter_id = splitter["name"]
@@ -194,7 +196,11 @@ class HVACDiagramGenerator:
                     if last_node:
                         c.edge(last_node, splitter_id)
                     last_node = splitter_id
-                elif not parallel_branches and outlet_branch and outlet_branch != inlet_branch:
+                elif (
+                    not parallel_branches
+                    and outlet_branch
+                    and outlet_branch != inlet_branch
+                ):
                     # No splitter, connect directly to outlet branch
                     if outlet_branch["components"]:
                         first_outlet_comp = f"{outlet_branch['name']}_0"
@@ -202,59 +208,69 @@ class HVACDiagramGenerator:
                 elif not parallel_branches and not outlet_branch:
                     # No splitter and no separate outlet branch, connect to outlet
                     c.edge(last_node, f"{side}_outlet")
-            
+
             # Draw parallel branches
             parallel_last_nodes = []
             for branch in parallel_branches:
                 if not branch["components"]:
                     continue
-                    
+
                 # Connect from splitter to first component of this branch
                 first_comp_id = f"{branch['name']}_0"
                 if splitter:
                     c.edge(splitter["name"], first_comp_id)
-                
+
                 # Draw all components in this branch
                 last_node = None
                 for comp_idx, comp in enumerate(branch["components"]):
                     comp_id = f"{branch['name']}_{comp_idx}"
                     self._draw_component(c, comp_id, comp)
-                    
+
                     if last_node:
                         c.edge(last_node, comp_id)
                     last_node = comp_id
-                
+
                 parallel_last_nodes.append(last_node)
-            
+
             # Draw mixer if it exists
             mixer_node = None
             if mixer and parallel_last_nodes:
                 mixer_id = mixer["name"]
                 self._draw_connector(c, mixer_id, mixer)
                 mixer_node = mixer_id
-                
+
                 # Connect all parallel branches to mixer
                 for last_node in parallel_last_nodes:
                     if last_node:
                         c.edge(last_node, mixer_id)
-            
+
             # Draw outlet branch if it exists
             if outlet_branch and outlet_branch != inlet_branch:
-                first_outlet_node = mixer_node if mixer_node else (parallel_last_nodes[0] if parallel_last_nodes else f"{side}_inlet")
-                
+                first_outlet_node = (
+                    mixer_node
+                    if mixer_node
+                    else (
+                        parallel_last_nodes[0]
+                        if parallel_last_nodes
+                        else f"{side}_inlet"
+                    )
+                )
+
                 for comp_idx, comp in enumerate(outlet_branch["components"]):
                     comp_id = f"{outlet_branch['name']}_{comp_idx}"
                     self._draw_component(c, comp_id, comp)
-                    
+
                     if comp_idx == 0 and first_outlet_node:
                         c.edge(first_outlet_node, comp_id)
                     elif comp_idx > 0:
                         prev_comp_id = f"{outlet_branch['name']}_{comp_idx-1}"
                         c.edge(prev_comp_id, comp_id)
-                
+
                 # Connect last component of outlet branch to side outlet
                 if outlet_branch["components"]:
-                    last_outlet_comp = f"{outlet_branch['name']}_{len(outlet_branch['components'])-1}"
+                    last_outlet_comp = (
+                        f"{outlet_branch['name']}_{len(outlet_branch['components'])-1}"
+                    )
                     c.edge(last_outlet_comp, f"{side}_outlet")
             elif mixer_node:
                 # Connect mixer directly to outlet if no outlet branch
@@ -295,9 +311,9 @@ class HVACDiagramGenerator:
                 zone_mixers = side_data.get("zone_mixers", [])
                 zone_equipment = side_data.get("zone_equipment", [])
                 return_plenums = side_data.get("return_plenums", [])
-                
+
                 last_node = f"{side}_inlet"
-                
+
                 # Draw zone splitters
                 if zone_splitters:
                     for idx, splitter in enumerate(zone_splitters):
@@ -305,14 +321,14 @@ class HVACDiagramGenerator:
                         self._draw_air_component(c, splitter_id, splitter)
                         c.edge(last_node, splitter_id)
                         last_node = splitter_id
-                        
+
                         # Connect splitter to zone equipment
                         if zone_equipment:
                             for eq_idx, equipment in enumerate(zone_equipment):
                                 eq_id = f"zone_equipment_{eq_idx}"
                                 self._draw_air_component(c, eq_id, equipment)
                                 c.edge(splitter_id, eq_id)
-                
+
                 # Draw return plenums if present
                 plenum_node = None
                 if return_plenums:
@@ -320,19 +336,19 @@ class HVACDiagramGenerator:
                         plenum_id = f"return_plenum_{idx}"
                         self._draw_air_component(c, plenum_id, plenum)
                         plenum_node = plenum_id
-                        
+
                         # Connect zone equipment to plenum (simplified)
                         if zone_equipment:
                             for eq_idx in range(len(zone_equipment)):
                                 eq_id = f"zone_equipment_{eq_idx}"
                                 c.edge(eq_id, plenum_id)
-                
+
                 # Draw zone mixers
                 if zone_mixers:
                     for idx, mixer in enumerate(zone_mixers):
                         mixer_id = f"zone_mixer_{idx}"
                         self._draw_air_component(c, mixer_id, mixer)
-                        
+
                         # Connect from plenum or equipment to mixer
                         if plenum_node:
                             c.edge(plenum_node, mixer_id)
@@ -343,7 +359,7 @@ class HVACDiagramGenerator:
                                 c.edge(eq_id, mixer_id)
                         else:
                             c.edge(last_node, mixer_id)
-                        
+
                         # Connect mixer to outlet
                         c.edge(mixer_id, f"{side}_outlet")
                 else:
@@ -360,9 +376,11 @@ class HVACDiagramGenerator:
     def _draw_component(self, c: Digraph, comp_id: str, comp: dict):
         """Draw a single component node."""
         label = self._abbrev_type(comp["type"])
-        color = self.COMPONENT_COLORS.get(comp["type"], self.COMPONENT_COLORS["default"])
+        color = self.COMPONENT_COLORS.get(
+            comp["type"], self.COMPONENT_COLORS["default"]
+        )
         c.node(comp_id, label, fillcolor=color, **self.NODE_STYLE)
-    
+
     def _draw_connector(self, c: Digraph, conn_id: str, connector: dict):
         """Draw a connector (splitter/mixer) node."""
         label = self._abbrev_type(connector["type"])
@@ -372,16 +390,18 @@ class HVACDiagramGenerator:
     def _draw_air_component(self, c: Digraph, comp_id: str, comp: dict):
         """Draw an air loop component node."""
         label = self._abbrev_type(comp["type"])
-        color = self.COMPONENT_COLORS.get(comp["type"], self.COMPONENT_COLORS["default"])
+        color = self.COMPONENT_COLORS.get(
+            comp["type"], self.COMPONENT_COLORS["default"]
+        )
         c.node(comp_id, label, fillcolor=color, **self.NODE_STYLE)
 
     def _add_compact_legend(self, dot: Digraph, used_types: set):
         """Create a compact horizontal legend positioned at bottom."""
-        
+
         # First, determine which legend nodes we need to create
         legend_nodes = []
         legend_data = []
-        
+
         for typ, col in self.COMPONENT_COLORS.items():
             if "Connector" in typ or typ == "default":
                 continue
@@ -390,47 +410,49 @@ class HVACDiagramGenerator:
                 node_id = f"leg_{short}"
                 legend_nodes.append(node_id)
                 legend_data.append((node_id, short, col))
-        
+
         # Only create the legend cluster if we have nodes to add
         if not legend_data:
             return
-            
+
         with dot.subgraph(name="cluster_legend") as leg:
             # Make legend more compact
             leg.attr(
-                label="Component Types", 
-                fontsize="12", 
+                label="Component Types",
+                fontsize="12",
                 labelloc="t",
                 style="rounded",
                 color="lightgray",
                 penwidth="1",
                 margin="10",
-                rank="min"  # Position at top instead of sink
+                rank="min",  # Position at top instead of sink
             )
-            
+
             # Create a hidden node to control legend positioning
-            leg.node("legend_anchor", "", shape="point", width="0", height="0", style="invis")
-            
+            leg.node(
+                "legend_anchor", "", shape="point", width="0", height="0", style="invis"
+            )
+
             # Create compact legend nodes with smaller styling
             for node_id, short, col in legend_data:
                 # Use smaller, more compact style for legend
                 leg.node(
-                    node_id, 
-                    short, 
-                    fillcolor=col, 
-                    shape="box", 
-                    style="rounded,filled", 
-                    fontname="Helvetica", 
+                    node_id,
+                    short,
+                    fillcolor=col,
+                    shape="box",
+                    style="rounded,filled",
+                    fontname="Helvetica",
                     fontsize="10",
                     width="0.8",
                     height="0.4",
-                    margin="0.05"
+                    margin="0.05",
                 )
-            
+
             # Create invisible edges to force horizontal layout
             for i in range(len(legend_nodes) - 1):
                 leg.edge(legend_nodes[i], legend_nodes[i + 1], style="invis")
-            
+
             # Set same rank for all legend nodes to make them horizontal
             if legend_nodes:
                 leg.attr(rank="same")
@@ -473,7 +495,7 @@ class HVACDiagramGenerator:
             # Count plant/condenser loop components
             for br in topology[side].get("branches", []):
                 cnt += len(br.get("components", []))
-            
+
             # Count air loop components
             cnt += len(topology[side].get("zone_splitters", []))
             cnt += len(topology[side].get("zone_mixers", []))
