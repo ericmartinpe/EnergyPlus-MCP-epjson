@@ -33,7 +33,6 @@
       ]
     }
   },
-  "postCreateCommand": "cd /workspace/energyplus-mcp-server && uv sync --extra dev",
-  "postStartCommand": "cd /workspace/energyplus-mcp-server && uv sync --extra dev",
+  "postCreateCommand": "uv sync --extra dev",
   "remoteUser": "vscode"
 }

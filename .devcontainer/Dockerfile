@@ -69,11 +69,5 @@ USER vscode
 # 6. Workspace location and default shell
 # ----------------------------------------------------------------------------- 
 WORKDIR /workspace/energyplus-mcp-server
-# ----------------------------------------------------------------------------- 
-# 7. Pre-install project dependencies for faster startup
-# ----------------------------------------------------------------------------- 
-WORKDIR /workspace/energyplus-mcp-server
-COPY pyproject.toml uv.lock ./
-RUN uv sync --extra dev
 
 CMD ["/bin/bash"]
