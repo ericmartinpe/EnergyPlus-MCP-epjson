@@ -1,0 +1,10 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "*.epJSON"
+      ],
+      "url": "/app/software/EnergyPlusV25-1-0/Energy+.schema.epJSON"
+    }
+  ]
+}
