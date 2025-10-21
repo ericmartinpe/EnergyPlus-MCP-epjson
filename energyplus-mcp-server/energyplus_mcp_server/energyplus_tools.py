@@ -2588,6 +2588,38 @@ class EnergyPlusManager:
             logger.error(f"Error modifying simulation settings for {resolved_path}: {e}")
             raise RuntimeError(f"Error modifying simulation settings: {str(e)}")
 
+    def find_exterior_walls(self, epjson_path: str) -> dict:
+            """
+            Creates a dictionary of exterior walls in the model
+            
+            Args:
+                epjson_path: Path to the input epJSON file
+            
+            Returns:
+                Dictionary of all exterior walls in the model - wall names are keys, constructions are values.
+            """
+            resolved_path = self._resolve_epjson_path(epjson_path)
+
+            try:
+                ep = self.load_json(resolved_path)
+
+                ext_walls = {}
+                # Get BuildingSurface:Detailed objects
+                building_surfaces = ep.get("BuildingSurface:Detailed", {})
+                for surf_name, surf_data in building_surfaces.items():
+                    surface_type = surf_data.get("surface_type", "").lower()
+                    outside_boundary = surf_data.get("outside_boundary_condition", "").lower()
+                    
+                    if surface_type == "wall" and outside_boundary == "outdoors":
+                        ext_walls[surf_name] = surf_data.get("construction_name", "")
+                
+                return ext_walls
+                
+            except Exception as e:
+                logger.error(f"Error finding exterior walls for {resolved_path}: {e}")
+                raise RuntimeError(f"Error finding exterior walls: {str(e)}")
+
+
     def add_coating_outside(self, epjson_path: str, location: str, solar_abs: float = 0.4, 
                             thermal_abs: float = 0.9, output_path: Optional[str] = None) -> str:
         """
