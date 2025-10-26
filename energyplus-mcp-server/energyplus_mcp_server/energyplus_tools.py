@@ -48,6 +48,9 @@ except ImportError:
     GRAPHVIZ_AVAILABLE = False
     HVACDiagramGenerator = None
 
+# Define DATA_PATH for internal use
+DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
 from .config import get_config, Config
 from .utils.schedules import ScheduleValueParser
 from .utils.output_variables import OutputVariableManager
