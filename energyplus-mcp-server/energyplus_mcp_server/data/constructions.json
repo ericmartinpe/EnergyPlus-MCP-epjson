@@ -1,0 +1,76 @@
+{
+    "exterior_wall": {
+        "non_residential": {
+            "WoodFramedWall": {
+                "outside_layer": "F07 25mm stucco",
+                "layer_2": "G01 16mm gypsum board",
+                "layer_3": "Nonres_Exterior_Wall_Insulation",
+                "layer_4": "G01 16mm gypsum board"
+            },
+            "SteelFramedWall": {
+                "outside_layer": "F07 25mm stucco",
+                "layer_2": "G01 16mm gypsum board",
+                "layer_3": "Nonres_Exterior_Wall_Insulation",
+                "layer_4": "G01 16mm gypsum board"
+            },
+            "MetalBuildingWall": {
+                "outside_layer": "F08 Metal surface",
+                "layer_2": "Nonres_Exterior_Wall_Insulation",
+                "layer_3": "G01 16mm gypsum board"
+            },
+            "MassWall": {
+                "outside_layer": "200mm Normalweight concrete wall",
+                "layer_2": "Nonres_Exterior_Wall_Insulation",
+                "layer_3": "G01 13mm gypsum board"
+            }
+        },
+        "residential": {
+            "WoodFramedWall": {
+                "outside_layer": "F07 25mm stucco",
+                "layer_2": "G01 16mm gypsum board",
+                "layer_3": "Res_Exterior_Wall_Insulation",
+                "layer_4": "G01 16mm gypsum board"
+            },
+            "SteelFramedWall": {
+                "outside_layer": "F07 25mm stucco",
+                "layer_2": "G01 16mm gypsum board",
+                "layer_3": "Res_Exterior_Wall_Insulation",
+                "layer_4": "G01 16mm gypsum board"
+            },
+            "MetalBuildingWall": {
+                "outside_layer": "F08 Metal surface",
+                "layer_2": "Res_Exterior_Wall_Insulation",
+                "layer_3": "G01 16mm gypsum board"
+            },
+            "MassWall": {
+                "outside_layer": "200mm Normalweight concrete wall",
+                "layer_2": "Res_Exterior_Wall_Insulation",
+                "layer_3": "G01 13mm gypsum board"
+            }
+        },
+        "semiheated": {
+            "WoodFramedWall": {
+                "outside_layer": "F07 25mm stucco",
+                "layer_2": "G01 16mm gypsum board",
+                "layer_3": "Semiheated_Exterior_Wall_Insulation",
+                "layer_4": "G01 16mm gypsum board"
+            },
+            "SteelFramedWall": {
+                "outside_layer": "F07 25mm stucco",
+                "layer_2": "G01 16mm gypsum board",
+                "layer_3": "Semiheated_Exterior_Wall_Insulation",
+                "layer_4": "G01 16mm gypsum board"
+            },
+            "MetalBuildingWall": {
+                "outside_layer": "F08 Metal surface",
+                "layer_2": "Semiheated_Exterior_Wall_Insulation",
+                "layer_3": "G01 16mm gypsum board"
+            },
+            "MassWall": {
+                "outside_layer": "200mm Normalweight concrete wall",
+                "layer_2": "Semiheated_Exterior_Wall_Insulation",
+                "layer_3": "G01 13mm gypsum board"
+            }
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "exterior_wall": {
+        "non_residential": {
+            "construction_name": "nonres_ext_wall",
+            "insulation_layer_name": "Nonres_Exterior_Wall_Insulation"
+        },
+        "residential": {
+            "construction_name": "res_ext_wall",
+            "insulation_layer_name": "Res_Exterior_Wall_Insulation"
+        },
+        "semiheated": {
+            "construction_name": "semiheated_exterior_wall",
+            "insulation_layer_name": "Semiheated_Exterior_Wall_Insulation"
+        }
+    }
+}

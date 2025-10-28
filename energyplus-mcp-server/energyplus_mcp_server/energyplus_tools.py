@@ -58,6 +58,7 @@ from .utils.output_meters import OutputMeterManager
 from .utils.people_utils import PeopleManager
 from .utils.lights_utils import LightsManager
 from .utils.electric_equipment_utils import ElectricEquipmentManager
+from .utils.construction import set_construction_ufactor
 from .utils.run_functions import run
 
 logger = logging.getLogger(__name__)
@@ -2622,6 +2623,130 @@ class EnergyPlusManager:
                 logger.error(f"Error finding exterior walls for {resolved_path}: {e}")
                 raise RuntimeError(f"Error finding exterior walls: {str(e)}")
 
+
+    def set_exterior_wall_construction(self, ep: Dict[str, Any], wall_type: str, code_version: str, 
+                                      climate_zone: str, wall_list: Optional[List[str]] = None, 
+                                      use_type: str = "non_residential") -> Dict[str, Any]:
+        """
+        Set exterior wall construction material layers for a wall type with code-compliant U-factor.
+        
+        This method:
+        1. Loads construction definitions and material properties from data files
+        2. Creates/adds all required materials to the epJSON model
+        3. Creates the construction with proper layer sequence
+        4. Adjusts insulation R-value to meet code-required U-factor
+        5. Optionally assigns construction to specified walls
+
+        Args:
+            ep: epJSON model dictionary (modified in-place)
+            wall_type: Type of wall construction. Options: ["MassWall", "MetalBuildingWall", 
+                      "SteelFramedWall", "WoodFramedWall", "BelowGradeWall"]
+            code_version: Energy code version (e.g., "90.1-2019")
+            climate_zone: ASHRAE climate zone (e.g., "5A")
+            wall_list: Optional list of wall names to assign this construction
+            use_type: Space use type. Options: ["non_residential", "residential", "semiheated"]
+                     (default: "non_residential")
+        
+        Returns:
+            The modified epJSON dictionary (same as input, modified in-place)
+            
+        Raises:
+            KeyError: If wall_type, code_version, or climate_zone not found in data files
+            RuntimeError: If required data files cannot be loaded            
+        """
+        # Constants for default insulation material properties
+        DEFAULT_INSULATION_PROPERTIES = {
+            "roughness": "MediumSmooth",
+            "solar_absorptance": 0.7,
+            "thermal_absorptance": 0.9,
+            "thermal_resistance": 2.368,  # Placeholder - will be adjusted to meet U-factor
+            "visible_absorptance": 0.7
+        }
+        
+        # Validate inputs
+        VALID_WALL_TYPES = ["MassWall", "MetalBuildingWall", "SteelFramedWall", "WoodFramedWall", "BelowGradeWall"]
+        VALID_USE_TYPES = ["non_residential", "residential", "semiheated"]
+        
+        if wall_type not in VALID_WALL_TYPES:
+            raise ValueError(f"Invalid wall_type '{wall_type}'. Must be one of: {VALID_WALL_TYPES}")
+        if use_type not in VALID_USE_TYPES:
+            raise ValueError(f"Invalid use_type '{use_type}'. Must be one of: {VALID_USE_TYPES}")
+        
+        # Determine prefix for U-factor lookup
+        prefix = "nonres" if "non_" in use_type else "res"
+        
+        # Load configuration and data files
+        try:
+            construction_map = self.load_json(os.path.join(DATA_PATH, "construction_map.json"))
+            constructions = self.load_json(os.path.join(DATA_PATH, "constructions.json"))
+            materials_dict = self.load_json(os.path.join(DATA_PATH, "materials.json"))
+            opaque_wall_values = self.load_json(os.path.join(DATA_PATH, "opaque_wall_values.json"))
+        except FileNotFoundError as e:
+            raise RuntimeError(f"Required data file not found: {e}")
+        
+        # Get construction metadata
+        try:
+            construction_name = construction_map["exterior_wall"][use_type]["construction_name"]
+            insulation_layer_name = construction_map["exterior_wall"][use_type]["insulation_layer_name"]
+            construction_material_dict = constructions["exterior_wall"][use_type][wall_type]
+            ext_wall_ufactor = opaque_wall_values[code_version][wall_type][climate_zone][prefix]
+        except KeyError as e:
+            raise KeyError(f"Configuration not found in data files: {e}. Check wall_type, code_version, climate_zone, and use_type.")
+        
+        # Initialize material and construction containers if needed
+        if "Material" not in ep:
+            ep["Material"] = {}
+        if "Material:NoMass" not in ep:
+            ep["Material:NoMass"] = {}
+        if "Construction" not in ep:
+            ep["Construction"] = {}
+        
+        # Add materials to epJSON model
+        for layer_name, material_name in construction_material_dict.items():
+            if material_name == insulation_layer_name:
+                # Create insulation material on-the-fly (R-value will be adjusted later)
+                # Using Material:NoMass since we'll specify thermal resistance directly
+                ep["Material:NoMass"][material_name] = DEFAULT_INSULATION_PROPERTIES.copy()
+                logger.debug(f"Created insulation material '{material_name}' with placeholder R-value")
+            else:
+                # Add material from materials library
+                if material_name not in materials_dict:
+                    logger.warning(f"Material '{material_name}' not found in materials.json, skipping")
+                    continue
+                
+                # Add to appropriate material type (Material or Material:NoMass)
+                # Determine type based on material properties
+                material_data = materials_dict[material_name]
+                if "thermal_resistance" in material_data:
+                    ep["Material:NoMass"][material_name] = material_data
+                else:
+                    ep["Material"][material_name] = material_data
+                
+                logger.debug(f"Added material '{material_name}' from library")
+        
+        # Create construction with material layers
+        ep["Construction"][construction_name] = construction_material_dict
+        logger.debug(f"Created construction '{construction_name}' with {len(construction_material_dict)} layers")
+        
+        # Adjust insulation R-value to meet code-required U-factor
+        ep = set_construction_ufactor(ep, ext_wall_ufactor, construction_name)
+        logger.info(f"Adjusted '{construction_name}' to meet U-factor: {ext_wall_ufactor} Btu/h·ft²·°F")
+        
+        # Assign construction to specified walls
+        if wall_list:
+            if "BuildingSurface:Detailed" not in ep:
+                logger.warning("No BuildingSurface:Detailed objects found in model, cannot assign construction")
+            else:
+                assigned_count = 0
+                for wall_name in wall_list:
+                    if wall_name in ep["BuildingSurface:Detailed"]:
+                        ep["BuildingSurface:Detailed"][wall_name]["construction_name"] = construction_name
+                        assigned_count += 1
+                    else:
+                        logger.warning(f"Wall '{wall_name}' not found in BuildingSurface:Detailed")
+                logger.info(f"Assigned construction to {assigned_count}/{len(wall_list)} walls")
+        
+        return ep
 
     def add_coating_outside(self, epjson_path: str, location: str, solar_abs: float = 0.4, 
                             thermal_abs: float = 0.9, output_path: Optional[str] = None) -> str:
