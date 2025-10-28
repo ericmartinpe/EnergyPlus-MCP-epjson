@@ -762,6 +762,197 @@ async def add_coating_outside(
 
 
 @mcp.tool()
+async def find_exterior_walls(epjson_path: str) -> str:
+    """
+    Find all exterior walls in the EnergyPlus model
+    
+    Identifies all BuildingSurface:Detailed objects that are walls with outdoor boundary
+    conditions. Useful for inventory before applying construction modifications.
+
+    Args:
+        epjson_path: Path to the input epJSON file
+
+    Returns:
+        JSON string with dictionary of exterior wall names and their current constructions
+
+    Examples:
+        # Find all exterior walls
+        find_exterior_walls("model.epJSON")
+        
+        # Use results to identify walls for construction assignment
+        walls = find_exterior_walls("5ZoneAirCooled.epJSON")
+    """
+    try:
+        logger.info(f"Finding exterior walls: {epjson_path}")
+        
+        ext_walls = ep_manager.find_exterior_walls(epjson_path)
+        
+        result = {
+            "success": True,
+            "epjson_file": epjson_path,
+            "exterior_walls": ext_walls,
+            "total_exterior_walls": len(ext_walls)
+        }
+        
+        logger.info(f"Found {len(ext_walls)} exterior walls in {epjson_path}")
+        return f"Exterior walls found:\n{json.dumps(result, indent=2)}"
+        
+    except FileNotFoundError as e:
+        logger.warning(f"epJSON file not found: {epjson_path}")
+        return f"File not found: {str(e)}"
+    except Exception as e:
+        logger.error(f"Error finding exterior walls for {epjson_path}: {str(e)}")
+        return f"Error finding exterior walls: {str(e)}"
+
+
+@mcp.tool()
+async def set_exterior_wall_construction(
+    epjson_path: str,
+    wall_type: str,
+    code_version: str,
+    climate_zone: str,
+    wall_list: Optional[List[str]] = None,
+    use_type: str = "non_residential",
+    output_path: Optional[str] = None,
+) -> str:
+    """
+    Set exterior wall construction with code-compliant materials and U-factor
+    
+    Creates or updates exterior wall constructions using ASHRAE-compliant materials
+    and adjusts insulation to meet specified code requirements. Automatically adds
+    all required materials to the model and assigns construction to specified walls.
+    
+    This tool:
+    1. Loads construction definitions from the data library
+    2. Adds all required materials (except insulation placeholder)
+    3. Creates construction with proper layer sequence
+    4. Calculates and sets insulation R-value to meet code U-factor
+    5. Optionally assigns construction to specified walls
+
+    Args:
+        epjson_path: Path to the input epJSON file
+        wall_type: Type of wall construction. Options:
+                  - "MassWall" (concrete, brick, stone)
+                  - "MetalBuildingWall" (metal panel systems)
+                  - "SteelFramedWall" (steel studs with insulation)
+                  - "WoodFramedWall" (wood studs with insulation)
+                  - "BelowGradeWall" (basement/foundation walls)
+        code_version: Energy code version (e.g., "90.1-2019", "90.1-2016", "90.1-2013")
+        climate_zone: ASHRAE climate zone (e.g., "5A", "3B", "2A", "7")
+        wall_list: Optional list of wall names to assign this construction.
+                  If None, construction is created but not assigned to any walls.
+                  Use find_exterior_walls() to get available wall names.
+        use_type: Space use type. Options:
+                 - "non_residential" (default - commercial, office, retail)
+                 - "residential" (apartments, condos, dormitories)
+                 - "semiheated" (warehouses, garages, unconditioned spaces)
+        output_path: Optional path for output file (if None, creates one with _modified suffix)
+
+    Returns:
+        JSON string with construction creation results including:
+        - Materials added to the model
+        - Construction name and composition
+        - Target and achieved U-factor
+        - Number of walls modified
+
+    Examples:
+        # Create steel-framed wall construction for climate zone 5A
+        set_exterior_wall_construction(
+            "model.epJSON",
+            wall_type="SteelFramedWall",
+            code_version="90.1-2019",
+            climate_zone="5A"
+        )
+        
+        # Find walls first, then apply construction
+        walls_info = find_exterior_walls("model.epJSON")
+        set_exterior_wall_construction(
+            "model.epJSON",
+            wall_type="MassWall",
+            code_version="90.1-2019",
+            climate_zone="3B",
+            wall_list=["North_Wall", "South_Wall", "East_Wall", "West_Wall"]
+        )
+        
+        # Residential wood-framed walls for cold climate
+        set_exterior_wall_construction(
+            "model.epJSON",
+            wall_type="WoodFramedWall",
+            code_version="90.1-2019",
+            climate_zone="7",
+            use_type="residential"
+        )
+        
+        # Below-grade walls for basement
+        set_exterior_wall_construction(
+            "model.epJSON",
+            wall_type="BelowGradeWall",
+            code_version="90.1-2019",
+            climate_zone="5A",
+            wall_list=["Basement_Wall_North", "Basement_Wall_South"]
+        )
+    """
+    try:
+        logger.info(f"Setting exterior wall construction: {epjson_path}")
+        logger.info(f"Parameters: {wall_type}, {code_version}, {climate_zone}, {use_type}")
+        
+        # Load the epJSON model
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep = ep_manager.load_json(resolved_path)
+        
+        # Apply the construction
+        ep = ep_manager.set_exterior_wall_construction(
+            ep=ep,
+            wall_type=wall_type,
+            code_version=code_version,
+            climate_zone=climate_zone,
+            wall_list=wall_list,
+            use_type=use_type
+        )
+        
+        # Determine output path
+        if output_path is None:
+            from pathlib import Path
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+        
+        # Save the modified model
+        ep_manager.save_json(ep, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "wall_type": wall_type,
+            "code_version": code_version,
+            "climate_zone": climate_zone,
+            "use_type": use_type,
+            "walls_modified": len(wall_list) if wall_list else 0,
+            "wall_names": wall_list if wall_list else [],
+            "message": f"Successfully created {wall_type} construction for {use_type} use complying with {code_version} for climate zone {climate_zone}"
+        }
+        
+        logger.info(f"Successfully set exterior wall construction: {output_path}")
+        return f"Exterior wall construction set:\n{json.dumps(result, indent=2)}"
+        
+    except FileNotFoundError as e:
+        logger.warning(f"epJSON file not found: {epjson_path}")
+        return f"File not found: {str(e)}"
+    except ValueError as e:
+        logger.warning(f"Invalid parameter for set_exterior_wall_construction: {str(e)}")
+        return f"Invalid parameter: {str(e)}"
+    except KeyError as e:
+        logger.error(f"Configuration not found in data files: {str(e)}")
+        return f"Configuration not found: {str(e)}. Please verify that wall_type ('{wall_type}'), code_version ('{code_version}'), climate_zone ('{climate_zone}'), and use_type ('{use_type}') are valid."
+    except RuntimeError as e:
+        logger.error(f"Runtime error: {str(e)}")
+        return f"Runtime error: {str(e)}"
+    except Exception as e:
+        logger.error(f"Error setting exterior wall construction for {epjson_path}: {str(e)}")
+        return f"Error setting exterior wall construction: {str(e)}"
+
+
+@mcp.tool()
 async def list_zones(epjson_path: str) -> str:
     """
     List all zones in the EnergyPlus model
