@@ -94,6 +94,10 @@ async def convert_idf_to_epjson(
 ) -> str:
     """
     Convert an IDF file to epJSON format using EnergyPlus --convert-only
+    
+    NOTE: This tool is typically NOT needed for normal workflows!
+    All MCP tools automatically convert IDF files to epJSON when you pass an .idf path.
+    Use this tool ONLY when you need explicit control over the output location.
 
     Args:
         idf_path: Path to the IDF file (can be absolute, relative, or filename for sample files)
@@ -103,18 +107,21 @@ async def convert_idf_to_epjson(
         JSON string with conversion results including the path to the converted epJSON file
 
     Examples:
-        # Convert IDF file from sample_files
-        convert_idf_to_epjson("5ZoneAirCooled.idf")
+        # Direct workflow (RECOMMENDED - no explicit conversion needed):
+        # Just pass the .idf file to any tool - it auto-converts!
+        find_exterior_walls("5ZoneAirCooled.idf")  # Automatically converts behind the scenes
+        
+        # Explicit conversion (only needed for custom output paths):
+        convert_idf_to_epjson("models/mymodel.idf", "custom_location/mymodel.epJSON")
 
-        # Convert with custom output path
-        convert_idf_to_epjson("models/mymodel.idf", "outputs/mymodel.epJSON")
-
-        # Convert IDF and automatically use in subsequent operations
-        convert_idf_to_epjson("1ZoneUncontrolled.idf")
-
-    Note:
-        After conversion, you can use the output epJSON file with any other MCP tools.
-        Most tools that accept epJSON paths will also automatically convert IDF files if needed.
+    When to use this tool:
+        - Copying IDF files to a specific directory with custom naming
+        - Pre-converting files for inspection before running other operations
+        - Batch conversion workflows with specific output requirements
+        
+    When NOT to use this tool:
+        - Normal workflows - just pass .idf paths directly to other tools!
+        - The automatic conversion in _resolve_epjson_path handles this for you
     """
     try:
         logger.info(f"Converting IDF to epJSON: {idf_path}")
