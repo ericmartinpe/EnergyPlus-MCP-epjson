@@ -487,8 +487,8 @@ class EnergyPlusManager:
             if file_types:
                 if '.idf' in file_types:
                     file_description = "IDF file"
-                if '.epjson' in file_types.lower():
-                    file_description = "epJSON file"
+                if '.epjson' in file_types or '.epJSON' in file_types or '.json' in file_types:
+                    file_description = "JSON file"
                 elif '.epw' in file_types:
                     file_description = "weather file"
                 else:
