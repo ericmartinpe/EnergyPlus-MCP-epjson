@@ -1,16 +1,24 @@
 {
-  "mcp.servers": {
+  // GitHub Copilot MCP Server Configuration
+  "github.copilot.chat.mcp.servers": {
     "energyplus": {
       "command": "docker",
       "args": [
         "run",
         "--rm",
         "-i",
-        "-v", "${workspaceFolder}:/workspace",
-        "-w", "/workspace/energyplus-mcp-server",
+        "-v",
+        "${workspaceFolder}:/workspace",
+        "-w",
+        "/workspace/energyplus-mcp-server",
         "energyplus-mcp-dev",
-        "uv", "run", "python", "-m", "energyplus_mcp_server.server"
-      ]
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "energyplus_mcp_server.server"
+      ],
+      "env": {}
     }
   }
 }

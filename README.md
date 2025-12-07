@@ -1,6 +1,6 @@
 # EnergyPlus MCP Server
 
-A Model Context Protocol (MCP) server that provides **35 comprehensive tools** for working with EnergyPlus building energy simulation models. This server enables AI assistants and other MCP clients to load, validate, modify, and analyze EnergyPlus IDF files through a standardized interface.
+A Model Context Protocol (MCP) server that provides **35 comprehensive tools** for working with EnergyPlus epJSON building energy simulation models. This server enables AI assistants and other MCP clients to load, validate, modify, and analyze EnergyPlus epJSON files through a standardized interface.
 
 > **Version**: 0.1.0  
 > **EnergyPlus Compatibility**: 25.1.0  
@@ -34,7 +34,7 @@ A Model Context Protocol (MCP) server that provides **35 comprehensive tools** f
 EnergyPlus MCP Server makes EnergyPlus building energy simulation accessible to AI assistants and automation tools through the Model Context Protocol.
 
 **Key Features:**
-- 🏗️ **Complete Model Lifecycle**: Load, validate, analyze, modify, and simulate IDF files
+- 🏗️ **Complete Model Lifecycle**: Load, validate, analyze, modify, and simulate IDF or epJSON files
 - 🔍 **Deep Building Analysis**: Extract detailed information about zones, surfaces, materials, and schedules
 - 🚀 **Automated Simulation**: Execute EnergyPlus simulations with weather files
 - 📊 **Advanced Visualization**: Create interactive plots and HVAC system diagrams
@@ -214,7 +214,7 @@ uv run python -m energyplus_mcp_server.server
 The server provides **35 tools** organized into **5 categories**:
 
 ### 🗂️ Model Config & Loading (9 tools)
-- `load_idf_model` - Load and validate IDF files
+- `load_idf_model` - Load and validate IDF and epJSON files
 - `validate_idf` - Comprehensive model validation
 - `list_available_files` - Browse sample files and weather data
 - `copy_file` - Intelligent file copying with path resolution
@@ -373,7 +373,7 @@ energyplus-mcp-server/
 │   ├── energyplus_tools.py    # Core EnergyPlus integration
 │   ├── config.py              # Configuration management
 │   └── utils/                 # Specialized utilities
-├── sample_files/              # Sample IDF and weather files
+├── sample_files/              # Sample IDF, epJSON, and weather files
 ├── tests/                     # Unit tests
 └── pyproject.toml            # Dependencies
 ```

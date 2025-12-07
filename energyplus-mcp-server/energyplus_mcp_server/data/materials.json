@@ -1,0 +1,43 @@
+{
+  "200mm Normalweight concrete wall": {
+    "conductivity": 2.31,
+    "density": 2322,
+    "roughness": "MediumRough",
+    "specific_heat": 832,
+    "thickness": 0.2032
+  },
+  "G01 13mm gypsum board": {
+    "conductivity": 0.16,
+    "density": 800.0,
+    "roughness": "Smooth",
+    "solar_absorptance": 0.7,
+    "specific_heat": 1090.0,
+    "thermal_absorptance": 0.9,
+    "thickness": 0.0127,
+    "visible_absorptance": 0.5
+  },
+  "G01 16mm gypsum board": {
+    "conductivity": 0.16,
+    "density": 800,
+    "roughness": "MediumSmooth",
+    "specific_heat": 1090,
+    "thickness": 0.0159
+  },
+  "F07 25mm stucco": {
+    "conductivity": 0.72,
+    "density": 1856,
+    "roughness": "Smooth",
+    "solar_absorptance": 0.7,
+    "specific_heat": 840,
+    "thermal_absorptance": 0.9,
+    "thickness": 0.0254,
+    "visible_absorptance": 0.7
+  },
+  "F08 Metal surface": {
+    "conductivity": 45.28,
+    "density": 7824,
+    "roughness": "Smooth",
+    "specific_heat": 500,
+    "thickness": 0.0008
+  }
+}
