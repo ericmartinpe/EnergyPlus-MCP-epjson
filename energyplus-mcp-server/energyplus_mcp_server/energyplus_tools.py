@@ -60,6 +60,7 @@ from .measures.schedules import SchedulesMeasures
 from .measures.hvac import HVACMeasures
 from .measures.envelope import EnvelopeMeasures
 from .measures.simulation import SimulationMeasures
+from .measures.surface import SurfaceMeasures
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +73,8 @@ class EnergyPlusManager(
     SchedulesMeasures,
     HVACMeasures,
     EnvelopeMeasures,
-    SimulationMeasures
+    SimulationMeasures,
+    SurfaceMeasures
 ):
     """
     Manager class for EnergyPlus epJSON operations with configuration management.
@@ -94,6 +96,7 @@ class EnergyPlusManager(
     - HVACMeasures: HVAC system discovery and visualization
     - EnvelopeMeasures: Envelope modifications and coating
     - SimulationMeasures: Running simulations and post-processing
+    - SurfaceMeasures: Surface area calculations and analysis
     """
     
     def __init__(self, config: Optional[Config] = None):

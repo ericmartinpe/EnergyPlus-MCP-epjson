@@ -13,6 +13,7 @@ from .schedules import SchedulesMeasures
 from .hvac import HVACMeasures
 from .envelope import EnvelopeMeasures
 from .simulation import SimulationMeasures
+from .surface import SurfaceMeasures
 
 __all__ = [
     'FileOperationsMeasures',
@@ -23,4 +24,5 @@ __all__ = [
     'HVACMeasures',
     'EnvelopeMeasures',
     'SimulationMeasures',
+    'SurfaceMeasures',
 ]
