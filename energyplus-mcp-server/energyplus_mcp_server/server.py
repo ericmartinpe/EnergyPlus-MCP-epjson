@@ -180,7 +180,9 @@ async def get_model_summary(epjson_path: str) -> str:
     """
     try:
         logger.info(f"Getting model summary: {epjson_path}")
-        summary = ep_manager.get_model_basics(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        summary = ep_manager.get_model_basics(ep_data)
         return f"Model Summary for {epjson_path}:\n{summary}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -203,7 +205,9 @@ async def check_simulation_settings(epjson_path: str) -> str:
     """
     try:
         logger.info(f"Checking simulation settings: {epjson_path}")
-        settings = ep_manager.check_simulation_settings(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        settings = ep_manager.check_simulation_settings(ep_data)
         return f"Simulation settings for {epjson_path}:\n{settings}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -229,7 +233,9 @@ async def inspect_schedules(epjson_path: str, include_values: bool = False) -> s
         logger.info(
             f"Inspecting schedules: {epjson_path} (include_values={include_values})"
         )
-        schedules_info = ep_manager.inspect_schedules(epjson_path, include_values)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        schedules_info = ep_manager.inspect_schedules(ep_data, include_values)
         return f"Schedule inspection for {epjson_path}:\n{schedules_info}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -256,7 +262,9 @@ async def inspect_people(epjson_path: str) -> str:
     """
     try:
         logger.info(f"Inspecting People objects: {epjson_path}")
-        result = ep_manager.inspect_people(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        result = ep_manager.inspect_people(ep_data)
         return f"People objects inspection for {epjson_path}:\n{result}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -338,8 +346,28 @@ async def modify_people(
     """
     try:
         logger.info(f"Modifying People objects: {epjson_path}")
-        result = ep_manager.modify_people(epjson_path, modifications, output_path)
-        return f"People modification results:\n{result}"
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.modify_people(ep_data, modifications)
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "modifications_count": len(modifications)
+        }
+        
+        return f"People modification results:\n{json.dumps(result, indent=2)}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
         return f"File not found: {str(e)}"
@@ -368,7 +396,9 @@ async def inspect_lights(epjson_path: str) -> str:
     """
     try:
         logger.info(f"Inspecting Lights objects: {epjson_path}")
-        result = ep_manager.inspect_lights(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        result = ep_manager.inspect_lights(ep_data)
         return f"Lights objects inspection for {epjson_path}:\n{result}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -452,8 +482,28 @@ async def modify_lights(
     """
     try:
         logger.info(f"Modifying Lights objects: {epjson_path}")
-        result = ep_manager.modify_lights(epjson_path, modifications, output_path)
-        return f"Lights modification results:\n{result}"
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.modify_lights(ep_data, modifications)
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "modifications_count": len(modifications)
+        }
+        
+        return f"Lights modification results:\n{json.dumps(result, indent=2)}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
         return f"File not found: {str(e)}"
@@ -482,7 +532,9 @@ async def inspect_electric_equipment(epjson_path: str) -> str:
     """
     try:
         logger.info(f"Inspecting ElectricEquipment objects: {epjson_path}")
-        result = ep_manager.inspect_electric_equipment(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        result = ep_manager.inspect_electric_equipment(ep_data)
         return f"ElectricEquipment objects inspection for {epjson_path}:\n{result}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -562,10 +614,28 @@ async def modify_electric_equipment(
     """
     try:
         logger.info(f"Modifying ElectricEquipment objects: {epjson_path}")
-        result = ep_manager.modify_electric_equipment(
-            epjson_path, modifications, output_path
-        )
-        return f"ElectricEquipment modification results:\n{result}"
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.modify_electric_equipment(ep_data, modifications)
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "modifications_count": len(modifications)
+        }
+        
+        return f"ElectricEquipment modification results:\n{json.dumps(result, indent=2)}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
         return f"File not found: {str(e)}"
@@ -598,15 +668,32 @@ async def modify_simulation_control(
     """
     try:
         logger.info(f"Modifying SimulationControl: {epjson_path}")
-
-        # No need to parse JSON since we're receiving a dict directly
-        result = ep_manager.modify_simulation_settings(
-            epjson_path=epjson_path,
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.modify_simulation_settings(
+            epjson_data=ep_data,
             object_type="SimulationControl",
-            field_updates=field_updates,  # Pass the dict directly
-            output_path=output_path,
+            field_updates=field_updates
         )
-        return f"SimulationControl modification results:\n{result}"
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "fields_modified": list(field_updates.keys())
+        }
+        
+        return f"SimulationControl modification results:\n{json.dumps(result, indent=2)}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
         return f"File not found: {str(e)}"
@@ -636,16 +723,34 @@ async def modify_run_period(
     """
     try:
         logger.info(f"Modifying RunPeriod: {epjson_path}")
-
-        # No need to parse JSON since we're receiving a dict directly
-        result = ep_manager.modify_simulation_settings(
-            epjson_path=epjson_path,
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.modify_simulation_settings(
+            epjson_data=ep_data,
             object_type="RunPeriod",
-            field_updates=field_updates,  # Pass the dict directly
-            run_period_index=run_period_index,
-            output_path=output_path,
+            field_updates=field_updates,
+            run_period_index=run_period_index
         )
-        return f"RunPeriod modification results:\n{result}"
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "run_period_index": run_period_index,
+            "fields_modified": list(field_updates.keys())
+        }
+        
+        return f"RunPeriod modification results:\n{json.dumps(result, indent=2)}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
         return f"File not found: {str(e)}"
@@ -671,14 +776,31 @@ async def change_infiltration_by_mult(
     """
     try:
         logger.info(f"Modifying Infiltration: {epjson_path}")
-
-        # No need to parse JSON since we're receiving a dict directly
-        result = ep_manager.change_infiltration_by_mult(
-            epjson_path=epjson_path,
-            mult=mult,  # Pass the float directly
-            output_path=output_path,
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.change_infiltration_by_mult(
+            epjson_data=ep_data,
+            mult=mult
         )
-        return f"Infiltration modification results:\n{result}"
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "multiplier": mult
+        }
+        
+        return f"Infiltration modification results:\n{json.dumps(result, indent=2)}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
         return f"File not found: {str(e)}"
@@ -710,14 +832,35 @@ async def add_window_film_outside(
     """
     try:
         logger.info(f"Adding window film to exterior windows: {epjson_path}")
-        result = ep_manager.add_window_film_outside(
-            epjson_path=epjson_path,
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.add_window_film_outside(
+            epjson_data=ep_data,
             u_value=u_value,
             shgc=shgc,
-            visible_transmittance=visible_transmittance,
-            output_path=output_path,
+            visible_transmittance=visible_transmittance
         )
-        return f"Window film modification results:\n{result}"
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "u_value": u_value,
+            "shgc": shgc,
+            "visible_transmittance": visible_transmittance
+        }
+        
+        return f"Window film modification results:\n{json.dumps(result, indent=2)}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
         return f"File not found: {str(e)}"
@@ -749,14 +892,35 @@ async def add_coating_outside(
     """
     try:
         logger.info(f"Adding exterior coating to {location} surfaces: {epjson_path}")
-        result = ep_manager.add_coating_outside(
-            epjson_path=epjson_path,
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.add_coating_outside(
+            epjson_data=ep_data,
             location=location,
             solar_abs=solar_abs,
-            thermal_abs=thermal_abs,
-            output_path=output_path,
+            thermal_abs=thermal_abs
         )
-        return f"Exterior coating modification results:\n{result}"
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "location": location,
+            "solar_absorptance": solar_abs,
+            "thermal_absorptance": thermal_abs
+        }
+        
+        return f"Exterior coating modification results:\n{json.dumps(result, indent=2)}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
         return f"File not found: {str(e)}"
@@ -775,24 +939,30 @@ async def find_exterior_walls(epjson_path: str) -> str:
     
     Identifies all BuildingSurface:Detailed objects that are walls with outdoor boundary
     conditions. Useful for inventory before applying construction modifications.
+    
+    NOTE: IDF files are AUTOMATICALLY converted to epJSON - do NOT manually call 
+    convert_idf_to_epjson before using this tool.
 
     Args:
-        epjson_path: Path to the input epJSON file
+        epjson_path: Path to the input epJSON or IDF file (IDF files are auto-converted)
 
     Returns:
         JSON string with dictionary of exterior wall names and their current constructions
 
     Examples:
-        # Find all exterior walls
+        # Find all exterior walls (works with both epJSON and IDF)
         find_exterior_walls("model.epJSON")
+        find_exterior_walls("model.idf")  # Auto-converts to epJSON
         
         # Use results to identify walls for construction assignment
-        walls = find_exterior_walls("5ZoneAirCooled.epJSON")
+        walls = find_exterior_walls("5ZoneAirCooled.idf")
     """
     try:
         logger.info(f"Finding exterior walls: {epjson_path}")
         
-        ext_walls = ep_manager.find_exterior_walls(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        ext_walls = ep_manager.find_exterior_walls(ep_data)
         
         result = {
             "success": True,
@@ -829,6 +999,9 @@ async def set_exterior_wall_construction(
     and adjusts insulation to meet specified code requirements. Automatically adds
     all required materials to the model and assigns construction to specified walls.
     
+    NOTE: IDF files are AUTOMATICALLY converted to epJSON - do NOT manually call 
+    convert_idf_to_epjson before using this tool.
+    
     This tool:
     1. Loads construction definitions from the data library
     2. Adds all required materials (except insulation placeholder)
@@ -837,7 +1010,7 @@ async def set_exterior_wall_construction(
     5. Optionally assigns construction to specified walls
 
     Args:
-        epjson_path: Path to the input epJSON file
+        epjson_path: Path to the input epJSON or IDF file (IDF files are auto-converted)
         wall_type: Type of wall construction. Options:
                   - "MassWall" (concrete, brick, stone)
                   - "MetalBuildingWall" (metal panel systems)
@@ -972,7 +1145,9 @@ async def list_zones(epjson_path: str) -> str:
     """
     try:
         logger.info(f"Listing zones: {epjson_path}")
-        zones = ep_manager.list_zones(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        zones = ep_manager.list_zones(ep_data)
         return f"Zones in {epjson_path}:\n{zones}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -995,7 +1170,9 @@ async def get_surfaces(epjson_path: str) -> str:
     """
     try:
         logger.info(f"Getting surfaces: {epjson_path}")
-        surfaces = ep_manager.get_surfaces(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        surfaces = ep_manager.get_surfaces(ep_data)
         return f"Surfaces in {epjson_path}:\n{surfaces}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -1018,7 +1195,9 @@ async def get_materials(epjson_path: str) -> str:
     """
     try:
         logger.info(f"Getting materials: {epjson_path}")
-        materials = ep_manager.get_materials(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        materials = ep_manager.get_materials(ep_data)
         return f"Materials in {epjson_path}:\n{materials}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -1073,9 +1252,9 @@ async def get_output_variables(
         logger.info(
             f"Getting output variables: {epjson_path} (discover_available={discover_available})"
         )
-        result = ep_manager.get_output_variables(
-            epjson_path, discover_available, run_days
-        )
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        result = ep_manager.get_output_variables(ep_data, discover_available, run_days)
 
         mode = (
             "available variables discovery"
@@ -1114,7 +1293,9 @@ async def get_output_meters(
         logger.info(
             f"Getting output meters: {epjson_path} (discover_available={discover_available})"
         )
-        result = ep_manager.get_output_meters(epjson_path, discover_available, run_days)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        result = ep_manager.get_output_meters(ep_data, discover_available, run_days)
 
         mode = (
             "available meters discovery" if discover_available else "configured meters"
@@ -1174,16 +1355,34 @@ async def add_output_variables(
         logger.info(
             f"Adding output variables: {epjson_path} ({len(variables)} variables, {validation_level} validation)"
         )
-
-        result = ep_manager.add_output_variables(
-            epjson_path=epjson_path,
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.add_output_variables(
+            epjson_data=ep_data,
             variables=variables,
             validation_level=validation_level,
-            allow_duplicates=allow_duplicates,
-            output_path=output_path,
+            allow_duplicates=allow_duplicates
         )
-
-        return f"Output variables addition results:\n{result}"
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_with_outputs{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "variables_requested": len(variables),
+            "validation_level": validation_level
+        }
+        
+        return f"Output variables addition results:\n{json.dumps(result, indent=2)}"
 
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -1242,16 +1441,34 @@ async def add_output_meters(
         logger.info(
             f"Adding output meters: {epjson_path} ({len(meters)} meters, {validation_level} validation)"
         )
-
-        result = ep_manager.add_output_meters(
-            epjson_path=epjson_path,
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Get modified data from the method (no output_path parameter)
+        modified_ep_data = ep_manager.add_output_meters(
+            epjson_data=ep_data,
             meters=meters,
             validation_level=validation_level,
-            allow_duplicates=allow_duplicates,
-            output_path=output_path,
+            allow_duplicates=allow_duplicates
         )
-
-        return f"Output meters addition results:\n{result}"
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_with_meters{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "meters_requested": len(meters),
+            "validation_level": validation_level
+        }
+        
+        return f"Output meters addition results:\n{json.dumps(result, indent=2)}"
 
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -1378,7 +1595,9 @@ async def discover_hvac_loops(epjson_path: str) -> str:
     """
     try:
         logger.info(f"Discovering HVAC loops: {epjson_path}")
-        loops = ep_manager.discover_hvac_loops(epjson_path)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        loops = ep_manager.discover_hvac_loops(ep_data)
         return f"HVAC loops discovered in {epjson_path}:\n{loops}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -1402,7 +1621,9 @@ async def get_loop_topology(epjson_path: str, loop_name: str) -> str:
     """
     try:
         logger.info(f"Getting loop topology for '{loop_name}': {epjson_path}")
-        topology = ep_manager.get_loop_topology(epjson_path, loop_name)
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        topology = ep_manager.get_loop_topology(ep_data, loop_name)
         return f"Loop topology for '{loop_name}' in {epjson_path}:\n{topology}"
     except FileNotFoundError as e:
         logger.warning(f"epJSON file not found: {epjson_path}")
@@ -1440,8 +1661,10 @@ async def visualize_loop_diagram(
         logger.info(
             f"Creating loop diagram for '{loop_name or 'all loops'}': {epjson_path} (show_legend={show_legend})"
         )
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
         result = ep_manager.visualize_loop_diagram(
-            epjson_path, loop_name, output_path, format, show_legend
+            ep_data, loop_name, output_path, format, show_legend
         )
         return f"Loop diagram created:\n{result}"
     except FileNotFoundError as e:
@@ -1481,9 +1704,12 @@ async def run_energyplus_simulation(
         logger.info(f"Running EnergyPlus simulation: {epjson_path}")
         if weather_file:
             logger.info(f"With weather file: {weather_file}")
-
+        
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
         result = ep_manager.run_simulation(
-            epjson_path=epjson_path,
+            epjson_data=ep_data,
             weather_file=weather_file,
             output_directory=output_directory,
             annual=annual,
