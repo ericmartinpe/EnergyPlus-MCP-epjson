@@ -485,7 +485,9 @@ class EnergyPlusManager:
             # Determine file description for error messages
             file_description = "file"
             if file_types:
-                if '.idf' in file_types:
+                # Convert file_types to lowercase for case-insensitive comparison
+                file_types_lower = [ft.lower() for ft in file_types]
+                if '.idf' in file_types_lower:
                     file_description = "IDF file"
                 if '.epjson' in file_types or '.epJSON' in file_types or '.json' in file_types:
                     file_description = "JSON file"
@@ -2597,7 +2599,8 @@ class EnergyPlusManager:
             Creates a dictionary of exterior walls in the model
             
             Args:
-                epjson_path: Path to the input epJSON file
+                epjson_path: Path to the input epJSON or IDF file. IDF files are automatically
+                           converted to epJSON format.
             
             Returns:
                 Dictionary of all exterior walls in the model - wall names are keys, constructions are values.
@@ -2629,6 +2632,9 @@ class EnergyPlusManager:
                                       use_type: str = "non_residential") -> Dict[str, Any]:
         """
         Set exterior wall construction material layers for a wall type with code-compliant U-factor.
+        
+        NOTE: This is a low-level method that operates on an already-loaded epJSON dictionary.
+        For MCP tool calls, use the wrapper function which automatically handles IDF conversion.
         
         This method:
         1. Loads construction definitions and material properties from data files

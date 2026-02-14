@@ -775,19 +775,23 @@ async def find_exterior_walls(epjson_path: str) -> str:
     
     Identifies all BuildingSurface:Detailed objects that are walls with outdoor boundary
     conditions. Useful for inventory before applying construction modifications.
+    
+    NOTE: IDF files are AUTOMATICALLY converted to epJSON - do NOT manually call 
+    convert_idf_to_epjson before using this tool.
 
     Args:
-        epjson_path: Path to the input epJSON file
+        epjson_path: Path to the input epJSON or IDF file (IDF files are auto-converted)
 
     Returns:
         JSON string with dictionary of exterior wall names and their current constructions
 
     Examples:
-        # Find all exterior walls
+        # Find all exterior walls (works with both epJSON and IDF)
         find_exterior_walls("model.epJSON")
+        find_exterior_walls("model.idf")  # Auto-converts to epJSON
         
         # Use results to identify walls for construction assignment
-        walls = find_exterior_walls("5ZoneAirCooled.epJSON")
+        walls = find_exterior_walls("5ZoneAirCooled.idf")
     """
     try:
         logger.info(f"Finding exterior walls: {epjson_path}")
@@ -829,6 +833,9 @@ async def set_exterior_wall_construction(
     and adjusts insulation to meet specified code requirements. Automatically adds
     all required materials to the model and assigns construction to specified walls.
     
+    NOTE: IDF files are AUTOMATICALLY converted to epJSON - do NOT manually call 
+    convert_idf_to_epjson before using this tool.
+    
     This tool:
     1. Loads construction definitions from the data library
     2. Adds all required materials (except insulation placeholder)
@@ -837,7 +844,7 @@ async def set_exterior_wall_construction(
     5. Optionally assigns construction to specified walls
 
     Args:
-        epjson_path: Path to the input epJSON file
+        epjson_path: Path to the input epJSON or IDF file (IDF files are auto-converted)
         wall_type: Type of wall construction. Options:
                   - "MassWall" (concrete, brick, stone)
                   - "MetalBuildingWall" (metal panel systems)
