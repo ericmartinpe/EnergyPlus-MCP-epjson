@@ -870,6 +870,101 @@ async def add_window_film_outside(
 
 
 @mcp.tool()
+async def adjust_windows_for_target_wwr(
+    epjson_path: str,
+    target_wwr: float,
+    by_orientation: bool = False,
+    orientation_targets: Optional[Dict[str, float]] = None,
+    output_path: Optional[str] = None,
+) -> str:
+    """
+    Adjust window sizes to achieve a target window-to-wall ratio (WWR)
+    
+    This tool modifies window dimensions by scaling them uniformly to meet a specified WWR target.
+    Windows can be adjusted globally for the entire building, by orientation, or with custom targets
+    for each orientation. Glass doors are included in WWR calculations but not scaled.
+
+    Args:
+        epjson_path: Path to the input epJSON file
+        target_wwr: Target window-to-wall ratio as a percentage (e.g., 30 for 30%) or fraction (0.30 for 30%)
+        by_orientation: If True, apply target_wwr to each orientation independently (default: False)
+        orientation_targets: Optional dict mapping orientation to target WWR 
+                           (e.g., {"North": 30, "South": 40, "East": 25, "West": 25})
+                           Overrides target_wwr and by_orientation if provided
+        output_path: Optional path for output file (if None, creates one with _WWR{target} suffix)
+
+    Returns:
+        JSON string with modification results including initial and final WWR values
+
+    Examples:
+        # Set building-wide WWR to 30%
+        adjust_windows_for_target_wwr("5ZoneAirCooled.epJSON", 30.0)
+        
+        # Set WWR to 30% independently for each orientation
+        adjust_windows_for_target_wwr("5ZoneAirCooled.epJSON", 30.0, by_orientation=True)
+        
+        # Set different WWR targets per orientation
+        adjust_windows_for_target_wwr(
+            "5ZoneAirCooled.epJSON", 
+            30.0,
+            orientation_targets={"North": 25, "South": 40, "East": 30, "West": 30}
+        )
+    """
+    try:
+        logger.info(f"Adjusting windows for target WWR {target_wwr}%: {epjson_path}")
+        resolved_path = ep_manager._resolve_epjson_path(epjson_path)
+        ep_data = ep_manager.load_json(resolved_path)
+        
+        # Calculate initial WWR
+        initial_wwr_json = ep_manager.calculate_window_to_wall_ratio(ep_data)
+        initial_wwr_data = json.loads(initial_wwr_json)
+        initial_wwr = initial_wwr_data["total_building_wwr"]["wwr_percent"]
+        
+        # Get modified data from the method
+        modified_ep_data = ep_manager.adjust_windows_for_target_wwr(
+            epjson_data=ep_data,
+            target_wwr=target_wwr,
+            by_orientation=by_orientation,
+            orientation_targets=orientation_targets
+        )
+        
+        # Calculate final WWR
+        final_wwr_json = ep_manager.calculate_window_to_wall_ratio(modified_ep_data)
+        final_wwr_data = json.loads(final_wwr_json)
+        final_wwr = final_wwr_data["total_building_wwr"]["wwr_percent"]
+        
+        # Determine output path
+        if output_path is None:
+            path_obj = Path(resolved_path)
+            # Normalize target_wwr for filename (convert to percentage if needed)
+            wwr_display = int(target_wwr) if target_wwr > 1.0 else int(target_wwr * 100)
+            output_path = str(path_obj.parent / f"{path_obj.stem}_WWR{wwr_display}{path_obj.suffix}")
+        
+        # Save the modified data
+        ep_manager.save_json(modified_ep_data, output_path)
+        
+        result = {
+            "success": True,
+            "input_file": resolved_path,
+            "output_file": output_path,
+            "target_wwr_percent": target_wwr if target_wwr > 1.0 else target_wwr * 100,
+            "initial_wwr_percent": initial_wwr,
+            "final_wwr_percent": final_wwr,
+            "by_orientation": by_orientation,
+            "orientation_targets": orientation_targets,
+            "wwr_by_orientation": final_wwr_data["wwr_by_orientation"]
+        }
+        
+        return f"Window WWR adjustment results:\n{json.dumps(result, indent=2)}"
+    except FileNotFoundError as e:
+        logger.warning(f"epJSON file not found: {epjson_path}")
+        return f"File not found: {str(e)}"
+    except Exception as e:
+        logger.error(f"Error adjusting windows for target WWR in {epjson_path}: {str(e)}")
+        return f"Error adjusting windows for target WWR in {epjson_path}: {str(e)}"
+
+
+@mcp.tool()
 async def add_coating_outside(
     epjson_path: str,
     location: str,
