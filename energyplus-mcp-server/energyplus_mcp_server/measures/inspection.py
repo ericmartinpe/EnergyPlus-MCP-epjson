@@ -19,13 +19,11 @@ logger = logging.getLogger(__name__)
 class InspectionMeasures:
     """Mixin class containing inspection methods for EnergyPlusManager"""
     
-    def get_model_basics(self, epjson_path: str) -> str:
+    def get_model_basics(self, epjson_data: Dict[str, Any]) -> str:
         """Get basic model information from Building, Site:Location, and SimulationControl"""
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.debug(f"Getting model basics for: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.debug("Getting model basics")
+            ep = epjson_data
             basics = {}
             
             # Building information
@@ -86,19 +84,16 @@ class InspectionMeasures:
             return json.dumps(basics, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting model basics for {resolved_path}: {e}")
+            logger.error(f"Error getting model basics: {e}")
             raise RuntimeError(f"Error getting model basics: {str(e)}")
     
-    def check_simulation_settings(self, epjson_path: str) -> str:
+    def check_simulation_settings(self, epjson_data: Dict[str, Any]) -> str:
         """Check SimulationControl and RunPeriod settings with modifiable fields info"""
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.debug(f"Checking simulation settings for: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.debug("Checking simulation settings")
+            ep = epjson_data
             
             settings_info = {
-                "file_path": resolved_path,
                 "SimulationControl": {
                     "current_values": {},
                     "modifiable_fields": {
@@ -176,16 +171,14 @@ class InspectionMeasures:
             return json.dumps(settings_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error checking simulation settings for {resolved_path}: {e}")
+            logger.error(f"Error checking simulation settings: {e}")
             raise RuntimeError(f"Error checking simulation settings: {str(e)}")
     
-    def list_zones(self, epjson_path: str) -> str:
+    def list_zones(self, epjson_data: Dict[str, Any]) -> str:
         """List all zones in the model"""
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.debug(f"Listing zones for: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.debug("Listing zones")
+            ep = epjson_data
             zones = ep.get("Zone", {})
             
             zone_info = []
@@ -208,16 +201,14 @@ class InspectionMeasures:
             return json.dumps(zone_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error listing zones for {resolved_path}: {e}")
+            logger.error(f"Error listing zones: {e}")
             raise RuntimeError(f"Error listing zones: {str(e)}")
     
-    def get_surfaces(self, epjson_path: str) -> str:
+    def get_surfaces(self, epjson_data: Dict[str, Any]) -> str:
         """Get detailed surface information"""
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.debug(f"Getting surfaces for: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.debug("Getting surfaces")
+            ep = epjson_data
             surfaces = ep.get("BuildingSurface:Detailed", {})
             
             surface_info = []
@@ -239,16 +230,14 @@ class InspectionMeasures:
             return json.dumps(surface_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting surfaces for {resolved_path}: {e}")
+            logger.error(f"Error getting surfaces: {e}")
             raise RuntimeError(f"Error getting surfaces: {str(e)}")
     
-    def get_materials(self, epjson_path: str) -> str:
+    def get_materials(self, epjson_data: Dict[str, Any]) -> str:
         """Get material information"""
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.debug(f"Getting materials for: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.debug("Getting materials")
+            ep = epjson_data
             
             materials = []
             
@@ -284,5 +273,5 @@ class InspectionMeasures:
             return json.dumps(materials, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting materials for {resolved_path}: {e}")
+            logger.error(f"Error getting materials: {e}")
             raise RuntimeError(f"Error getting materials: {str(e)}")

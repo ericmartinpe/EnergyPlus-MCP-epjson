@@ -15,21 +15,19 @@ logger = logging.getLogger(__name__)
 class SurfaceMeasures:
     """Mixin class for surface calculation measures"""
     
-    def calculate_exterior_wall_area(self, epjson_path: str) -> str:
+    def calculate_exterior_wall_area(self, epjson_data: Dict[str, Any]) -> str:
         """
         Calculate total above-ground exterior wall area
         
         Args:
-            epjson_path: Path to the input epJSON or IDF file
+            epjson_data: Loaded epJSON data as a dictionary
         
         Returns:
             JSON string with total area and detailed wall information
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.info(f"Calculating exterior wall area for: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.info("Calculating exterior wall area")
+            ep = epjson_data
             
             wall_details = []
             total_area = 0.0
@@ -61,7 +59,6 @@ class SurfaceMeasures:
             
             result = {
                 "success": True,
-                "file_path": resolved_path,
                 "total_exterior_wall_area": {
                     "m2": round(total_area, 4),
                     "ft2": round(total_area * 10.7639, 4)
@@ -74,7 +71,7 @@ class SurfaceMeasures:
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error calculating exterior wall area for {resolved_path}: {e}")
+            logger.error(f"Error calculating exterior wall area: {e}")
             raise RuntimeError(f"Error calculating exterior wall area: {str(e)}")
     
     def _calculate_surface_area(self, surface_data: Dict[str, Any]) -> float:
@@ -173,21 +170,19 @@ class SurfaceMeasures:
             logger.warning(f"Error calculating surface area: {e}")
             return 0.0
     
-    def calculate_exterior_window_area(self, epjson_path: str) -> str:
+    def calculate_exterior_window_area(self, epjson_data: Dict[str, Any]) -> str:
         """
         Calculate total exterior window area
         
         Args:
-            epjson_path: Path to the input epJSON or IDF file
+            epjson_data: Loaded epJSON data as a dictionary
         
         Returns:
             JSON string with total area and detailed window information
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.info(f"Calculating exterior window area for: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.info("Calculating exterior window area")
+            ep = epjson_data
             
             # First, identify exterior building surfaces
             building_surfaces = ep.get("BuildingSurface:Detailed", {})
@@ -224,7 +219,6 @@ class SurfaceMeasures:
             
             result = {
                 "success": True,
-                "file_path": resolved_path,
                 "total_exterior_window_area": {
                     "m2": round(total_area, 4),
                     "ft2": round(total_area * 10.7639, 4)
@@ -237,24 +231,22 @@ class SurfaceMeasures:
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error calculating exterior window area for {resolved_path}: {e}")
+            logger.error(f"Error calculating exterior window area: {e}")
             raise RuntimeError(f"Error calculating exterior window area: {str(e)}")
     
-    def calculate_window_to_wall_ratio(self, epjson_path: str) -> str:
+    def calculate_window_to_wall_ratio(self, epjson_data: Dict[str, Any]) -> str:
         """
         Calculate window-to-wall ratio (WWR) by orientation and total building WWR
         
         Args:
-            epjson_path: Path to the input epJSON or IDF file
+            epjson_data: Loaded epJSON data as a dictionary
         
         Returns:
             JSON string with WWR by orientation and total building WWR
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.info(f"Calculating window-to-wall ratio for: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.info("Calculating window-to-wall ratio")
+            ep = epjson_data
             
             # Initialize dictionaries for wall and window areas by orientation
             wall_area_by_orientation = {
@@ -338,7 +330,6 @@ class SurfaceMeasures:
             
             result = {
                 "success": True,
-                "file_path": resolved_path,
                 "total_building_wwr": {
                     "total_wall_area_m2": round(total_wall_area, 4),
                     "total_window_area_m2": round(total_window_area, 4),
@@ -355,7 +346,7 @@ class SurfaceMeasures:
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error calculating window-to-wall ratio for {resolved_path}: {e}")
+            logger.error(f"Error calculating window-to-wall ratio: {e}")
             raise RuntimeError(f"Error calculating window-to-wall ratio: {str(e)}")
     
     def _get_surface_orientation(self, surface_data: Dict[str, Any]) -> str:
@@ -434,33 +425,27 @@ class SurfaceMeasures:
             logger.warning(f"Error determining surface orientation: {e}")
             return "Other"
     
-    def adjust_windows_for_target_wwr(self, epjson_path: str, target_wwr: float, 
-                                      output_path: str = None, 
+    def adjust_windows_for_target_wwr(self, epjson_data: Dict[str, Any], target_wwr: float, 
                                       by_orientation: bool = False,
-                                      orientation_targets: Dict[str, float] = None) -> str:
+                                      orientation_targets: Dict[str, float] = None) -> Dict[str, Any]:
         """
         Adjust window sizes to achieve a target window-to-wall ratio (WWR)
         
         Args:
-            epjson_path: Path to the input epJSON or IDF file
+            epjson_data: Loaded epJSON data as a dictionary (will be modified in place)
             target_wwr: Target window-to-wall ratio as a percentage (e.g., 30 for 30%)
-            output_path: Optional path to save the modified file. If None, overwrites the input file
             by_orientation: If True, apply target_wwr to each orientation independently
             orientation_targets: Optional dict mapping orientation to target WWR (e.g., {"North": 30, "South": 40})
         
         Returns:
-            JSON string with adjustment results and new WWR values
+            Modified epJSON dict (same as input but with adjusted windows)
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.info(f"Adjusting windows for target WWR: {target_wwr}% in {resolved_path}")
-            
-            # Load the epJSON file
-            ep = self.load_json(resolved_path)
+            logger.info(f"Adjusting windows for target WWR: {target_wwr}%")
+            ep = epjson_data
             
             # Get current WWR data
-            current_wwr_result = self.calculate_window_to_wall_ratio(epjson_path)
+            current_wwr_result = self.calculate_window_to_wall_ratio(ep)
             current_wwr_data = json.loads(current_wwr_result)
             
             # Identify exterior building surfaces
@@ -571,36 +556,10 @@ class SurfaceMeasures:
                         "scaling_factor": round(scaling_factor, 4)
                     })
             
-            # Save the modified file
-            if output_path is None:
-                output_path = resolved_path
-            else:
-                output_path = self._resolve_epjson_path(output_path)
+            logger.info(f"Modified {windows_modified} windows")
             
-            with open(output_path, 'w') as f:
-                json.dump(ep, f, indent=2)
-            
-            logger.info(f"Modified {windows_modified} windows, saved to {output_path}")
-            
-            # Calculate new WWR
-            new_wwr_result = self.calculate_window_to_wall_ratio(output_path)
-            new_wwr_data = json.loads(new_wwr_result)
-            
-            result = {
-                "success": True,
-                "input_file": resolved_path,
-                "output_file": output_path,
-                "windows_modified": windows_modified,
-                "target_wwr": target_wwr,
-                "previous_wwr": current_wwr_data['total_building_wwr'],
-                "new_wwr": new_wwr_data['total_building_wwr'],
-                "previous_wwr_by_orientation": current_wwr_data['wwr_by_orientation'],
-                "new_wwr_by_orientation": new_wwr_data['wwr_by_orientation'],
-                "modifications": modifications
-            }
-            
-            logger.info(f"New total building WWR: {new_wwr_data['total_building_wwr']['wwr_percent']:.2f}%")
-            return json.dumps(result, indent=2)
+            # Return the modified epJSON dict
+            return ep
             
         except Exception as e:
             logger.error(f"Error adjusting windows for target WWR: {e}")

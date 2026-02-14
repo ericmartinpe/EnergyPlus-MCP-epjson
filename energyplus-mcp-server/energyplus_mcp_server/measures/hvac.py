@@ -32,17 +32,20 @@ logger = logging.getLogger(__name__)
 class HVACMeasures:
     """Mixin class for HVAC system measures"""
     
-    def discover_hvac_loops(self, epjson_path: str) -> str:
+    def discover_hvac_loops(self, epjson_data: Dict[str, Any]) -> str:
         """Discover all HVAC loops (Plant, Condenser, Air) in the EnergyPlus model
-        """
-        resolved_path = self._resolve_epjson_path(epjson_path)
         
+        Args:
+            epjson_data: The epJSON data dictionary
+            
+        Returns:
+            JSON string with HVAC loop information
+        """
         try:
-            logger.debug(f"Discovering HVAC loops for: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.debug("Discovering HVAC loops")
+            ep = epjson_data
             
             hvac_info = {
-                "file_path": resolved_path,
                 "plant_loops": [],
                 "condenser_loops": [],
                 "air_loops": [],
@@ -110,16 +113,23 @@ class HVACMeasures:
             return json.dumps(hvac_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error discovering HVAC loops for {epjson_path}: {e}")
+            logger.error(f"Error discovering HVAC loops: {e}")
             raise RuntimeError(f"Error discovering HVAC loops: {str(e)}")
 
 
-    def get_loop_topology(self, epjson_path: str, loop_name: str) -> str:
-        """Get detailed topology information for a specific HVAC loop"""
-        resolved_path = self._resolve_epjson_path(epjson_path)
+    def get_loop_topology(self, epjson_data: Dict[str, Any], loop_name: str) -> str:
+        """Get detailed topology information for a specific HVAC loop
+        
+        Args:
+            epjson_data: The epJSON data dictionary
+            loop_name: Name of the HVAC loop to analyze
+            
+        Returns:
+            JSON string with loop topology information
+        """
         try:
-            logger.debug(f"Getting loop topology for '{loop_name}' in: {resolved_path}")
-            ep = self.load_json(resolved_path)
+            logger.debug(f"Getting loop topology for '{loop_name}'")
+            ep = epjson_data
 
             # Try to find the loop in different loop types
             loop_obj = None
@@ -171,7 +181,7 @@ class HVACMeasures:
             return json.dumps(topology_info, indent=2)
 
         except Exception as e:
-            logger.error(f"Error getting loop topology for {resolved_path}: {e}")
+            logger.error(f"Error getting loop topology: {e}")
             raise RuntimeError(f"Error getting loop topology: {str(e)}")
 
 
@@ -542,14 +552,14 @@ class HVACMeasures:
         return None
 
 
-    def visualize_loop_diagram(self, epjson_path: str, loop_name: str = None, 
+    def visualize_loop_diagram(self, epjson_data: Dict[str, Any], loop_name: str = None, 
                             output_path: Optional[str] = None, format: str = "png", 
                             show_legend: bool = True) -> str:
         """
         Generate and save a visual diagram of HVAC loop(s) using custom topology-based approach
         
         Args:
-            epjson_path: Path to the epJSON file
+            epjson_data: The epJSON data dictionary
             loop_name: Optional specific loop name (if None, creates diagram for first found loop)
             output_path: Optional custom output path (if None, creates one automatically)
             format: Image format for the diagram (png, jpg, pdf, svg)
@@ -558,20 +568,17 @@ class HVACMeasures:
         Returns:
             JSON string with diagram generation results and file path
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.info(f"Creating custom loop diagram for: {resolved_path}")
+            logger.info("Creating custom loop diagram")
             
             # Determine output path
             if output_path is None:
-                path_obj = Path(resolved_path)
-                diagram_name = f"{path_obj.stem}_hvac_diagram" if not loop_name else f"{path_obj.stem}_{loop_name}_diagram"
-                output_path = str(path_obj.parent / f"{diagram_name}.{format}")
+                diagram_name = "hvac_diagram" if not loop_name else f"{loop_name}_diagram"
+                output_path = f"{diagram_name}.{format}"
             
             # Method 1: Use topology data for custom diagram (PRIMARY)
             try:
-                result = self._create_topology_based_diagram(resolved_path, loop_name, output_path, show_legend)
+                result = self._create_topology_based_diagram(epjson_data, loop_name, output_path, show_legend)
                 if result["success"]:
                     logger.info(f"Custom topology diagram created: {output_path}")
                     return json.dumps(result, indent=2)
@@ -579,19 +586,28 @@ class HVACMeasures:
                 logger.warning(f"Topology-based diagram failed: {e}. Using simplified approach.")
             
             # Method 2: Simplified diagram (LAST RESORT)
-            result = self._create_simplified_diagram(resolved_path, loop_name, output_path, format)
+            result = self._create_simplified_diagram(epjson_data, loop_name, output_path, format)
             logger.info(f"Simplified diagram created: {output_path}")
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error creating loop diagram for {resolved_path}: {e}")
+            logger.error(f"Error creating loop diagram: {e}")
             raise RuntimeError(f"Error creating loop diagram: {str(e)}")
 
 
-    def _create_topology_based_diagram(self, epjson_path: str, loop_name: Optional[str], 
+    def _create_topology_based_diagram(self, epjson_data: Dict[str, Any], loop_name: Optional[str], 
                                      output_path: str, show_legend: bool = True) -> Dict[str, Any]:
         """
         Create diagram using topology data from get_loop_topology
+        
+        Args:
+            epjson_data: The epJSON data dictionary
+            loop_name: Optional specific loop name
+            output_path: Path to save the diagram
+            show_legend: Whether to show legend
+            
+        Returns:
+            Dictionary with diagram generation results
         """
         if not GRAPHVIZ_AVAILABLE:
             raise ImportError(
@@ -600,7 +616,7 @@ class HVACMeasures:
             )
         
         # Get available loops
-        loops_info = json.loads(self.discover_hvac_loops(epjson_path))
+        loops_info = json.loads(self.discover_hvac_loops(epjson_data))
         
         # Determine which loop to diagram
         target_loop = None
@@ -625,7 +641,7 @@ class HVACMeasures:
             raise ValueError("No HVAC loops found or specified loop not found")
         
         # Get detailed topology for the target loop
-        topology_json = self.get_loop_topology(epjson_path, target_loop)
+        topology_json = self.get_loop_topology(epjson_data, target_loop)
         
         # Create custom diagram using the topology data
         result = self.diagram_generator.create_diagram_from_topology(
@@ -634,7 +650,6 @@ class HVACMeasures:
         
         # Add additional metadata
         result.update({
-            "input_file": epjson_path,
             "method": "topology_based",
             "total_loops_available": sum(len(loops_info.get(key, [])) 
                                        for key in ['plant_loops', 'condenser_loops', 'air_loops'])
@@ -643,16 +658,26 @@ class HVACMeasures:
         return result
     
 
-    def _create_simplified_diagram(self, epjson_path: str, loop_name: str, 
+    def _create_simplified_diagram(self, epjson_data: Dict[str, Any], loop_name: str, 
                                 output_path: str, format: str) -> Dict[str, Any]:
-        """Create a simplified diagram for HVAC loops from epJSON data"""
+        """Create a simplified diagram for HVAC loops from epJSON data
+        
+        Args:
+            epjson_data: The epJSON data dictionary
+            loop_name: Name of the loop to diagram
+            output_path: Path to save the diagram
+            format: Image format
+            
+        Returns:
+            Dictionary with diagram generation results
+        """
         if not MATPLOTLIB_AVAILABLE:
             raise ImportError(
                 "Matplotlib is required for diagram generation. "
                 "Please install it with: pip install matplotlib"
             )
         
-        ep = self.load_json(epjson_path)
+        ep = epjson_data
         
         # Get basic loop information
         loops_info = []
@@ -738,7 +763,6 @@ class HVACMeasures:
         
         return {
             "success": True,
-            "input_file": epjson_path,
             "output_file": output_path,
             "loop_name": loop_name or "all_loops",
             "format": format,

@@ -35,28 +35,23 @@ logger = logging.getLogger(__name__)
 class SimulationMeasures:
     """Mixin class for simulation control and execution measures"""
     
-    def modify_simulation_settings(self, epjson_path: str, object_type: str, field_updates: Dict[str, Any], 
-                                 run_period_index: int = 0, output_path: Optional[str] = None) -> str:
+    def modify_simulation_settings(self, epjson_data: Dict[str, Any], object_type: str, field_updates: Dict[str, Any], 
+                                 run_period_index: int = 0) -> Dict[str, Any]:
         """
-        Modify SimulationControl or RunPeriod settings and save to a new file
+        Modify SimulationControl or RunPeriod settings in the epJSON data
         
         Args:
-            epjson_path: Path to the input epJSON file
+            epjson_data: The epJSON data dictionary to modify
             object_type: "SimulationControl" or "RunPeriod"
             field_updates: Dictionary of field names and new values
             run_period_index: Index of RunPeriod to modify (default 0, ignored for SimulationControl)
-            output_path: Path for output file (if None, creates one with _modified suffix)
-        """
-        resolved_path = self._resolve_epjson_path(epjson_path)
         
+        Returns:
+            Modified epJSON data dictionary
+        """
         try:
-            logger.info(f"Modifying {object_type} settings for: {resolved_path}")
-            ep = self.load_json(resolved_path)
-            
-            # Determine output path
-            if output_path is None:
-                path_obj = Path(resolved_path)
-                output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+            logger.info(f"Modifying {object_type} settings")
+            ep = epjson_data
             
             modifications_made = []
             
@@ -138,36 +133,23 @@ class SimulationMeasures:
             else:
                 raise ValueError(f"Invalid object_type: {object_type}. Must be 'SimulationControl' or 'RunPeriod'")
             
-            # Save the modified epJSON
-            self.save_json(ep, output_path)
-            
-            result = {
-                "success": True,
-                "input_file": resolved_path,
-                "output_file": output_path,
-                "object_type": object_type,
-                "run_period_index": run_period_index if object_type == "RunPeriod" else None,
-                "modifications_made": modifications_made,
-                "total_modifications": len(modifications_made)
-            }
-            
-            logger.info(f"Successfully modified {object_type} and saved to: {output_path}")
-            return json.dumps(result, indent=2)
+            logger.info(f"Successfully modified {object_type} ({len(modifications_made)} modifications)")
+            return ep
             
         except Exception as e:
-            logger.error(f"Error modifying simulation settings for {resolved_path}: {e}")
+            logger.error(f"Error modifying simulation settings: {e}")
             raise RuntimeError(f"Error modifying simulation settings: {str(e)}")
 
     
-    def run_simulation(self, epjson_path: str, weather_file: str = None, 
+    def run_simulation(self, epjson_data: Dict[str, Any], weather_file: str = None, 
                         output_directory: str = None, annual: bool = True,
                         design_day: bool = False, readvars: bool = True,
                         expandobjects: bool = True, ep_version: str = "25-1-0") -> str:
         """
-        Run EnergyPlus simulation with specified epjson and weather file
+        Run EnergyPlus simulation with specified epJSON data and weather file
         
         Args:
-            epjson_path: Path to the epjson file
+            epjson_data: The epJSON data dictionary to simulate
             weather_file: Path to weather file (.epw). If None, searches for weather files in sample_files
             output_directory: Directory for simulation outputs. If None, creates one in outputs/
             annual: Run annual simulation (default: True)
@@ -179,10 +161,10 @@ class SimulationMeasures:
         Returns:
             JSON string with simulation results and output file paths
         """
-        resolved_epjson_path = self._resolve_epjson_path(epjson_path)
+        import tempfile
         
         try:
-            logger.info(f"Starting simulation for: {resolved_epjson_path}")
+            logger.info(f"Starting simulation")
             
             # Resolve weather file path
             resolved_weather_path = None
@@ -190,31 +172,36 @@ class SimulationMeasures:
                 resolved_weather_path = self._resolve_weather_file_path(weather_file)
                 logger.info(f"Using weather file: {resolved_weather_path}")
             
+            # Save epJSON data to a temporary file
+            temp_fd, temp_epjson_path = tempfile.mkstemp(suffix='.epJSON', prefix='energyplus_sim_')
+            os.close(temp_fd)  # Close the file descriptor
+            self.save_json(epjson_data, temp_epjson_path)
+            logger.info(f"Saved epJSON data to temporary file: {temp_epjson_path}")
+            
             # Set up output directory
             if output_directory is None:
-                epjson_name = Path(resolved_epjson_path).stem
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_directory = str(Path(self.config.paths.output_dir) / f"{epjson_name}_simulation_{timestamp}")
+                output_directory = str(Path(self.config.paths.output_dir) / f"simulation_{timestamp}")
             
             # Create output directory if it doesn't exist
             os.makedirs(output_directory, exist_ok=True)
             logger.info(f"Output directory: {output_directory}")
             
-            # Load epjson file
-            ep = self.load_json(epjson_path)
+            # Get version from epJSON data
+            ep = epjson_data
             version = ep["Version"]["Version 1"]["version_identifier"]
             # Split, pad to 3 parts, and join with dashes
             ep_version = "-".join((version.split(".") + ["0", "0"])[:3])
             
             # Configure simulation options
             simulation_options = {
-                'idf': epjson_path,
+                'idf': temp_epjson_path,
                 'output_directory': output_directory,
                 'annual': annual,
                 'design_day': design_day,
                 'readvars': readvars,
                 'expandobjects': expandobjects,
-                'output_prefix': Path(resolved_epjson_path).stem,
+                'output_prefix': Path(temp_epjson_path).stem,
                 'output_suffix': 'C',  # Capital suffix style
                 'verbose': 'v',  # Verbose output,
                 'ep_version': ep_version
@@ -238,22 +225,28 @@ class SimulationMeasures:
                 
                 simulation_result = {
                     "success": True,
-                    "input_idf": resolved_epjson_path,
                     "weather_file": resolved_weather_path,
                     "output_directory": output_directory,
                     "simulation_duration": str(duration),
-                    "simulation_options": simulation_options,
                     "output_files": output_files,
                     "energyplus_result": str(result) if result else "Simulation completed",
                     "timestamp": end_time.isoformat()
                 }
                 
                 logger.info(f"Simulation completed successfully in {duration}")
+                
+                # Clean up temporary file
+                try:
+                    os.unlink(temp_epjson_path)
+                    logger.debug(f"Cleaned up temporary file: {temp_epjson_path}")
+                except Exception:
+                    pass
+                
                 return json.dumps(simulation_result, indent=2)
                 
             except Exception as e:
                 # Try to find error file for more detailed error information
-                error_file = Path(output_directory) / f"{Path(resolved_epjson_path).stem}.err"
+                error_file = Path(output_directory) / f"{Path(temp_epjson_path).stem}.err"
                 error_details = ""
                 
                 if error_file.exists():
@@ -265,20 +258,25 @@ class SimulationMeasures:
                 
                 simulation_result = {
                     "success": False,
-                    "input_idf": resolved_epjson_path,
                     "weather_file": resolved_weather_path,
                     "output_directory": output_directory,
                     "error": str(e),
                     "error_details": error_details,
-                    "simulation_options": simulation_options,
                     "timestamp": datetime.now().isoformat()
                 }
                 
                 logger.error(f"Simulation failed: {str(e)}")
+                
+                # Clean up temporary file
+                try:
+                    os.unlink(temp_epjson_path)
+                except Exception:
+                    pass
+                
                 return json.dumps(simulation_result, indent=2)
                 
         except Exception as e:
-            logger.error(f"Error setting up simulation for {resolved_epjson_path}: {e}")
+            logger.error(f"Error setting up simulation: {e}")
             raise RuntimeError(f"Error running simulation: {str(e)}")
 
         

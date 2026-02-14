@@ -24,21 +24,18 @@ logger = logging.getLogger(__name__)
 class EnvelopeMeasures:
     """Mixin class for building envelope measures"""
     
-    def find_exterior_walls(self, epjson_path: str) -> dict:
+    def find_exterior_walls(self, epjson_data: Dict[str, Any]) -> dict:
         """
         Creates a dictionary of exterior walls in the model
         
         Args:
-            epjson_path: Path to the input epJSON or IDF file. IDF files are automatically
-                       converted to epJSON format.
+            epjson_data: The epJSON model dictionary
         
         Returns:
             Dictionary of all exterior walls in the model - wall names are keys, constructions are values.
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-
         try:
-            ep = self.load_json(resolved_path)
+            ep = epjson_data
 
             ext_walls = {}
             # Get BuildingSurface:Detailed objects
@@ -53,7 +50,7 @@ class EnvelopeMeasures:
             return ext_walls
             
         except Exception as e:
-            logger.error(f"Error finding exterior walls for {resolved_path}: {e}")
+            logger.error(f"Error finding exterior walls: {e}")
             raise RuntimeError(f"Error finding exterior walls: {str(e)}")
 
     def set_exterior_wall_construction(self, ep: Dict[str, Any], wall_type: str, code_version: str, 
@@ -183,32 +180,24 @@ class EnvelopeMeasures:
         
         return ep
 
-    def add_coating_outside(self, epjson_path: str, location: str, solar_abs: float = 0.4, 
-                            thermal_abs: float = 0.9, output_path: Optional[str] = None) -> str:
+    def add_coating_outside(self, epjson_data: Dict[str, Any], location: str, solar_abs: float = 0.4, 
+                            thermal_abs: float = 0.9) -> Dict[str, Any]:
         """
         Add exterior coating to all exterior surfaces of the specified location (wall or roof)
         
         Args:
-            epjson_path: Path to the input epJSON file
+            epjson_data: The epJSON model dictionary
             location: Surface location - either "wall" or "roof"
             solar_abs: Solar Absorptance of the exterior coating (default: 0.4)
             thermal_abs: Thermal Absorptance of the exterior coating (default: 0.9)
-            output_path: Path for output file (if None, creates one with _modified suffix)
         
         Returns:
-            JSON string with modification results
+            The modified epJSON dictionary
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         modifications_made = []
 
         try:
-            ep = self.load_json(resolved_path)
-            
-            # Determine output path
-            if output_path is None:
-                path_obj = Path(resolved_path)
-                output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+            ep = epjson_data
             
             # Validate location parameter
             location_lower = location.lower()
@@ -300,55 +289,31 @@ class EnvelopeMeasures:
                     })
                     logger.debug(f"Modified no-mass material '{layer_name}'")
 
-            # Save the modified epJSON
-            self.save_json(ep, output_path)
-            
-            result = {
-                "success": True,
-                "input_file": resolved_path,
-                "output_file": output_path,
-                "location": location,
-                "solar_absorptance": solar_abs,
-                "thermal_absorptance": thermal_abs,
-                "surfaces_found": len(all_surfs),
-                "modifications_made": modifications_made,
-                "total_modifications": len(modifications_made)
-            }
-            
-            logger.info(f"Successfully modified exterior coating for {len(ext_layer_names)} materials and saved to: {output_path}")
-            return json.dumps(result, indent=2)
+            logger.info(f"Successfully modified exterior coating for {len(ext_layer_names)} materials")
+            return ep
             
         except Exception as e:
-            logger.error(f"Error modifying exterior coating for {resolved_path}: {e}")
+            logger.error(f"Error modifying exterior coating: {e}")
             raise RuntimeError(f"Error modifying exterior coating: {str(e)}")
 
-
-    def add_window_film_outside(self, epjson_path: str, u_value: float = 4.94, shgc: float = 0.45, 
-                                visible_transmittance: float = 0.66, output_path: Optional[str] = None) -> str:
+    def add_window_film_outside(self, epjson_data: Dict[str, Any], u_value: float = 4.94, shgc: float = 0.45, 
+                                visible_transmittance: float = 0.66) -> Dict[str, Any]:
         """
         Add window film to exterior windows using WindowMaterial:SimpleGlazingSystem
         
         Args:
-            epjson_path: Path to the input epJSON file
+            epjson_data: The epJSON model dictionary
             u_value: U-factor of the window film (default: 4.94 W/m²-K from CBES)
             shgc: Solar Heat Gain Coefficient (default: 0.45 from CBES)
             visible_transmittance: Visible transmittance (default: 0.66 from CBES)
-            output_path: Path for output file (if None, creates one with _modified suffix)
         
         Returns:
-            JSON string with modification results
+            The modified epJSON dictionary
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         modifications_made = []
 
         try:
-            ep = self.load_json(resolved_path)
-            
-            # Determine output path
-            if output_path is None:
-                path_obj = Path(resolved_path)
-                output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+            ep = epjson_data
             
             # Find all exterior window surfaces
             # First, identify exterior building surfaces
@@ -376,11 +341,7 @@ class EnvelopeMeasures:
             
             if not ext_window_surfs:
                 logger.warning("No exterior windows found in the model")
-                return json.dumps({
-                    "success": False,
-                    "message": "No exterior windows found in the model",
-                    "windows_found": 0
-                }, indent=2)
+                return ep
             
             # Create unique window film material name
             random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
@@ -423,67 +384,35 @@ class EnvelopeMeasures:
                 })
                 logger.debug(f"Updated construction of window '{window_name}': {old_construction} -> {window_film_construction_name}")
             
-            # Save the modified epJSON
-            self.save_json(ep, output_path)
-            
-            result = {
-                "success": True,
-                "input_file": resolved_path,
-                "output_file": output_path,
-                "window_film_material": window_film_name,
-                "window_film_construction": window_film_construction_name,
-                "u_factor": u_value,
-                "solar_heat_gain_coefficient": shgc,
-                "visible_transmittance": visible_transmittance,
-                "windows_modified": len(ext_window_surfs),
-                "modifications_made": modifications_made,
-                "total_modifications": len(modifications_made)
-            }
-            
-            logger.info(f"Successfully added window film to {len(ext_window_surfs)} windows and saved to: {output_path}")
-            return json.dumps(result, indent=2)
+            logger.info(f"Successfully added window film to {len(ext_window_surfs)} windows")
+            return ep
             
         except Exception as e:
-            logger.error(f"Error modifying window film properties for {resolved_path}: {e}")
+            logger.error(f"Error modifying window film properties: {e}")
             raise RuntimeError(f"Error modifying window film properties: {str(e)}")
 
-
-    def change_infiltration_by_mult(self, epjson_path: str, mult: float = 0.9,
-                                 output_path: Optional[str] = None) -> str:
+    def change_infiltration_by_mult(self, epjson_data: Dict[str, Any], mult: float = 0.9) -> Dict[str, Any]:
         """
         Modify infiltration rates in the epJSON file by a multiplier
 
         Args:
-            epjson_path: Path to the input epJSON file
+            epjson_data: The epJSON model dictionary
             mult: Multiplier for infiltration rates (default: 0.9)
-            output_path: Path for output file (if None, creates one with _modified suffix)
         
         Returns:
-            JSON string with modification results
+            The modified epJSON dictionary
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         modifications_made = []
 
         try:
-            ep = self.load_json(resolved_path)
-            
-            # Determine output path
-            if output_path is None:
-                path_obj = Path(resolved_path)
-                output_path = str(path_obj.parent / f"{path_obj.stem}_modified{path_obj.suffix}")
+            ep = epjson_data
             
             object_type = "ZoneInfiltration:DesignFlowRate"
             infiltration_objs = ep.get(object_type, {})
             
             if not infiltration_objs:
                 logger.warning(f"No {object_type} objects found in the epJSON file")
-                return json.dumps({
-                    "success": False,
-                    "message": f"No {object_type} objects found",
-                    "input_file": resolved_path,
-                    "infiltration_objects_found": 0
-                }, indent=2)
+                return ep
 
             for infil_name, infiltration_obj in infiltration_objs.items():
                 design_flow_method = infiltration_obj.get("design_flow_rate_calculation_method", "")
@@ -522,22 +451,9 @@ class EnvelopeMeasures:
                 except Exception as e:
                     logger.error(f"Error setting {flow_field} to {new_value} for '{infil_name}': {e}")
 
-            # Save the modified epJSON
-            self.save_json(ep, output_path)
-            
-            result = {
-                "success": True,
-                "input_file": resolved_path,
-                "output_file": output_path,
-                "multiplier": mult,
-                "infiltration_objects_found": len(infiltration_objs),
-                "modifications_made": modifications_made,
-                "total_modifications": len(modifications_made)
-            }
-            
-            logger.info(f"Successfully modified {len(modifications_made)} infiltration objects and saved to: {output_path}")
-            return json.dumps(result, indent=2)
+            logger.info(f"Successfully modified {len(modifications_made)} infiltration objects")
+            return ep
             
         except Exception as e:
-            logger.error(f"Error modifying infiltration rate for {resolved_path}: {e}")
+            logger.error(f"Error modifying infiltration rate: {e}")
             raise RuntimeError(f"Error modifying infiltration rate: {str(e)}")

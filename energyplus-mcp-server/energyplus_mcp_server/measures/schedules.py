@@ -17,22 +17,20 @@ logger = logging.getLogger(__name__)
 class SchedulesMeasures:
     """Mixin class for schedule inspection measures"""
     
-    def inspect_schedules(self, epjson_path: str, include_values: bool = False) -> str:
+    def inspect_schedules(self, epjson_data: Dict[str, Any], include_values: bool = False) -> str:
         """
         Inspect and inventory all schedule objects in the EnergyPlus model
         
         Args:
-            epjson_path: Path to the epJSON file
+            epjson_data: The epJSON data dictionary
             include_values: Whether to extract actual schedule values (default: False)
         
         Returns:
             JSON string with schedule inventory and analysis
         """
-        resolved_path = self._resolve_epjson_path(epjson_path)
-        
         try:
-            logger.debug(f"Inspecting schedules for: {resolved_path} (include_values={include_values})")
-            ep = self.load_json(resolved_path)
+            logger.debug(f"Inspecting schedules (include_values={include_values})")
+            ep = epjson_data
             
             # Define all schedule object types to inspect
             schedule_object_types = [
@@ -50,7 +48,6 @@ class SchedulesMeasures:
             ]
             
             schedule_inventory = {
-                "file_path": resolved_path,
                 "include_values": include_values,
                 "summary": {
                     "total_schedule_objects": 0,
@@ -229,9 +226,9 @@ class SchedulesMeasures:
                 schedule_inventory["summary"]["value_extraction"] = value_extraction_summary
             
             logger.debug(f"Found {total_objects} schedule objects across {len(schedule_inventory['summary']['schedule_types_found'])} object types")
-            logger.info(f"Schedule inspection for {resolved_path} completed successfully")
+            logger.info(f"Schedule inspection completed successfully")
             return json.dumps(schedule_inventory, indent=2)
             
         except Exception as e:
-            logger.error(f"Error inspecting schedules for {resolved_path}: {e}")
+            logger.error(f"Error inspecting schedules: {e}")
             raise RuntimeError(f"Error inspecting schedules: {str(e)}")
