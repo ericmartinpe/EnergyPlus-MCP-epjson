@@ -14,6 +14,12 @@ from typing import Dict, List, Any, Optional
 from pathlib import Path
 
 from ..utils.construction import set_construction_ufactor
+from ..utils.surface_utils import (
+    get_exterior_surface_names,
+    get_exterior_surfaces_with_details,
+    get_exterior_windows,
+    get_construction_exterior_layers
+)
 
 # Define DATA_PATH for internal use
 DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
@@ -204,36 +210,17 @@ class EnvelopeMeasures:
             if location_lower not in ["wall", "roof"]:
                 raise ValueError(f"Location must be 'wall' or 'roof', got '{location}'")
             
-            # Collect all surfaces of the specified type
-            all_surfs = []
-            
-            # Get BuildingSurface:Detailed objects
-            building_surfaces = ep.get("BuildingSurface:Detailed", {})
-            for surf_name, surf_data in building_surfaces.items():
-                surface_type = surf_data.get("surface_type", "").lower()
-                outside_boundary = surf_data.get("outside_boundary_condition", "").lower()
-                
-                if surface_type == location_lower and outside_boundary == "outdoors":
-                    all_surfs.append({
-                        "name": surf_name,
-                        "construction_name": surf_data.get("construction_name", "")
-                    })
+            # Collect all surfaces of the specified type using utility function
+            all_surfs = get_exterior_surfaces_with_details(ep, surface_type=location_lower)
             
             logger.debug(f"Found {len(all_surfs)} exterior {location} surfaces")
             
             # Get unique construction names from surfaces
-            construction_names = set(surf["construction_name"] for surf in all_surfs if surf["construction_name"])
+            construction_names = set(surf["construction"] for surf in all_surfs if surf["construction"])
             
-            # Get exterior layer names from constructions
-            constructions = ep.get("Construction", {})
-            ext_layer_names = set()
-            for const_name in construction_names:
-                if const_name in constructions:
-                    const_data = constructions[const_name]
-                    # The outside layer is the first layer
-                    outside_layer = const_data.get("outside_layer", "")
-                    if outside_layer:
-                        ext_layer_names.add(outside_layer)
+            # Get exterior layer names from constructions using utility function
+            construction_layers = get_construction_exterior_layers(ep, construction_names)
+            ext_layer_names = set(construction_layers.values())
             
             logger.debug(f"Construction names: {construction_names}")
             logger.debug(f"Exterior layer names: {ext_layer_names}")
@@ -315,27 +302,8 @@ class EnvelopeMeasures:
         try:
             ep = epjson_data
             
-            # Find all exterior window surfaces
-            # First, identify exterior building surfaces
-            building_surfaces = ep.get("BuildingSurface:Detailed", {})
-            exterior_surf_names = set()
-            for surf_name, surf_data in building_surfaces.items():
-                if surf_data.get("outside_boundary_condition", "").lower() == "outdoors":
-                    exterior_surf_names.add(surf_name)
-            
-            logger.debug(f"Found {len(exterior_surf_names)} exterior building surfaces")
-            
-            # Find windows on exterior surfaces
-            ext_window_surfs = []
-            fenestration_surfaces = ep.get("FenestrationSurface:Detailed", {})
-            for window_name, window_data in fenestration_surfaces.items():
-                if window_data.get("surface_type", "").lower() == "window":
-                    building_surface_name = window_data.get("building_surface_name", "")
-                    if building_surface_name in exterior_surf_names:
-                        ext_window_surfs.append({
-                            "name": window_name,
-                            "data": window_data
-                        })
+            # Find all exterior windows using utility function
+            ext_window_surfs = get_exterior_windows(ep, include_doors=False)
             
             logger.debug(f"Found {len(ext_window_surfs)} exterior window surfaces")
             

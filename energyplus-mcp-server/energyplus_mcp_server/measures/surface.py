@@ -9,6 +9,16 @@ import json
 import logging
 from typing import Dict, Any
 
+from ..utils.geometry_utils import (
+    calculate_surface_area,
+    get_surface_orientation,
+    get_building_north_axis,
+    extract_vertices,
+    scale_vertices_from_centroid,
+    update_surface_vertices
+)
+from ..utils.surface_utils import get_exterior_surface_names
+
 logger = logging.getLogger(__name__)
 
 
@@ -41,8 +51,8 @@ class SurfaceMeasures:
                 
                 # Check if it's an exterior wall (above-grade)
                 if surface_type == "wall" and outside_boundary == "outdoors":
-                    # Calculate area from vertices using Shoelace formula
-                    area = self._calculate_surface_area(surf_data)
+                    # Calculate area from vertices using utility function
+                    area = calculate_surface_area(surf_data)
                     
                     wall_info = {
                         "name": surf_name,
@@ -74,102 +84,6 @@ class SurfaceMeasures:
             logger.error(f"Error calculating exterior wall area: {e}")
             raise RuntimeError(f"Error calculating exterior wall area: {str(e)}")
     
-    def _calculate_surface_area(self, surface_data: Dict[str, Any]) -> float:
-        """
-        Calculate surface area from vertices using the Shoelace formula
-        
-        Args:
-            surface_data: Surface data dictionary containing vertices
-        
-        Returns:
-            Area in square meters
-        """
-        try:
-            # Handle two formats: array format and flat format
-            vertices = surface_data.get("vertices", [])
-            
-            # If no vertices array, try flat format (vertex_1_x_coordinate, etc.)
-            if not vertices:
-                num_vertices = surface_data.get("number_of_vertices", 0)
-                if num_vertices >= 3:
-                    vertices = []
-                    for i in range(1, num_vertices + 1):
-                        vertex = {
-                            "vertex_x_coordinate": surface_data.get(f"vertex_{i}_x_coordinate", 0.0),
-                            "vertex_y_coordinate": surface_data.get(f"vertex_{i}_y_coordinate", 0.0),
-                            "vertex_z_coordinate": surface_data.get(f"vertex_{i}_z_coordinate", 0.0)
-                        }
-                        vertices.append(vertex)
-            
-            if not vertices or len(vertices) < 3:
-                logger.warning(f"Insufficient vertices to calculate area")
-                return 0.0
-            
-            # Extract coordinates
-            coords = []
-            for vertex in vertices:
-                x = vertex.get("vertex_x_coordinate", 0.0)
-                y = vertex.get("vertex_y_coordinate", 0.0)
-                z = vertex.get("vertex_z_coordinate", 0.0)
-                coords.append((x, y, z))
-            
-            # Use Shoelace formula for polygon area in 3D space
-            # First, find the normal vector to determine the plane
-            if len(coords) < 3:
-                return 0.0
-            
-            # Calculate two edge vectors
-            v1 = (coords[1][0] - coords[0][0], 
-                  coords[1][1] - coords[0][1], 
-                  coords[1][2] - coords[0][2])
-            v2 = (coords[2][0] - coords[0][0], 
-                  coords[2][1] - coords[0][1], 
-                  coords[2][2] - coords[0][2])
-            
-            # Cross product to get normal vector
-            normal = (
-                v1[1] * v2[2] - v1[2] * v2[1],
-                v1[2] * v2[0] - v1[0] * v2[2],
-                v1[0] * v2[1] - v1[1] * v2[0]
-            )
-            
-            # Calculate area using cross products of consecutive edges
-            total_area = 0.0
-            n = len(coords)
-            
-            for i in range(n):
-                j = (i + 1) % n
-                # Vector from origin to current point
-                vi = coords[i]
-                vj = coords[j]
-                
-                # Cross product
-                cross = (
-                    vi[1] * vj[2] - vi[2] * vj[1],
-                    vi[2] * vj[0] - vi[0] * vj[2],
-                    vi[0] * vj[1] - vi[1] * vj[0]
-                )
-                
-                # Dot product with normal
-                total_area += (cross[0] * normal[0] + 
-                              cross[1] * normal[1] + 
-                              cross[2] * normal[2])
-            
-            # Magnitude of normal vector
-            normal_mag = (normal[0]**2 + normal[1]**2 + normal[2]**2)**0.5
-            
-            if normal_mag == 0:
-                return 0.0
-            
-            # Final area calculation
-            area = abs(total_area) / (2.0 * normal_mag)
-            
-            return area
-            
-        except Exception as e:
-            logger.warning(f"Error calculating surface area: {e}")
-            return 0.0
-    
     def calculate_exterior_window_area(self, epjson_data: Dict[str, Any]) -> str:
         """
         Calculate total exterior window area
@@ -184,12 +98,8 @@ class SurfaceMeasures:
             logger.info("Calculating exterior window area")
             ep = epjson_data
             
-            # First, identify exterior building surfaces
-            building_surfaces = ep.get("BuildingSurface:Detailed", {})
-            exterior_surf_names = set()
-            for surf_name, surf_data in building_surfaces.items():
-                if surf_data.get("outside_boundary_condition", "").lower() == "outdoors":
-                    exterior_surf_names.add(surf_name)
+            # Use utility function to identify exterior building surfaces
+            exterior_surf_names = get_exterior_surface_names(ep)
             
             window_details = []
             total_area = 0.0
@@ -203,8 +113,8 @@ class SurfaceMeasures:
                 
                 # Check if it's a window or glass door on an exterior surface
                 if surface_type in ["window", "glassdoor"] and building_surface_name in exterior_surf_names:
-                    # Calculate area from vertices
-                    area = self._calculate_surface_area(window_data)
+                    # Calculate area from vertices using utility function
+                    area = calculate_surface_area(window_data)
                     
                     window_info = {
                         "name": window_name,
@@ -274,8 +184,8 @@ class SurfaceMeasures:
                 outside_boundary = surf_data.get("outside_boundary_condition", "").lower()
                 
                 if surface_type == "wall" and outside_boundary == "outdoors":
-                    area = self._calculate_surface_area(surf_data)
-                    orientation = self._get_surface_orientation(surf_data, ep)
+                    area = calculate_surface_area(surf_data)
+                    orientation = get_surface_orientation(surf_data, get_building_north_axis(ep))
                     
                     wall_area_by_orientation[orientation] += area
                     wall_details[surf_name] = {
@@ -293,7 +203,7 @@ class SurfaceMeasures:
                 
                 # Include both windows and glass doors in WWR calculation
                 if surface_type in ["window", "glassdoor"] and building_surface_name in wall_details:
-                    area = self._calculate_surface_area(window_data)
+                    area = calculate_surface_area(window_data)
                     orientation = wall_details[building_surface_name]["orientation"]
                     
                     window_area_by_orientation[orientation] += area
@@ -350,108 +260,6 @@ class SurfaceMeasures:
             logger.error(f"Error calculating window-to-wall ratio: {e}")
             raise RuntimeError(f"Error calculating window-to-wall ratio: {str(e)}")
     
-    def _get_surface_orientation(self, surface_data: Dict[str, Any], epjson_data: Dict[str, Any]) -> str:
-        """
-        Determine the cardinal orientation of a surface based on its outward normal vector,
-        accounting for building rotation (north_axis).
-        
-        Orientation ranges:
-        - North: 315° to 45° (wraps around 0°)
-        - East: 45° to 135°
-        - South: 135° to 225°
-        - West: 225° to 315°
-        
-        Args:
-            surface_data: Surface data dictionary containing vertices
-            epjson_data: Complete epJSON data to extract building north_axis
-        
-        Returns:
-            Orientation as string: "North", "South", "East", "West", or "Other"
-        """
-        try:
-            import math
-            
-            # Get building north_axis rotation
-            building = epjson_data.get("Building", {})
-            north_axis = 0.0
-            if building:
-                building_name = list(building.keys())[0]
-                north_axis = building[building_name].get("north_axis", 0.0)
-            
-            vertices = surface_data.get("vertices", [])
-            
-            if not vertices or len(vertices) < 3:
-                return "Other"
-            
-            # Extract coordinates for first three vertices
-            coords = []
-            for i in range(min(3, len(vertices))):
-                vertex = vertices[i]
-                x = vertex.get("vertex_x_coordinate", 0.0)
-                y = vertex.get("vertex_y_coordinate", 0.0)
-                z = vertex.get("vertex_z_coordinate", 0.0)
-                coords.append((x, y, z))
-            
-            # Calculate two edge vectors
-            v1 = (coords[1][0] - coords[0][0], 
-                  coords[1][1] - coords[0][1], 
-                  coords[1][2] - coords[0][2])
-            v2 = (coords[2][0] - coords[0][0], 
-                  coords[2][1] - coords[0][1], 
-                  coords[2][2] - coords[0][2])
-            
-            # Cross product to get outward normal vector
-            # Assuming vertices are in counter-clockwise order when viewed from outside
-            normal = (
-                v1[1] * v2[2] - v1[2] * v2[1],
-                v1[2] * v2[0] - v1[0] * v2[2],
-                v1[0] * v2[1] - v1[1] * v2[0]
-            )
-            
-            # Calculate magnitude
-            magnitude = (normal[0]**2 + normal[1]**2 + normal[2]**2)**0.5
-            if magnitude == 0:
-                return "Other"
-            
-            # Check if mostly horizontal (vertical wall)
-            abs_z = abs(normal[2])
-            if abs_z / magnitude >= 0.5:
-                # Mostly roof or floor - not a typical wall orientation
-                return "Other"
-            
-            # Calculate azimuth angle from normal vector
-            # EnergyPlus coordinate system: X=East, Y=North, Z=Up
-            # Azimuth: 0°=North, 90°=East, 180°=South, 270°=West
-            azimuth_rad = math.atan2(normal[0], normal[1])  # atan2(East, North)
-            azimuth_deg = math.degrees(azimuth_rad)
-            
-            # Normalize to 0-360
-            if azimuth_deg < 0:
-                azimuth_deg += 360
-            
-            # Apply building rotation (north_axis)
-            azimuth_actual = (azimuth_deg + north_axis) % 360
-            
-            # Categorize into orientation ranges
-            # North: 315 to 45 (wraps around 0)
-            # East: 45 to 135
-            # South: 135 to 225
-            # West: 225 to 315
-            if azimuth_actual >= 315 or azimuth_actual < 45:
-                return "North"
-            elif 45 <= azimuth_actual < 135:
-                return "East"
-            elif 135 <= azimuth_actual < 225:
-                return "South"
-            elif 225 <= azimuth_actual < 315:
-                return "West"
-            else:
-                return "Other"
-            
-        except Exception as e:
-            logger.warning(f"Error determining surface orientation: {e}")
-            return "Other"
-    
     def adjust_windows_for_target_wwr(self, epjson_data: Dict[str, Any], target_wwr: float, 
                                       by_orientation: bool = False,
                                       orientation_targets: Dict[str, float] = None) -> Dict[str, Any]:
@@ -499,8 +307,8 @@ class SurfaceMeasures:
                 
                 if surface_type == "wall" and outside_boundary == "outdoors":
                     exterior_surf_names.add(surf_name)
-                    orientation = self._get_surface_orientation(surf_data, ep)
-                    wall_area = self._calculate_surface_area(surf_data)
+                    orientation = get_surface_orientation(surf_data, get_building_north_axis(ep))
+                    wall_area = calculate_surface_area(surf_data)
                     wall_details[surf_name] = {
                         "orientation": orientation,
                         "area": wall_area
@@ -529,7 +337,7 @@ class SurfaceMeasures:
                         building_surface_name = window_data.get("building_surface_name", "")
                         if building_surface_name in wall_details:
                             if wall_details[building_surface_name]["orientation"] == orientation:
-                                area = self._calculate_surface_area(window_data)
+                                area = calculate_surface_area(window_data)
                                 if surface_type == "window":
                                     window_area += area
                                 elif surface_type == "glassdoor":
@@ -561,7 +369,7 @@ class SurfaceMeasures:
                         building_surface_name = window_data.get("building_surface_name", "")
                         if building_surface_name in wall_details:
                             if wall_details[building_surface_name]["orientation"] == orientation:
-                                area = self._calculate_surface_area(window_data)
+                                area = calculate_surface_area(window_data)
                                 if surface_type == "window":
                                     window_area += area
                                 elif surface_type == "glassdoor":
@@ -588,7 +396,7 @@ class SurfaceMeasures:
                     surface_type = window_data.get("surface_type", "").lower()
                     building_surface_name = window_data.get("building_surface_name", "")
                     if building_surface_name in wall_details:
-                        area = self._calculate_surface_area(window_data)
+                        area = calculate_surface_area(window_data)
                         if surface_type == "window":
                             current_window_area += area
                         elif surface_type == "glassdoor":
@@ -616,7 +424,7 @@ class SurfaceMeasures:
                 if surface_type == "window" and building_surface_name in wall_details:
                     orientation = wall_details[building_surface_name]["orientation"]
                     wall_area = wall_details[building_surface_name]["area"]
-                    current_window_area = self._calculate_surface_area(window_data)
+                    current_window_area = calculate_surface_area(window_data)
                     
                     # Get initial scaling factor
                     scaling_factor = scaling_factors.get(orientation, 1.0)
@@ -640,60 +448,18 @@ class SurfaceMeasures:
                         )
                         scaling_factor = max_scaling_factor
                     
-                    # Handle both vertex formats: array format and legacy format
-                    vertices = window_data.get("vertices", [])
-                    num_vertices = window_data.get("number_of_vertices", 0)
+                    # Use geometry utilities to scale vertices from centroid
+                    current_vertices = extract_vertices(window_data)
                     
-                    # Use array format if available, otherwise use legacy format
-                    if vertices and len(vertices) >= 3:
-                        # Modern array format
-                        # Calculate centroid
-                        centroid_x = sum(v.get("vertex_x_coordinate", 0.0) for v in vertices) / len(vertices)
-                        centroid_y = sum(v.get("vertex_y_coordinate", 0.0) for v in vertices) / len(vertices)
-                        centroid_z = sum(v.get("vertex_z_coordinate", 0.0) for v in vertices) / len(vertices)
-                        
-                        # Scale each vertex from the centroid
-                        for vertex in vertices:
-                            x = vertex.get("vertex_x_coordinate", 0.0)
-                            y = vertex.get("vertex_y_coordinate", 0.0)
-                            z = vertex.get("vertex_z_coordinate", 0.0)
-                            
-                            # Scale from centroid
-                            new_x = centroid_x + (x - centroid_x) * scaling_factor
-                            new_y = centroid_y + (y - centroid_y) * scaling_factor
-                            new_z = centroid_z + (z - centroid_z) * scaling_factor
-                            
-                            # Update vertex in place
-                            vertex["vertex_x_coordinate"] = round(new_x, 6)
-                            vertex["vertex_y_coordinate"] = round(new_y, 6)
-                            vertex["vertex_z_coordinate"] = round(new_z, 6)
-                    
-                    elif num_vertices >= 3:
-                        # Legacy flat format (vertex_1_x_coordinate, etc.)
-                        # Calculate centroid
-                        centroid_x = sum(window_data.get(f"vertex_{i}_x_coordinate", 0.0) for i in range(1, num_vertices + 1)) / num_vertices
-                        centroid_y = sum(window_data.get(f"vertex_{i}_y_coordinate", 0.0) for i in range(1, num_vertices + 1)) / num_vertices
-                        centroid_z = sum(window_data.get(f"vertex_{i}_z_coordinate", 0.0) for i in range(1, num_vertices + 1)) / num_vertices
-                        
-                        # Scale each vertex from the centroid
-                        for i in range(1, num_vertices + 1):
-                            x = window_data.get(f"vertex_{i}_x_coordinate", 0.0)
-                            y = window_data.get(f"vertex_{i}_y_coordinate", 0.0)
-                            z = window_data.get(f"vertex_{i}_z_coordinate", 0.0)
-                            
-                            # Scale from centroid
-                            new_x = centroid_x + (x - centroid_x) * scaling_factor
-                            new_y = centroid_y + (y - centroid_y) * scaling_factor
-                            new_z = centroid_z + (z - centroid_z) * scaling_factor
-                            
-                            # Update vertex fields
-                            window_data[f"vertex_{i}_x_coordinate"] = round(new_x, 6)
-                            window_data[f"vertex_{i}_y_coordinate"] = round(new_y, 6)
-                            window_data[f"vertex_{i}_z_coordinate"] = round(new_z, 6)
-                    
-                    else:
+                    if not current_vertices or len(current_vertices) < 3:
                         logger.warning(f"Skipping {window_name}: insufficient vertices")
                         continue
+                    
+                    # Scale vertices from centroid
+                    scaled_vertices = scale_vertices_from_centroid(current_vertices, scaling_factor)
+                    
+                    # Update window data with scaled vertices
+                    update_surface_vertices(window_data, scaled_vertices)
                     
                     windows_modified += 1
                     modifications.append({

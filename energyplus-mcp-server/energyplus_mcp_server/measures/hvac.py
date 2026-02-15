@@ -26,6 +26,8 @@ except ImportError:
     GRAPHVIZ_AVAILABLE = False
     HVACDiagramGenerator = None
 
+from ..utils.hvac_utils import iter_numbered_components, iter_numbered_nodes
+
 logger = logging.getLogger(__name__)
 
 
@@ -362,25 +364,12 @@ class HVACMeasures:
                 path_info = {
                     "name": path_name,
                     "inlet_node": path_inlet_node,
-                    "components": []
+                    "components": iter_numbered_components(
+                        supply_path,
+                        name_field_pattern="component_{}_name",
+                        type_field_pattern="component_{}_object_type"
+                    )
                 }
-                
-                # Get components in the supply path
-                for i in range(1, 10):  # Supply paths can have multiple components
-                    comp_type_field = f"component_{i}_object_type" if i > 1 else "component_1_object_type"
-                    comp_name_field = f"component_{i}_name" if i > 1 else "component_1_name"
-                    
-                    comp_type = supply_path.get(comp_type_field)
-                    comp_name = supply_path.get(comp_name_field)
-                    
-                    if not comp_type or not comp_name:
-                        break
-                    
-                    component_info = {
-                        "type": comp_type,
-                        "name": comp_name
-                    }
-                    path_info["components"].append(component_info)
                 
                 supply_paths.append(path_info)
         
@@ -397,25 +386,12 @@ class HVACMeasures:
                 path_info = {
                     "name": path_name,
                     "outlet_node": path_outlet_node,
-                    "components": []
+                    "components": iter_numbered_components(
+                        return_path,
+                        name_field_pattern="component_{}_name",
+                        type_field_pattern="component_{}_object_type"
+                    )
                 }
-                
-                # Get components in the return path
-                for i in range(1, 10):  # Return paths can have multiple components
-                    comp_type_field = f"component_{i}_object_type" if i > 1 else "component_1_object_type"
-                    comp_name_field = f"component_{i}_name" if i > 1 else "component_1_name"
-                    
-                    comp_type = return_path.get(comp_type_field)
-                    comp_name = return_path.get(comp_name_field)
-                    
-                    if not comp_type or not comp_name:
-                        break
-                    
-                    component_info = {
-                        "type": comp_type,
-                        "name": comp_name
-                    }
-                    path_info["components"].append(component_info)
                 
                 return_paths.append(path_info)
         
@@ -483,16 +459,11 @@ class HVACMeasures:
                 "name": splitter_name,
                 "type": "AirLoopHVAC:ZoneSplitter",
                 "inlet_node": splitter.get("inlet_node_name", "Unknown"),
-                "outlet_nodes": []
+                "outlet_nodes": iter_numbered_nodes(
+                    splitter,
+                    node_field_pattern="outlet_{}_node_name"
+                )
             }
-            
-            # Get all outlet nodes
-            for i in range(1, 50):  # Zone splitters can have many outlets
-                outlet_field = f"outlet_{i}_node_name" if i > 1 else "outlet_1_node_name"
-                outlet_node = splitter.get(outlet_field)
-                if not outlet_node:
-                    break
-                splitter_info["outlet_nodes"].append(outlet_node)
             
             return splitter_info
         
@@ -508,16 +479,11 @@ class HVACMeasures:
                 "name": mixer_name,
                 "type": "AirLoopHVAC:ZoneMixer",
                 "outlet_node": mixer.get("outlet_node_name", "Unknown"),
-                "inlet_nodes": []
+                "inlet_nodes": iter_numbered_nodes(
+                    mixer,
+                    node_field_pattern="inlet_{}_node_name"
+                )
             }
-            
-            # Get all inlet nodes
-            for i in range(1, 50):  # Zone mixers can have many inlets
-                inlet_field = f"inlet_{i}_node_name" if i > 1 else "inlet_1_node_name"
-                inlet_node = mixer.get(inlet_field)
-                if not inlet_node:
-                    break
-                mixer_info["inlet_nodes"].append(inlet_node)
             
             return mixer_info
         
@@ -536,16 +502,11 @@ class HVACMeasures:
                 "zone_node_name": plenum.get("zone_node_name", "Unknown"),
                 "outlet_node": plenum.get("outlet_node_name", "Unknown"),
                 "induced_air_outlet_node": plenum.get("induced_air_outlet_node_or_nodelist_name", ""),
-                "inlet_nodes": []
+                "inlet_nodes": iter_numbered_nodes(
+                    plenum,
+                    node_field_pattern="inlet_{}_node_name"
+                )
             }
-            
-            # Get all inlet nodes
-            for i in range(1, 50):  # Return plenums can have many inlets
-                inlet_field = f"inlet_{i}_node_name" if i > 1 else "inlet_1_node_name"
-                inlet_node = plenum.get(inlet_field)
-                if not inlet_node:
-                    break
-                plenum_info["inlet_nodes"].append(inlet_node)
             
             return plenum_info
         
