@@ -47,9 +47,9 @@ DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 from .config import get_config, Config
 from .utils.output_variables import OutputVariableManager
 from .utils.output_meters import OutputMeterManager
-from .utils.people_utils import PeopleManager
-from .utils.lights_utils import LightsManager
-from .utils.electric_equipment_utils import ElectricEquipmentManager
+from .utils.people import PeopleManager
+from .utils.lights import LightsManager
+from .utils.equipment import EquipmentManager
 
 # Import measure mixins
 from .measures.file_operations import FileOperationsMeasures
@@ -109,6 +109,6 @@ class EnergyPlusManager(
         self.output_meter_manager = OutputMeterManager(self.config)
         self.people_manager = PeopleManager()
         self.lights_manager = LightsManager()
-        self.electric_equipment_manager = ElectricEquipmentManager()
+        self.electric_equipment_manager = EquipmentManager()
 
         logger.info("EnergyPlus Manager initialized for epJSON format")

@@ -26,7 +26,7 @@ except ImportError:
     GRAPHVIZ_AVAILABLE = False
     HVACDiagramGenerator = None
 
-from ..utils.hvac_utils import iter_numbered_components, iter_numbered_nodes
+from ..utils.hvac import iter_numbered_components, iter_numbered_nodes
 
 logger = logging.getLogger(__name__)
 

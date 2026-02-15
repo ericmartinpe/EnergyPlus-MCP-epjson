@@ -283,7 +283,7 @@ class SimulationMeasures:
 
     def _resolve_weather_file_path(self, weather_file: str) -> str:
         """Resolve weather file path (handle relative paths, sample files, EnergyPlus weather data, etc.)"""
-        from ..utils.path_utils import resolve_path
+        from ..utils.path import resolve_path
         return resolve_path(self.config, weather_file, file_types=['.epw'], description="weather file", 
                            enable_fuzzy_weather_matching=True)
     

@@ -16,7 +16,7 @@ def load_json(file_path: str) -> Dict[str, Any]:
         return json.load(f)
 
 
-class ElectricEquipmentManager:
+class EquipmentManager:
     """Manager for EnergyPlus ElectricEquipment objects"""
 
     # Valid calculation methods for Design Level

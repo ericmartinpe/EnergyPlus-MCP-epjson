@@ -14,7 +14,7 @@ from typing import Dict, List, Any, Optional
 from pathlib import Path
 
 from ..utils.construction import set_construction_ufactor
-from ..utils.surface_utils import (
+from ..utils.surface import (
     get_exterior_surface_names,
     get_exterior_surfaces_with_details,
     get_exterior_windows,

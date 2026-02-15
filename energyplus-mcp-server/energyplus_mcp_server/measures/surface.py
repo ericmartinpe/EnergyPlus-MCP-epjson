@@ -9,7 +9,7 @@ import json
 import logging
 from typing import Dict, Any
 
-from ..utils.geometry_utils import (
+from ..utils.geometry import (
     calculate_surface_area,
     get_surface_orientation,
     get_building_north_axis,
@@ -17,7 +17,7 @@ from ..utils.geometry_utils import (
     scale_vertices_from_centroid,
     update_surface_vertices
 )
-from ..utils.surface_utils import get_exterior_surface_names
+from ..utils.surface import get_exterior_surface_names
 
 logger = logging.getLogger(__name__)
 

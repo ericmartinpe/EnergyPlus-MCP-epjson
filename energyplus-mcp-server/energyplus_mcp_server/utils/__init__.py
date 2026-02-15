@@ -10,9 +10,9 @@ from .schedules import (
 )
 from .output_variables import OutputVariableManager
 from .output_meters import OutputMeterManager
-from .people_utils import PeopleManager
-from .lights_utils import LightsManager
-from .electric_equipment_utils import ElectricEquipmentManager
+from .people import PeopleManager
+from .lights import LightsManager
+from .equipment import EquipmentManager
 from .run_functions import run
 
 # Optional diagram generation (requires graphviz)
@@ -24,7 +24,7 @@ except ImportError:
     HVACDiagramGenerator = None
     _DIAGRAM_AVAILABLE = False
 
-from .path_utils import (
+from .path import (
     PathResolver,
     resolve_path,
     resolve_epjson_path,
@@ -46,7 +46,7 @@ __all__ = [
     "OutputMeterManager",
     "PeopleManager",
     "LightsManager",
-    "ElectricEquipmentManager",
+    "EquipmentManager",
     "run",
     "PathResolver",
     "resolve_path",

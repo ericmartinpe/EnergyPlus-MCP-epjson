@@ -50,7 +50,7 @@ class FileOperationsMeasures:
         Returns:
             JSON string with conversion results
         """
-        from ..utils.path_utils import resolve_path
+        from ..utils.path import resolve_path
         
         try:
             # Resolve the IDF path
@@ -127,7 +127,7 @@ class FileOperationsMeasures:
         Resolve epJSON path (handle relative paths, sample files, example files, etc.)
         Automatically converts IDF files to epJSON if needed.
         """
-        from ..utils.path_utils import resolve_path
+        from ..utils.path import resolve_path
         
         # Check if the path points to an IDF file
         if epjson_path.lower().endswith('.idf'):
@@ -408,7 +408,7 @@ class FileOperationsMeasures:
             logger.info(f"Copying file from '{source_path}' to '{target_path}'")
             
             # Import here to avoid circular imports
-            from ..utils.path_utils import resolve_path
+            from ..utils.path import resolve_path
             
             # Determine file description for error messages
             file_description = "file"
@@ -513,7 +513,7 @@ class FileOperationsMeasures:
             
             # Try to provide helpful suggestions
             try:
-                from ..utils.path_utils import PathResolver
+                from ..utils.path import PathResolver
                 resolver = PathResolver(self.config)
                 suggestions = resolver.suggest_similar_paths(source_path, file_types)
                 
