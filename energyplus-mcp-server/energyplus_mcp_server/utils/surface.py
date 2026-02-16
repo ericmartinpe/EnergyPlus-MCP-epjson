@@ -174,3 +174,58 @@ def get_construction_exterior_layers(
                 exterior_layers[const_name] = outside_layer
     
     return exterior_layers
+
+
+def calculate_window_perimeters_on_surfaces(
+    epjson_data: Dict[str, Any],
+    surface_names: Optional[Set[str]] = None
+) -> Dict[str, Any]:
+    """
+    Calculate perimeters of windows on specified surfaces (or all exterior surfaces)
+    
+    Args:
+        epjson_data: The epJSON model dictionary
+        surface_names: Optional set of surface names to check. If None, checks all exterior surfaces
+        
+    Returns:
+        Dictionary containing:
+            - total_perimeter: Total perimeter of all windows (meters)
+            - window_count: Number of windows analyzed
+            - windows: List of individual window perimeter details
+    """
+    from .geometry import calculate_perimeter
+    
+    # Get target surfaces
+    if surface_names is None:
+        surface_names = get_exterior_surface_names(epjson_data)
+    
+    # Get windows on these surfaces
+    windows = get_fenestration_on_surfaces(
+        epjson_data,
+        surface_names,
+        fenestration_type=["window"]
+    )
+    
+    total_perimeter = 0.0
+    window_details = []
+    
+    for window in windows:
+        perimeter = calculate_perimeter(window["data"])
+        total_perimeter += perimeter
+        
+        window_details.append({
+            "name": window["name"],
+            "parent_surface": window["parent_surface"],
+            "perimeter_m": round(perimeter, 4),
+            "perimeter_ft": round(perimeter * 3.28084, 4)
+        })
+    
+    result = {
+        "total_perimeter_m": round(total_perimeter, 4),
+        "total_perimeter_ft": round(total_perimeter * 3.28084, 4),
+        "window_count": len(windows),
+        "windows": window_details
+    }
+    
+    logger.info(f"Calculated perimeters for {len(windows)} windows, total: {total_perimeter:.2f} m")
+    return result

@@ -274,3 +274,170 @@ def update_surface_vertices(
             surface_data[f"vertex_{i}_x_coordinate"] = x
             surface_data[f"vertex_{i}_y_coordinate"] = y
             surface_data[f"vertex_{i}_z_coordinate"] = z
+
+
+def calculate_perimeter(surface_data: Dict[str, Any]) -> float:
+    """
+    Calculate the perimeter of a surface (e.g., window, wall) from its vertices
+    
+    Args:
+        surface_data: Surface data dictionary containing vertices
+        
+    Returns:
+        Perimeter in meters
+    """
+    try:
+        vertices = extract_vertices(surface_data)
+        
+        if not vertices or len(vertices) < 2:
+            logger.warning("Insufficient vertices to calculate perimeter")
+            return 0.0
+        
+        perimeter = 0.0
+        n = len(vertices)
+        
+        # Calculate distance between consecutive vertices
+        for i in range(n):
+            j = (i + 1) % n  # Wrap around to first vertex
+            v1 = vertices[i]
+            v2 = vertices[j]
+            
+            # Euclidean distance in 3D
+            dx = v2[0] - v1[0]
+            dy = v2[1] - v1[1]
+            dz = v2[2] - v1[2]
+            distance = math.sqrt(dx**2 + dy**2 + dz**2)
+            
+            perimeter += distance
+        
+        return perimeter
+        
+    except Exception as e:
+        logger.warning(f"Error calculating perimeter: {e}")
+        return 0.0
+
+
+def calculate_wall_roof_intersection_length(epjson_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Calculate the length of wall-roof intersections in the building
+    
+    This function identifies where exterior walls meet exterior roofs and calculates
+    the total length of these intersections. Useful for analyzing roof-wall junctions,
+    parapets, and thermal bridging.
+    
+    Args:
+        epjson_data: The epJSON model dictionary
+        
+    Returns:
+        Dictionary containing:
+            - total_length: Total length of all wall-roof intersections (meters)
+            - intersections: List of individual intersection segments with details
+    """
+    try:
+        building_surfaces = epjson_data.get("BuildingSurface:Detailed", {})
+        
+        # Identify exterior walls and roofs
+        walls = {}
+        roofs = {}
+        
+        for surf_name, surf_data in building_surfaces.items():
+            surface_type = surf_data.get("surface_type", "").lower()
+            outside_boundary = surf_data.get("outside_boundary_condition", "").lower()
+            
+            if outside_boundary == "outdoors":
+                vertices = extract_vertices(surf_data)
+                if surface_type == "wall":
+                    walls[surf_name] = {
+                        "data": surf_data,
+                        "vertices": vertices
+                    }
+                elif surface_type == "roof":
+                    roofs[surf_name] = {
+                        "data": surf_data,
+                        "vertices": vertices
+                    }
+        
+        # Find shared edges between walls and roofs
+        intersections = []
+        total_length = 0.0
+        tolerance = 0.01  # 1 cm tolerance for matching vertices
+        
+        for wall_name, wall_info in walls.items():
+            wall_vertices = wall_info["vertices"]
+            
+            for roof_name, roof_info in roofs.items():
+                roof_vertices = roof_info["vertices"]
+                
+                # Check each edge of the wall against each edge of the roof
+                for i in range(len(wall_vertices)):
+                    j = (i + 1) % len(wall_vertices)
+                    wall_edge = (wall_vertices[i], wall_vertices[j])
+                    
+                    for k in range(len(roof_vertices)):
+                        l = (k + 1) % len(roof_vertices)
+                        roof_edge = (roof_vertices[k], roof_vertices[l])
+                        
+                        # Check if edges share two vertices (same edge)
+                        # Edge can be in same or opposite direction
+                        match1 = (_vertices_match(wall_edge[0], roof_edge[0], tolerance) and
+                                 _vertices_match(wall_edge[1], roof_edge[1], tolerance))
+                        match2 = (_vertices_match(wall_edge[0], roof_edge[1], tolerance) and
+                                 _vertices_match(wall_edge[1], roof_edge[0], tolerance))
+                        
+                        if match1 or match2:
+                            # Calculate edge length
+                            dx = wall_edge[1][0] - wall_edge[0][0]
+                            dy = wall_edge[1][1] - wall_edge[0][1]
+                            dz = wall_edge[1][2] - wall_edge[0][2]
+                            length = math.sqrt(dx**2 + dy**2 + dz**2)
+                            
+                            intersections.append({
+                                "wall_name": wall_name,
+                                "roof_name": roof_name,
+                                "length_m": round(length, 4),
+                                "start_vertex": {
+                                    "x": round(wall_edge[0][0], 3),
+                                    "y": round(wall_edge[0][1], 3),
+                                    "z": round(wall_edge[0][2], 3)
+                                },
+                                "end_vertex": {
+                                    "x": round(wall_edge[1][0], 3),
+                                    "y": round(wall_edge[1][1], 3),
+                                    "z": round(wall_edge[1][2], 3)
+                                }
+                            })
+                            total_length += length
+        
+        result = {
+            "total_length_m": round(total_length, 4),
+            "total_length_ft": round(total_length * 3.28084, 4),
+            "num_intersections": len(intersections),
+            "intersections": intersections
+        }
+        
+        logger.info(f"Found {len(intersections)} wall-roof intersections, total length: {total_length:.2f} m")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error calculating wall-roof intersections: {e}")
+        raise RuntimeError(f"Error calculating wall-roof intersections: {str(e)}")
+
+
+def _vertices_match(v1: Tuple[float, float, float], v2: Tuple[float, float, float], 
+                   tolerance: float = 0.01) -> bool:
+    """
+    Helper function to check if two vertices match within a tolerance
+    
+    Args:
+        v1: First vertex (x, y, z)
+        v2: Second vertex (x, y, z)
+        tolerance: Distance tolerance in meters
+        
+    Returns:
+        True if vertices match within tolerance
+    """
+    dx = v1[0] - v2[0]
+    dy = v1[1] - v2[1]
+    dz = v1[2] - v2[2]
+    distance = math.sqrt(dx**2 + dy**2 + dz**2)
+    return distance <= tolerance
