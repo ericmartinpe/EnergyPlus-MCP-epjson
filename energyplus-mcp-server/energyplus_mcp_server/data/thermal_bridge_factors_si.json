@@ -1,0 +1,694 @@
+{
+  "90.1-2022": {
+    "unmitigated": {
+      "SteelFramedWall": {
+        "roof_edge": {
+          "psi": 0.65,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.5,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.842,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.842,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 1.686,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.554,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.505,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.92
+        }
+      },
+      "MassWall_ExteriorInsulation": {
+        "roof_edge": {
+          "psi": 0.75,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.412,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.824,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.824,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 1.686,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.476,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.325,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.46
+        }
+      },
+      "MassWall_InteriorInsulation": {
+        "roof_edge": {
+          "psi": 0.75,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.884,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.824,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.824,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 1.686,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.476,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.543,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.46
+        }
+      },
+      "WoodFramedWall": {
+        "roof_edge": {
+          "psi": 0.15,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.056,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.582,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.322,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.26,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.33
+        }
+      },
+      "MetalBuildingWall": {
+        "roof_edge": {
+          "psi": 0.65,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.5,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.842,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.842,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 1.686,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.554,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.505,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.92
+        }
+      }
+    },
+    "mitigated": {
+      "SteelFramedWall": {
+        "roof_edge": {
+          "psi": 0.02,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.26,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.307,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.307,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.307,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.376,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.194,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.48
+        }
+      },
+      "MassWall_ExteriorInsulation": {
+        "roof_edge": {
+          "psi": 0.15,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.217,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.205,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.205,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.307,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.322,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.226,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.33
+        }
+      },
+      "MassWall_InteriorInsulation": {
+        "roof_edge": {
+          "psi": 0.15,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.393,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.495,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.495,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.307,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.322,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.143,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.33
+        }
+      },
+      "WoodFramedWall": {
+        "roof_edge": {
+          "psi": 0.02,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.056,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.084,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.074,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.171,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.04
+        }
+      },
+      "MetalBuildingWall": {
+        "roof_edge": {
+          "psi": 0.02,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.26,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.307,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.307,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.307,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.376,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.194,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0.48
+        }
+      }
+    }
+  },
+  "IECC-2024": {
+    "unmitigated": {
+      "SteelFramedWall": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.692,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      },
+      "MassWall_ExteriorInsulation": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.692,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      },
+      "MassWall_InteriorInsulation": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.692,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      },
+      "WoodFramedWall": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.692,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      },
+      "MetalBuildingWall": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.692,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.865,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.519,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      }
+    },
+    "mitigated": {
+      "SteelFramedWall": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.26,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      },
+      "MassWall_ExteriorInsulation": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.26,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      },
+      "MassWall_InteriorInsulation": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.26,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      },
+      "WoodFramedWall": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.26,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      },
+      "MetalBuildingWall": {
+        "roof_edge": {
+          "psi": 0,
+          "chi": 0
+        },
+        "parapet": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_to_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_opaque_wall": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "intermediate_floor_balcony_fenestration": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "cladding_support": {
+          "psi": 0.346,
+          "chi": 0
+        },
+        "wall_to_fenestration": {
+          "psi": 0.26,
+          "chi": 0
+        },
+        "other_intersections": {
+          "psi": 0,
+          "chi": 0
+        }
+      }
+    }
+  }
+}
