@@ -8,7 +8,7 @@ def load_json(file_path: str) -> Dict[str, Any]:
         return json.load(f)
 
 def base_assembly_r(ep, material_list, surface_type="wall"):
-    """Calculate base assembly R-value excluding insulation (returns IP units).
+    """Calculate base assembly R-value excluding insulation (returns SI units).
     
     Args:
         ep (dict): EnergyPlus input file dictionary object
@@ -16,7 +16,7 @@ def base_assembly_r(ep, material_list, surface_type="wall"):
         surface_type (str): Type of surface - "wall" or "roof" (default: "wall")
     
     Returns:
-        float: Base assembly R-value in IP units (h·ft²·°F/Btu)
+        float: Base assembly R-value in SI units (m²·K/W)
     """
     # Constants
     EXT_AIR_FILM = 0.03  # m²·K/W
@@ -24,8 +24,6 @@ def base_assembly_r(ep, material_list, surface_type="wall"):
         "wall": 0.12,
         "roof": 0.107
     }  # m²·K/W
-    SI_TO_IP_CONVERSION = 5.678  # Conversion factor
-    
     # Start with air film resistances
     r_value_si = EXT_AIR_FILM + INT_AIR_FILMS[surface_type]
     
@@ -38,7 +36,7 @@ def base_assembly_r(ep, material_list, surface_type="wall"):
             if conductivity > 0:  # Avoid division by zero
                 r_value_si += thickness / conductivity
     
-    return r_value_si * SI_TO_IP_CONVERSION
+    return r_value_si
 
 
 def set_construction_ufactor(ep, ufactor, construction_name):
@@ -48,14 +46,13 @@ def set_construction_ufactor(ep, ufactor, construction_name):
 
     Args:
         ep (dict): EnergyPlus input file dictionary object
-        ufactor (float): Target U-Factor in IP units (Btu/h·ft²·°F)
+        ufactor (float): Target U-Factor in SI units (W/m²·K)
         construction_name (str): Name of construction to modify
     
     Returns:
         dict: Modified EnergyPlus input file dictionary
     """
     # Constants
-    IP_TO_SI_CONVERSION = 5.678  # Conversion factor for R-value
     MIN_VALUE = 0.001  # Minimum value to prevent error
     
     # Get material list from construction
@@ -67,9 +64,8 @@ def set_construction_ufactor(ep, ufactor, construction_name):
 
     # Calculate required insulation R-value
     r_target = 1 / ufactor
-    r_val_base_ip = base_assembly_r(ep, material_list)
-    r_ins_ip = r_target - r_val_base_ip
-    r_ins_si = r_ins_ip / IP_TO_SI_CONVERSION
+    r_val_base_si = base_assembly_r(ep, material_list)
+    r_ins_si = r_target - r_val_base_si
 
     if r_ins_si >= MIN_VALUE:
         # Update insulation material thermal resistance
@@ -116,9 +112,9 @@ def set_construction_ufactor(ep, ufactor, construction_name):
             for i, material in enumerate(remaining_layers, start=2):
                 ep["Construction"][construction_name][f"layer_{i}"] = material
 
-    # reduce thickenss of base material if r_target < r_val_base_ip
-    if r_target < r_val_base_ip:
-        rsi_diff = (r_val_base_ip - r_target) / IP_TO_SI_CONVERSION
+    # reduce thickenss of base material if r_target < r_val_base_si
+    if r_target < r_val_base_si:
+        rsi_diff = r_val_base_si - r_target
         for material in material_list:
             if "insulation" not in material.lower():
                 new_thickness = ep["Material"][material]["thickness"] - rsi_diff * ep["Material"][material]["conductivity"]

@@ -1101,7 +1101,8 @@ async def set_exterior_wall_construction(
     1. Loads construction definitions from the data library
     2. Adds all required materials (except insulation placeholder)
     3. Creates construction with proper layer sequence
-    4. Calculates and sets insulation R-value to meet code U-factor
+     4. Calculates and sets insulation R-value to meet code U-factor
+         using SI units (W/m²·K)
     5. Optionally assigns construction to specified walls
 
     Args:
@@ -1127,7 +1128,7 @@ async def set_exterior_wall_construction(
         JSON string with construction creation results including:
         - Materials added to the model
         - Construction name and composition
-        - Target and achieved U-factor
+        - Target and achieved U-factor (W/m²·K)
         - Number of walls modified
 
     Examples:

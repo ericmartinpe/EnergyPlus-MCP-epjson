@@ -72,7 +72,8 @@ class EnvelopeMeasures:
         1. Loads construction definitions and material properties from data files
         2. Creates/adds all required materials to the epJSON model
         3. Creates the construction with proper layer sequence
-        4. Adjusts insulation R-value to meet code-required U-factor
+          4. Adjusts insulation R-value to meet code-required U-factor
+              (SI units, W/m²·K)
         5. Optionally assigns construction to specified walls
 
         Args:
@@ -113,12 +114,12 @@ class EnvelopeMeasures:
         # Determine prefix for U-factor lookup
         prefix = "nonres" if "non_" in use_type else "res"
         
-        # Load configuration and data files
+        # Load configuration and data files (opaque wall U-factors are SI: W/m²·K)
         try:
             construction_map = self.load_json(os.path.join(DATA_PATH, "construction_map.json"))
             constructions = self.load_json(os.path.join(DATA_PATH, "constructions.json"))
             materials_dict = self.load_json(os.path.join(DATA_PATH, "materials.json"))
-            opaque_wall_values = self.load_json(os.path.join(DATA_PATH, "opaque_wall_values.json"))
+            opaque_wall_values = self.load_json(os.path.join(DATA_PATH, "opaque_wall_values_si.json"))
         except FileNotFoundError as e:
             raise RuntimeError(f"Required data file not found: {e}")
         
@@ -168,7 +169,7 @@ class EnvelopeMeasures:
         
         # Adjust insulation R-value to meet code-required U-factor
         ep = set_construction_ufactor(ep, ext_wall_ufactor, construction_name)
-        logger.info(f"Adjusted '{construction_name}' to meet U-factor: {ext_wall_ufactor} Btu/h·ft²·°F")
+        logger.info(f"Adjusted '{construction_name}' to meet U-factor: {ext_wall_ufactor} W/m²·K")
         
         # Assign construction to specified walls
         if wall_list:

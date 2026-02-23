@@ -1,0 +1,5462 @@
+{
+    "90.1-2004": {
+        "MassWall": {
+            "0A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "0B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "2A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "2B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "3A": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "3B": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "3C": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "4A": {
+                "nonres": 0.857,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "4B": {
+                "nonres": 0.857,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "4C": {
+                "nonres": 0.857,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "5A": {
+                "nonres": 0.701,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "5B": {
+                "nonres": 0.701,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "5C": {
+                "nonres": 0.701,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "6A": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "6B": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "7": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 3.293
+            },
+            "8": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 6.7
+            },
+            "0B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 6.7
+            },
+            "1A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 6.7
+            },
+            "1B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 6.7
+            },
+            "2A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "2B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "3A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "3B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "3C": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "4A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.761
+            },
+            "4B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.761
+            },
+            "4C": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.761
+            },
+            "5A": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.698
+            },
+            "5B": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.698
+            },
+            "5C": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.698
+            },
+            "6A": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.642
+            },
+            "6B": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.642
+            },
+            "7": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.642
+            },
+            "8": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.642
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "2B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "3A": {
+                "nonres": 0.705,
+                "res": 0.479,
+                "semiht": 1.998
+            },
+            "3B": {
+                "nonres": 0.705,
+                "res": 0.479,
+                "semiht": 1.998
+            },
+            "3C": {
+                "nonres": 0.705,
+                "res": 0.479,
+                "semiht": 1.998
+            },
+            "4A": {
+                "nonres": 0.705,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4B": {
+                "nonres": 0.705,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4C": {
+                "nonres": 0.705,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5A": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5B": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5C": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "6A": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "6B": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "7": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "8": {
+                "nonres": 0.365,
+                "res": 0.315,
+                "semiht": 0.705
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "0B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "2A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "2B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "3A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3C": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "4A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "4B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "4C": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "5A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "5B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "5C": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "6A": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "6B": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "7": {
+                "nonres": 0.504,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "8": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            }
+        }
+    },
+    "90.1-2007": {
+        "MassWall": {
+            "0A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "0B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "3A": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3B": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3C": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "4A": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4B": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4C": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "5A": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5B": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5C": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "6A": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "6B": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "7": {
+                "nonres": 0.404,
+                "res": 0.404,
+                "semiht": 0.701
+            },
+            "8": {
+                "nonres": 0.404,
+                "res": 0.295,
+                "semiht": 0.592
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 6.7
+            },
+            "0B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 6.7
+            },
+            "1A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 6.7
+            },
+            "1B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 6.7
+            },
+            "2A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "2B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "3A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "3B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "3C": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 1.045
+            },
+            "4A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.761
+            },
+            "4B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.761
+            },
+            "4C": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.761
+            },
+            "5A": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.698
+            },
+            "5B": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.698
+            },
+            "5C": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.698
+            },
+            "6A": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.642
+            },
+            "6B": {
+                "nonres": 0.642,
+                "res": 0.324,
+                "semiht": 0.642
+            },
+            "7": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.642
+            },
+            "8": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.642
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.705,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "2B": {
+                "nonres": 0.705,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3A": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3B": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3C": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "6A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "6B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "7": {
+                "nonres": 0.365,
+                "res": 0.24,
+                "semiht": 0.705
+            },
+            "8": {
+                "nonres": 0.365,
+                "res": 0.212,
+                "semiht": 0.479
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "0B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "2A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "2B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3C": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "4A": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4B": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4C": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "5A": {
+                "nonres": 0.365,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5B": {
+                "nonres": 0.365,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5C": {
+                "nonres": 0.365,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "7": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "8": {
+                "nonres": 0.203,
+                "res": 0.203,
+                "semiht": 0.504
+            }
+        }
+    },
+    "90.1-2010": {
+        "MassWall": {
+            "0A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "0B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "3A": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3B": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3C": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "4A": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4B": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4C": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "5A": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5B": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5C": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "6A": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "6B": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "7": {
+                "nonres": 0.404,
+                "res": 0.404,
+                "semiht": 0.701
+            },
+            "8": {
+                "nonres": 0.404,
+                "res": 0.295,
+                "semiht": 0.592
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.527,
+                "res": 0.527,
+                "semiht": 0.642
+            },
+            "0B": {
+                "nonres": 0.527,
+                "res": 0.527,
+                "semiht": 0.642
+            },
+            "1A": {
+                "nonres": 0.527,
+                "res": 0.527,
+                "semiht": 0.642
+            },
+            "1B": {
+                "nonres": 0.527,
+                "res": 0.527,
+                "semiht": 0.642
+            },
+            "2A": {
+                "nonres": 0.528,
+                "res": 0.528,
+                "semiht": 0.642
+            },
+            "2B": {
+                "nonres": 0.528,
+                "res": 0.528,
+                "semiht": 0.642
+            },
+            "3A": {
+                "nonres": 0.477,
+                "res": 0.476,
+                "semiht": 0.642
+            },
+            "3B": {
+                "nonres": 0.477,
+                "res": 0.476,
+                "semiht": 0.642
+            },
+            "3C": {
+                "nonres": 0.477,
+                "res": 0.476,
+                "semiht": 0.642
+            },
+            "4A": {
+                "nonres": 0.477,
+                "res": 0.476,
+                "semiht": 0.642
+            },
+            "4B": {
+                "nonres": 0.477,
+                "res": 0.476,
+                "semiht": 0.642
+            },
+            "4C": {
+                "nonres": 0.477,
+                "res": 0.476,
+                "semiht": 0.642
+            },
+            "5A": {
+                "nonres": 0.391,
+                "res": 0.391,
+                "semiht": 0.642
+            },
+            "5B": {
+                "nonres": 0.391,
+                "res": 0.391,
+                "semiht": 0.642
+            },
+            "5C": {
+                "nonres": 0.391,
+                "res": 0.391,
+                "semiht": 0.642
+            },
+            "6A": {
+                "nonres": 0.392,
+                "res": 0.392,
+                "semiht": 0.642
+            },
+            "6B": {
+                "nonres": 0.392,
+                "res": 0.392,
+                "semiht": 0.642
+            },
+            "7": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.642
+            },
+            "8": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.642
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.705,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "2B": {
+                "nonres": 0.705,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3A": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3B": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3C": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "6A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "6B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "7": {
+                "nonres": 0.365,
+                "res": 0.24,
+                "semiht": 0.705
+            },
+            "8": {
+                "nonres": 0.365,
+                "res": 0.212,
+                "semiht": 0.479
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "0B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "2A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "2B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3C": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "4A": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4B": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4C": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "5A": {
+                "nonres": 0.365,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5B": {
+                "nonres": 0.365,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5C": {
+                "nonres": 0.365,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "7": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "8": {
+                "nonres": 0.203,
+                "res": 0.203,
+                "semiht": 0.504
+            }
+        }
+    },
+    "90.1-2013": {
+        "MassWall": {
+            "0A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "0B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "3A": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3B": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3C": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "4A": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4B": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4C": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "5A": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5B": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5C": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "6A": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "6B": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "7": {
+                "nonres": 0.404,
+                "res": 0.404,
+                "semiht": 0.701
+            },
+            "8": {
+                "nonres": 0.273,
+                "res": 0.273,
+                "semiht": 0.592
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 0.92
+            },
+            "2B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 0.92
+            },
+            "3A": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "3B": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "3C": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "4A": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "4B": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "4C": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "5A": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "5B": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "5C": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "6A": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "6B": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "7": {
+                "nonres": 0.248,
+                "res": 0.248,
+                "semiht": 0.41
+            },
+            "8": {
+                "nonres": 0.22,
+                "res": 0.22,
+                "semiht": 0.341
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "2B": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3A": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3B": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3C": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5A": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "5B": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "5C": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "6A": {
+                "nonres": 0.277,
+                "res": 0.277,
+                "semiht": 0.479
+            },
+            "6B": {
+                "nonres": 0.277,
+                "res": 0.277,
+                "semiht": 0.479
+            },
+            "7": {
+                "nonres": 0.277,
+                "res": 0.24,
+                "semiht": 0.365
+            },
+            "8": {
+                "nonres": 0.212,
+                "res": 0.212,
+                "semiht": 0.365
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "0B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "2A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "2B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3A": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "3B": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "3C": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "5A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5C": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "7": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.365
+            },
+            "8": {
+                "nonres": 0.182,
+                "res": 0.182,
+                "semiht": 0.291
+            }
+        }
+    },
+    "90.1-2016": {
+        "MassWall": {
+            "0A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "0B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "3A": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3B": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3C": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "4A": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4B": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4C": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "5A": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5B": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5C": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "6A": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "6B": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "7": {
+                "nonres": 0.404,
+                "res": 0.404,
+                "semiht": 0.701
+            },
+            "8": {
+                "nonres": 0.273,
+                "res": 0.273,
+                "semiht": 0.592
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 0.92
+            },
+            "2B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 0.92
+            },
+            "3A": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "3B": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "3C": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "4A": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "4B": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "4C": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "5A": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "5B": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "5C": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "6A": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "6B": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "7": {
+                "nonres": 0.248,
+                "res": 0.248,
+                "semiht": 0.41
+            },
+            "8": {
+                "nonres": 0.22,
+                "res": 0.22,
+                "semiht": 0.341
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "2B": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3A": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3B": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3C": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5A": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "5B": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "5C": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "6A": {
+                "nonres": 0.277,
+                "res": 0.277,
+                "semiht": 0.479
+            },
+            "6B": {
+                "nonres": 0.277,
+                "res": 0.277,
+                "semiht": 0.479
+            },
+            "7": {
+                "nonres": 0.277,
+                "res": 0.24,
+                "semiht": 0.365
+            },
+            "8": {
+                "nonres": 0.212,
+                "res": 0.212,
+                "semiht": 0.365
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "0B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "2A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "2B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3A": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "3B": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "3C": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "5A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5C": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "7": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.365
+            },
+            "8": {
+                "nonres": 0.182,
+                "res": 0.182,
+                "semiht": 0.291
+            }
+        }
+    },
+    "90.1-2019": {
+        "MassWall": {
+            "0A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "0B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "3A": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3B": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3C": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "4A": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4B": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4C": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "5A": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5B": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5C": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "6A": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "6B": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "7": {
+                "nonres": 0.404,
+                "res": 0.404,
+                "semiht": 0.701
+            },
+            "8": {
+                "nonres": 0.273,
+                "res": 0.273,
+                "semiht": 0.592
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 0.92
+            },
+            "2B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 0.92
+            },
+            "3A": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "3B": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "3C": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "4A": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "4B": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "4C": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "5A": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "5B": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "5C": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "6A": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "6B": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "7": {
+                "nonres": 0.248,
+                "res": 0.248,
+                "semiht": 0.41
+            },
+            "8": {
+                "nonres": 0.22,
+                "res": 0.22,
+                "semiht": 0.341
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "2B": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3A": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3B": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3C": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5A": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "5B": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "5C": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "6A": {
+                "nonres": 0.277,
+                "res": 0.277,
+                "semiht": 0.479
+            },
+            "6B": {
+                "nonres": 0.277,
+                "res": 0.277,
+                "semiht": 0.479
+            },
+            "7": {
+                "nonres": 0.277,
+                "res": 0.24,
+                "semiht": 0.365
+            },
+            "8": {
+                "nonres": 0.212,
+                "res": 0.212,
+                "semiht": 0.365
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "0B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "2A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "2B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3A": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "3B": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "3C": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "5A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5C": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "7": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.365
+            },
+            "8": {
+                "nonres": 0.182,
+                "res": 0.182,
+                "semiht": 0.291
+            }
+        }
+    },
+    "90.1-2022": {
+        "MassWall": {
+            "0A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "0B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.701,
+                "semiht": 3.293
+            },
+            "3A": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3B": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "3C": {
+                "nonres": 0.701,
+                "res": 0.592,
+                "semiht": 3.293
+            },
+            "4A": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4B": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "4C": {
+                "nonres": 0.592,
+                "res": 0.513,
+                "semiht": 3.293
+            },
+            "5A": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5B": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "5C": {
+                "nonres": 0.513,
+                "res": 0.453,
+                "semiht": 0.857
+            },
+            "6A": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "6B": {
+                "nonres": 0.453,
+                "res": 0.404,
+                "semiht": 0.857
+            },
+            "7": {
+                "nonres": 0.404,
+                "res": 0.404,
+                "semiht": 0.701
+            },
+            "8": {
+                "nonres": 0.273,
+                "res": 0.273,
+                "semiht": 0.592
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 0.92
+            },
+            "2B": {
+                "nonres": 0.533,
+                "res": 0.533,
+                "semiht": 0.92
+            },
+            "3A": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "3B": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "3C": {
+                "nonres": 0.533,
+                "res": 0.41,
+                "semiht": 0.92
+            },
+            "4A": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "4B": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "4C": {
+                "nonres": 0.341,
+                "res": 0.286,
+                "semiht": 0.92
+            },
+            "5A": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "5B": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "5C": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "6A": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "6B": {
+                "nonres": 0.286,
+                "res": 0.286,
+                "semiht": 0.533
+            },
+            "7": {
+                "nonres": 0.248,
+                "res": 0.248,
+                "semiht": 0.41
+            },
+            "8": {
+                "nonres": 0.22,
+                "res": 0.22,
+                "semiht": 0.341
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "0B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1A": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "1B": {
+                "nonres": 0.705,
+                "res": 0.705,
+                "semiht": 1.998
+            },
+            "2A": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "2B": {
+                "nonres": 0.479,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3A": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3B": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "3C": {
+                "nonres": 0.435,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.705
+            },
+            "5A": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "5B": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "5C": {
+                "nonres": 0.315,
+                "res": 0.315,
+                "semiht": 0.479
+            },
+            "6A": {
+                "nonres": 0.277,
+                "res": 0.277,
+                "semiht": 0.479
+            },
+            "6B": {
+                "nonres": 0.277,
+                "res": 0.277,
+                "semiht": 0.479
+            },
+            "7": {
+                "nonres": 0.277,
+                "res": 0.24,
+                "semiht": 0.365
+            },
+            "8": {
+                "nonres": 0.212,
+                "res": 0.212,
+                "semiht": 0.365
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "0B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "1B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 1.66
+            },
+            "2A": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "2B": {
+                "nonres": 0.504,
+                "res": 0.504,
+                "semiht": 0.504
+            },
+            "3A": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "3B": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "3C": {
+                "nonres": 0.504,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4A": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4B": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "4C": {
+                "nonres": 0.365,
+                "res": 0.365,
+                "semiht": 0.504
+            },
+            "5A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "5C": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6A": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "6B": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.504
+            },
+            "7": {
+                "nonres": 0.291,
+                "res": 0.291,
+                "semiht": 0.365
+            },
+            "8": {
+                "nonres": 0.182,
+                "res": 0.182,
+                "semiht": 0.291
+            }
+        }
+    },
+    "IECC-2006": {
+        "MassWall": {
+            "0A": {
+                "nonres": 3.293,
+                "res": 3.293,
+                "semiht": 3.293
+            },
+            "0B": {
+                "nonres": 3.293,
+                "res": 3.293,
+                "semiht": 3.293
+            },
+            "1A": {
+                "nonres": 3.293,
+                "res": 3.293,
+                "semiht": 3.293
+            },
+            "1B": {
+                "nonres": 3.293,
+                "res": 3.293,
+                "semiht": 3.293
+            },
+            "2A": {
+                "nonres": 3.293,
+                "res": 3.293,
+                "semiht": 3.293
+            },
+            "2B": {
+                "nonres": 3.293,
+                "res": 3.293,
+                "semiht": 3.293
+            },
+            "3A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "3B": {
+                "nonres": 3.293,
+                "res": 3.293,
+                "semiht": 3.293
+            },
+            "3C": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "4A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "4B": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "4C": {
+                "nonres": 0.698,
+                "res": 0.698,
+                "semiht": 0.698
+            },
+            "5A": {
+                "nonres": 0.698,
+                "res": 0.698,
+                "semiht": 0.698
+            },
+            "5B": {
+                "nonres": 0.698,
+                "res": 0.698,
+                "semiht": 0.698
+            },
+            "5C": {
+                "nonres": 0.698,
+                "res": 0.698,
+                "semiht": 0.698
+            },
+            "6A": {
+                "nonres": 0.591,
+                "res": 0.591,
+                "semiht": 0.591
+            },
+            "6B": {
+                "nonres": 0.591,
+                "res": 0.591,
+                "semiht": 0.591
+            },
+            "7": {
+                "nonres": 0.511,
+                "res": 0.511,
+                "semiht": 0.511
+            },
+            "8": {
+                "nonres": 0.454,
+                "res": 0.454,
+                "semiht": 0.454
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "0B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "1A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "1B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "2A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "2B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "3A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "3B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "3C": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "4A": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "4B": {
+                "nonres": 0.642,
+                "res": 0.642,
+                "semiht": 0.642
+            },
+            "4C": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            },
+            "5A": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            },
+            "5B": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            },
+            "5C": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            },
+            "6A": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            },
+            "6B": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            },
+            "7": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            },
+            "8": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "0B": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "1A": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "1B": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "2A": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "2B": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "3A": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "3B": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "3C": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "4A": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "4B": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "4C": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "5A": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "5B": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "5C": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "6A": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "6B": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "7": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "8": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "0B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "1A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "1B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "2A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "2B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "3A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "3B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "3C": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "4A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "4B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "4C": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "5A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "5B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "5C": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "6A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "6B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "7": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "8": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            }
+        }
+    },
+    "IECC-2009": {
+        "MassWall": {
+            "0A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "0B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1A": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "1B": {
+                "nonres": 3.293,
+                "res": 0.857,
+                "semiht": 3.293
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "3A": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3B": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3C": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "4A": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4B": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5A": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5B": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "6A": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "6B": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "7": {
+                "nonres": 0.403,
+                "res": 0.403,
+                "semiht": 0.403
+            },
+            "8": {
+                "nonres": 0.403,
+                "res": 0.295,
+                "semiht": 0.403
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.528,
+                "res": 0.528,
+                "semiht": 0.528
+            },
+            "0B": {
+                "nonres": 0.528,
+                "res": 0.528,
+                "semiht": 0.528
+            },
+            "1A": {
+                "nonres": 0.528,
+                "res": 0.528,
+                "semiht": 0.528
+            },
+            "1B": {
+                "nonres": 0.528,
+                "res": 0.528,
+                "semiht": 0.528
+            },
+            "2A": {
+                "nonres": 0.528,
+                "res": 0.528,
+                "semiht": 0.528
+            },
+            "2B": {
+                "nonres": 0.528,
+                "res": 0.528,
+                "semiht": 0.528
+            },
+            "3A": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "3B": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "3C": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "4A": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "4B": {
+                "nonres": 0.477,
+                "res": 0.477,
+                "semiht": 0.477
+            },
+            "4C": {
+                "nonres": 0.392,
+                "res": 0.392,
+                "semiht": 0.392
+            },
+            "5A": {
+                "nonres": 0.392,
+                "res": 0.392,
+                "semiht": 0.392
+            },
+            "5B": {
+                "nonres": 0.392,
+                "res": 0.392,
+                "semiht": 0.392
+            },
+            "5C": {
+                "nonres": 0.392,
+                "res": 0.392,
+                "semiht": 0.392
+            },
+            "6A": {
+                "nonres": 0.392,
+                "res": 0.392,
+                "semiht": 0.392
+            },
+            "6B": {
+                "nonres": 0.392,
+                "res": 0.392,
+                "semiht": 0.392
+            },
+            "7": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            },
+            "8": {
+                "nonres": 0.324,
+                "res": 0.324,
+                "semiht": 0.324
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "0B": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "1A": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "1B": {
+                "nonres": 0.704,
+                "res": 0.704,
+                "semiht": 0.704
+            },
+            "2A": {
+                "nonres": 0.704,
+                "res": 0.363,
+                "semiht": 0.704
+            },
+            "2B": {
+                "nonres": 0.704,
+                "res": 0.363,
+                "semiht": 0.704
+            },
+            "3A": {
+                "nonres": 0.477,
+                "res": 0.363,
+                "semiht": 0.477
+            },
+            "3B": {
+                "nonres": 0.477,
+                "res": 0.363,
+                "semiht": 0.477
+            },
+            "3C": {
+                "nonres": 0.477,
+                "res": 0.363,
+                "semiht": 0.477
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "6A": {
+                "nonres": 0.363,
+                "res": 0.324,
+                "semiht": 0.363
+            },
+            "6B": {
+                "nonres": 0.363,
+                "res": 0.324,
+                "semiht": 0.363
+            },
+            "7": {
+                "nonres": 0.363,
+                "res": 0.295,
+                "semiht": 0.363
+            },
+            "8": {
+                "nonres": 0.363,
+                "res": 0.21,
+                "semiht": 0.363
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "0B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "1A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "1B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "2A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "2B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "3A": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "3B": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "3C": {
+                "nonres": 0.505,
+                "res": 0.505,
+                "semiht": 0.505
+            },
+            "4A": {
+                "nonres": 0.505,
+                "res": 0.363,
+                "semiht": 0.505
+            },
+            "4B": {
+                "nonres": 0.505,
+                "res": 0.363,
+                "semiht": 0.505
+            },
+            "4C": {
+                "nonres": 0.363,
+                "res": 0.29,
+                "semiht": 0.363
+            },
+            "5A": {
+                "nonres": 0.363,
+                "res": 0.29,
+                "semiht": 0.363
+            },
+            "5B": {
+                "nonres": 0.363,
+                "res": 0.29,
+                "semiht": 0.363
+            },
+            "5C": {
+                "nonres": 0.363,
+                "res": 0.29,
+                "semiht": 0.363
+            },
+            "6A": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "6B": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "7": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "8": {
+                "nonres": 0.204,
+                "res": 0.204,
+                "semiht": 0.204
+            }
+        }
+    },
+    "IECC-2012": {
+        "MassWall": {
+            "0A": {
+                "nonres": 0.806,
+                "res": 0.806,
+                "semiht": 0.806
+            },
+            "0B": {
+                "nonres": 0.806,
+                "res": 0.806,
+                "semiht": 0.806
+            },
+            "1A": {
+                "nonres": 0.806,
+                "res": 0.806,
+                "semiht": 0.806
+            },
+            "1B": {
+                "nonres": 0.806,
+                "res": 0.806,
+                "semiht": 0.806
+            },
+            "2A": {
+                "nonres": 0.806,
+                "res": 0.698,
+                "semiht": 0.806
+            },
+            "2B": {
+                "nonres": 0.806,
+                "res": 0.698,
+                "semiht": 0.806
+            },
+            "3A": {
+                "nonres": 0.625,
+                "res": 0.591,
+                "semiht": 0.625
+            },
+            "3B": {
+                "nonres": 0.625,
+                "res": 0.591,
+                "semiht": 0.625
+            },
+            "3C": {
+                "nonres": 0.625,
+                "res": 0.591,
+                "semiht": 0.625
+            },
+            "4A": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4B": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4C": {
+                "nonres": 0.443,
+                "res": 0.443,
+                "semiht": 0.443
+            },
+            "5A": {
+                "nonres": 0.443,
+                "res": 0.443,
+                "semiht": 0.443
+            },
+            "5B": {
+                "nonres": 0.443,
+                "res": 0.443,
+                "semiht": 0.443
+            },
+            "5C": {
+                "nonres": 0.443,
+                "res": 0.443,
+                "semiht": 0.443
+            },
+            "6A": {
+                "nonres": 0.443,
+                "res": 0.403,
+                "semiht": 0.443
+            },
+            "6B": {
+                "nonres": 0.443,
+                "res": 0.403,
+                "semiht": 0.443
+            },
+            "7": {
+                "nonres": 0.346,
+                "res": 0.346,
+                "semiht": 0.346
+            },
+            "8": {
+                "nonres": 0.346,
+                "res": 0.346,
+                "semiht": 0.346
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "0B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "3A": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3B": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3C": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "4A": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "4B": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "4C": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "5A": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "5B": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "5C": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "6A": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "6B": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "7": {
+                "nonres": 0.295,
+                "res": 0.221,
+                "semiht": 0.295
+            },
+            "8": {
+                "nonres": 0.295,
+                "res": 0.221,
+                "semiht": 0.295
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "0B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "2A": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "2B": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "6A": {
+                "nonres": 0.363,
+                "res": 0.324,
+                "semiht": 0.363
+            },
+            "6B": {
+                "nonres": 0.363,
+                "res": 0.324,
+                "semiht": 0.363
+            },
+            "7": {
+                "nonres": 0.363,
+                "res": 0.295,
+                "semiht": 0.363
+            },
+            "8": {
+                "nonres": 0.256,
+                "res": 0.256,
+                "semiht": 0.256
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "0B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "6A": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "6B": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "7": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "8": {
+                "nonres": 0.204,
+                "res": 0.204,
+                "semiht": 0.204
+            }
+        }
+    },
+    "IECC-2015": {
+        "MassWall": {
+            "0A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "0B": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "1A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "1B": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "3A": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3B": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3C": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "4A": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4B": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5A": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5B": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "6A": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "6B": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "7": {
+                "nonres": 0.403,
+                "res": 0.346,
+                "semiht": 0.403
+            },
+            "8": {
+                "nonres": 0.346,
+                "res": 0.346,
+                "semiht": 0.346
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "0B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "3A": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3B": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3C": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "4A": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "4B": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "4C": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "5A": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "5B": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "5C": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "6A": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "6B": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "7": {
+                "nonres": 0.295,
+                "res": 0.221,
+                "semiht": 0.295
+            },
+            "8": {
+                "nonres": 0.295,
+                "res": 0.221,
+                "semiht": 0.295
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "0B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "2A": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "2B": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "6A": {
+                "nonres": 0.363,
+                "res": 0.324,
+                "semiht": 0.363
+            },
+            "6B": {
+                "nonres": 0.363,
+                "res": 0.324,
+                "semiht": 0.363
+            },
+            "7": {
+                "nonres": 0.363,
+                "res": 0.295,
+                "semiht": 0.363
+            },
+            "8": {
+                "nonres": 0.256,
+                "res": 0.256,
+                "semiht": 0.256
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "0B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "6A": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "6B": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "7": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "8": {
+                "nonres": 0.204,
+                "res": 0.204,
+                "semiht": 0.204
+            }
+        }
+    },
+    "IECC-2018": {
+        "MassWall": {
+            "0A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "0B": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "1A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "1B": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "3A": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3B": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3C": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "4A": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4B": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5A": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5B": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "6A": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "6B": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "7": {
+                "nonres": 0.403,
+                "res": 0.346,
+                "semiht": 0.403
+            },
+            "8": {
+                "nonres": 0.346,
+                "res": 0.346,
+                "semiht": 0.346
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "0B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "3A": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3B": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3C": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "4A": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "4B": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "4C": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "5A": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "5B": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "5C": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "6A": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "6B": {
+                "nonres": 0.295,
+                "res": 0.295,
+                "semiht": 0.295
+            },
+            "7": {
+                "nonres": 0.295,
+                "res": 0.221,
+                "semiht": 0.295
+            },
+            "8": {
+                "nonres": 0.295,
+                "res": 0.221,
+                "semiht": 0.295
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "0B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "2A": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "2B": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "6A": {
+                "nonres": 0.363,
+                "res": 0.324,
+                "semiht": 0.363
+            },
+            "6B": {
+                "nonres": 0.363,
+                "res": 0.324,
+                "semiht": 0.363
+            },
+            "7": {
+                "nonres": 0.363,
+                "res": 0.295,
+                "semiht": 0.363
+            },
+            "8": {
+                "nonres": 0.256,
+                "res": 0.256,
+                "semiht": 0.256
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "0B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "5C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "6A": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "6B": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "7": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "8": {
+                "nonres": 0.204,
+                "res": 0.204,
+                "semiht": 0.204
+            }
+        }
+    },
+    "IECC-2021": {
+        "MassWall": {
+            "0A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "0B": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "1A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "1B": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "3A": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3B": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3C": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "4A": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4B": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5A": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5B": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "6A": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "6B": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "7": {
+                "nonres": 0.403,
+                "res": 0.346,
+                "semiht": 0.403
+            },
+            "8": {
+                "nonres": 0.21,
+                "res": 0.21,
+                "semiht": 0.21
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "0B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "3A": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3B": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3C": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "4A": {
+                "nonres": 0.295,
+                "res": 0.284,
+                "semiht": 0.295
+            },
+            "4B": {
+                "nonres": 0.295,
+                "res": 0.284,
+                "semiht": 0.295
+            },
+            "4C": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "5A": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "5B": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "5C": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "6A": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "6B": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "7": {
+                "nonres": 0.25,
+                "res": 0.221,
+                "semiht": 0.25
+            },
+            "8": {
+                "nonres": 0.221,
+                "res": 0.221,
+                "semiht": 0.221
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "0B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "2A": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "2B": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.312,
+                "res": 0.312,
+                "semiht": 0.312
+            },
+            "5A": {
+                "nonres": 0.312,
+                "res": 0.312,
+                "semiht": 0.312
+            },
+            "5B": {
+                "nonres": 0.312,
+                "res": 0.312,
+                "semiht": 0.312
+            },
+            "5C": {
+                "nonres": 0.312,
+                "res": 0.312,
+                "semiht": 0.312
+            },
+            "6A": {
+                "nonres": 0.278,
+                "res": 0.278,
+                "semiht": 0.278
+            },
+            "6B": {
+                "nonres": 0.278,
+                "res": 0.278,
+                "semiht": 0.278
+            },
+            "7": {
+                "nonres": 0.278,
+                "res": 0.238,
+                "semiht": 0.278
+            },
+            "8": {
+                "nonres": 0.21,
+                "res": 0.21,
+                "semiht": 0.21
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "0B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "5A": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "5B": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "5C": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "6A": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "6B": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "7": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "8": {
+                "nonres": 0.182,
+                "res": 0.182,
+                "semiht": 0.182
+            }
+        }
+    },
+    "IECC-2024": {
+        "MassWall": {
+            "0A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "0B": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "1A": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "1B": {
+                "nonres": 0.857,
+                "res": 0.857,
+                "semiht": 0.857
+            },
+            "2A": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "2B": {
+                "nonres": 0.857,
+                "res": 0.698,
+                "semiht": 0.857
+            },
+            "3A": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3B": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "3C": {
+                "nonres": 0.698,
+                "res": 0.591,
+                "semiht": 0.698
+            },
+            "4A": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4B": {
+                "nonres": 0.591,
+                "res": 0.511,
+                "semiht": 0.591
+            },
+            "4C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5A": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5B": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "5C": {
+                "nonres": 0.511,
+                "res": 0.454,
+                "semiht": 0.511
+            },
+            "6A": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "6B": {
+                "nonres": 0.454,
+                "res": 0.403,
+                "semiht": 0.454
+            },
+            "7": {
+                "nonres": 0.403,
+                "res": 0.346,
+                "semiht": 0.403
+            },
+            "8": {
+                "nonres": 0.21,
+                "res": 0.21,
+                "semiht": 0.21
+            }
+        },
+        "MetalBuildingWall": {
+            "0A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "0B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "1B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2A": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "2B": {
+                "nonres": 0.449,
+                "res": 0.449,
+                "semiht": 0.449
+            },
+            "3A": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3B": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "3C": {
+                "nonres": 0.449,
+                "res": 0.295,
+                "semiht": 0.449
+            },
+            "4A": {
+                "nonres": 0.295,
+                "res": 0.284,
+                "semiht": 0.295
+            },
+            "4B": {
+                "nonres": 0.295,
+                "res": 0.284,
+                "semiht": 0.295
+            },
+            "4C": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "5A": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "5B": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "5C": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "6A": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "6B": {
+                "nonres": 0.284,
+                "res": 0.284,
+                "semiht": 0.284
+            },
+            "7": {
+                "nonres": 0.25,
+                "res": 0.221,
+                "semiht": 0.25
+            },
+            "8": {
+                "nonres": 0.221,
+                "res": 0.221,
+                "semiht": 0.221
+            }
+        },
+        "SteelFramedWall": {
+            "0A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "0B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1A": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "1B": {
+                "nonres": 0.437,
+                "res": 0.437,
+                "semiht": 0.437
+            },
+            "2A": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "2B": {
+                "nonres": 0.437,
+                "res": 0.363,
+                "semiht": 0.437
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.312,
+                "res": 0.312,
+                "semiht": 0.312
+            },
+            "5A": {
+                "nonres": 0.312,
+                "res": 0.312,
+                "semiht": 0.312
+            },
+            "5B": {
+                "nonres": 0.312,
+                "res": 0.312,
+                "semiht": 0.312
+            },
+            "5C": {
+                "nonres": 0.312,
+                "res": 0.312,
+                "semiht": 0.312
+            },
+            "6A": {
+                "nonres": 0.278,
+                "res": 0.278,
+                "semiht": 0.278
+            },
+            "6B": {
+                "nonres": 0.278,
+                "res": 0.278,
+                "semiht": 0.278
+            },
+            "7": {
+                "nonres": 0.278,
+                "res": 0.238,
+                "semiht": 0.278
+            },
+            "8": {
+                "nonres": 0.21,
+                "res": 0.21,
+                "semiht": 0.21
+            }
+        },
+        "WoodFramedWall": {
+            "0A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "0B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "1B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "2B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "3C": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4A": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4B": {
+                "nonres": 0.363,
+                "res": 0.363,
+                "semiht": 0.363
+            },
+            "4C": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "5A": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "5B": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "5C": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "6A": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "6B": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "7": {
+                "nonres": 0.29,
+                "res": 0.29,
+                "semiht": 0.29
+            },
+            "8": {
+                "nonres": 0.182,
+                "res": 0.182,
+                "semiht": 0.182
+            }
+        }
+    }
+}
